@@ -127,7 +127,6 @@
             height: 100%;
             backface-visibility: hidden;
             border: 2px solid var(--gold);
-            border-radius: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -158,8 +157,11 @@
             border-top: none;
         }
 
-        .card-back {
+        .card-front {
             transform: rotateY(180deg);
+        }
+
+        .card-back {
             background: linear-gradient(45deg, var(--obsidian), var(--table-row1));
         }
 
