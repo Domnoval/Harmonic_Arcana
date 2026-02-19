@@ -1403,9 +1403,12 @@
                 <p><strong>Full Prompt:</strong></p>
                 <textarea rows="4" cols="50" readonly style="width:100%; background: var(--obsidian); color: var(--white); border: 1px solid var(--gold); padding: 10px;">${prompt}</textarea>
                 <br><br>
-                <button onclick="navigator.clipboard.writeText('${prompt.replace(/'/g, '\\\')}').then(() => logHistory('Copied Suno prompt to clipboard'))">Copy to Clipboard</button>
+                <button id="copy-suno-btn">Copy to Clipboard</button>
             `;
             
+            document.getElementById('copy-suno-btn').addEventListener('click', function() {
+                navigator.clipboard.writeText(prompt).then(function() { logHistory('Copied Suno prompt to clipboard'); });
+            });
             logHistory('Generated Suno AI prompt from drawn cards');
         }
 
