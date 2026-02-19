@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harmonic Arcana</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Source+Code+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --obsidian: #050507;
+            --gold: #c9a84c;
+            --purple: #6b3fa0;
+            --white: #e8e8e8;
+            --dim: #555;
+            --red: #8b2500;
+            --table-row1: #0d0d10;
+            --table-row2: #111115;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Code Pro', monospace;
+            background: var(--obsidian);
+            color: var(--white);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--obsidian);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 0;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .app-title {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 3rem;
+            text-align: center;
+            color: var(--gold);
+            margin-bottom: 2rem;
+            text-shadow: 0 0 20px var(--gold);
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 2rem;
+            padding: 15px;
+            background: var(--table-row1);
+            border: 1px solid var(--gold);
+        }
+
+        .toolbar button {
+            background: var(--obsidian);
+            color: var(--white);
+            border: 1px solid var(--dim);
+            padding: 8px 16px;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .toolbar button:hover,
+        .toolbar button.active {
+            border-color: var(--gold);
+            background: var(--gold);
+            color: var(--obsidian);
+        }
+
+        .main-content {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: 1fr;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .tarot-card {
+            width: 150px;
+            height: 240px;
+            position: relative;
+            cursor: pointer;
+            perspective: 1000px;
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 50% 50%, rgba(201, 168, 76, 0.1) 0%, var(--obsidian) 70%);
+        }
+
+        .card-face::before,
+        .card-face::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--gold);
+        }
+
+        .card-face::before {
+            top: 10px;
+            left: 10px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .card-face::after {
+            bottom: 10px;
+            right: 10px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(45deg, var(--obsidian), var(--table-row1));
+        }
+
+        .card-hebrew {
+            font-size: 4rem;
+            color: var(--gold);
+            text-shadow: 0 0 30px var(--gold);
+            margin-bottom: 10px;
+        }
+
+        .card-name {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 14px;
+            color: var(--white);
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .card-number {
+            font-size: 12px;
+            color: var(--dim);
+        }
+
+        .card.reversed {
+            transform: rotate(180deg);
+        }
+
+        .card.reversed .card-face {
+            border-color: var(--red);
+        }
+
+        .card.reversed .card-hebrew {
+            color: var(--red);
+            text-shadow: 0 0 30px var(--red);
+        }
+
+        .spread-container {
+            display: none;
+            min-height: 400px;
+            position: relative;
+            margin: 2rem 0;
+        }
+
+        .spread-container.active {
+            display: block;
+        }
+
+        .single-spread {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+        }
+
+        .three-spread {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            height: 300px;
+        }
+
+        .four-elements-spread {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 40px;
+            justify-items: center;
+            align-items: center;
+            height: 400px;
+        }
+
+        .celtic-cross {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 20px;
+            height: 500px;
+            justify-items: center;
+            align-items: center;
+        }
+
+        .celtic-cross .card:nth-child(1) { grid-column: 2; grid-row: 2; }
+        .celtic-cross .card:nth-child(2) { grid-column: 2; grid-row: 2; transform: rotate(90deg); }
+        .celtic-cross .card:nth-child(3) { grid-column: 2; grid-row: 1; }
+        .celtic-cross .card:nth-child(4) { grid-column: 2; grid-row: 3; }
+        .celtic-cross .card:nth-child(5) { grid-column: 1; grid-row: 2; }
+        .celtic-cross .card:nth-child(6) { grid-column: 3; grid-row: 2; }
+        .celtic-cross .card:nth-child(7) { grid-column: 4; grid-row: 4; }
+        .celtic-cross .card:nth-child(8) { grid-column: 4; grid-row: 3; }
+        .celtic-cross .card:nth-child(9) { grid-column: 4; grid-row: 2; }
+        .celtic-cross .card:nth-child(10) { grid-column: 4; grid-row: 1; }
+
+        .piano-container {
+            margin: 2rem 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .piano {
+            display: flex;
+            border: 1px solid var(--gold);
+            height: 80px;
+        }
+
+        .piano-key {
+            border: 1px solid var(--dim);
+            cursor: pointer;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 5px;
+            font-size: 10px;
+            color: var(--dim);
+            transition: all 0.1s;
+        }
+
+        .piano-key.white {
+            width: 30px;
+            height: 80px;
+            background: var(--white);
+            color: var(--obsidian);
+            z-index: 1;
+        }
+
+        .piano-key.black {
+            width: 20px;
+            height: 50px;
+            background: var(--obsidian);
+            color: var(--white);
+            margin-left: -10px;
+            margin-right: -10px;
+            z-index: 2;
+        }
+
+        .piano-key.active {
+            background: var(--gold) !important;
+            color: var(--obsidian) !important;
+        }
+
+        .correspondence-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            font-size: 11px;
+        }
+
+        .correspondence-table th {
+            background: var(--gold);
+            color: var(--obsidian);
+            padding: 8px 4px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .correspondence-table td {
+            padding: 6px 4px;
+            border-bottom: 1px solid var(--dim);
+        }
+
+        .correspondence-table tr:nth-child(even) {
+            background: var(--table-row1);
+        }
+
+        .correspondence-table tr:nth-child(odd) {
+            background: var(--table-row2);
+        }
+
+        .graph-container {
+            height: 600px;
+            border: 1px solid var(--gold);
+            position: relative;
+            margin: 2rem 0;
+            background: var(--obsidian);
+        }
+
+        .graph-legend {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(5, 5, 7, 0.9);
+            padding: 10px;
+            border: 1px solid var(--gold);
+            font-size: 10px;
+            z-index: 10;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            margin-right: 6px;
+        }
+
+        .history-log {
+            background: var(--table-row1);
+            border: 1px solid var(--gold);
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 2rem 0;
+        }
+
+        .history-entry {
+            margin-bottom: 8px;
+            font-size: 12px;
+            border-left: 2px solid var(--gold);
+            padding-left: 10px;
+        }
+
+        .journal-container {
+            background: var(--table-row1);
+            border: 1px solid var(--gold);
+            padding: 20px;
+            margin: 2rem 0;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-top: 10px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--dim);
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .calendar-day.today {
+            border-color: var(--gold);
+            background: var(--gold);
+            color: var(--obsidian);
+        }
+
+        .calendar-day.has-entry {
+            background: var(--purple);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--dim);
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gold);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .suno-prompt {
+            background: var(--table-row1);
+            border: 1px solid var(--gold);
+            padding: 15px;
+            margin: 2rem 0;
+            font-size: 12px;
+        }
+
+        .section {
+            display: none;
+            padding: 20px;
+            border: 1px solid var(--gold);
+            margin: 1rem 0;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @media (max-width: 700px) {
+            .app-title {
+                font-size: 2rem;
+            }
+            
+            .toolbar {
+                flex-direction: column;
+            }
+            
+            .tarot-card {
+                width: 120px;
+                height: 190px;
+            }
+            
+            .three-spread {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .four-elements-spread {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(4, 1fr);
+            }
+            
+            .piano {
+                height: 60px;
+            }
+            
+            .piano-key.white {
+                width: 20px;
+                height: 60px;
+            }
+            
+            .piano-key.black {
+                width: 15px;
+                height: 40px;
+            }
+            
+            .correspondence-table {
+                font-size: 9px;
+            }
+            
+            .graph-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <h1 class="app-title">⧨ HARMONIC ARCANA ⧨</h1>
+        
+        <div class="toolbar">
+            <button onclick="showSection('spreads')" class="active">Spreads</button>
+            <button onclick="showSection('daily')">Daily Draw</button>
+            <button onclick="showSection('piano')">Piano</button>
+            <button onclick="showSection('correspondence')">Correspondence</button>
+            <button onclick="showSection('graph')">3D Graph</button>
+            <button onclick="showSection('journal')">Journal</button>
+            <button onclick="showSection('fullArcana')">Full Arcana</button>
+            <button onclick="showSection('suno')">Suno Generator</button>
+            <button onclick="shuffleAndPlay()">Shuffle & Play</button>
+            <button onclick="stopAudio()">Stop Audio</button>
+        </div>
+
+        <div id="spreads" class="section active">
+            <div class="toolbar">
+                <button onclick="setSpread('single')">Single Card</button>
+                <button onclick="setSpread('three')">Past/Present/Future</button>
+                <button onclick="setSpread('elements')">Four Elements</button>
+                <button onclick="setSpread('celtic')">Celtic Cross</button>
+                <button onclick="drawSpread()">Draw Cards</button>
+                <button onclick="clearSpread()">Clear</button>
+            </div>
+            <div class="spread-container active" id="spread-display"></div>
+        </div>
+
+        <div id="daily" class="section">
+            <h3>Daily Card Draw</h3>
+            <div class="toolbar">
+                <button onclick="drawDailyCard()">Draw Today's Card</button>
+            </div>
+            <div id="daily-card-display"></div>
+            <div id="daily-journal"></div>
+        </div>
+
+        <div id="piano" class="section">
+            <h3>Piano Keyboard</h3>
+            <div class="piano-container">
+                <div class="piano" id="piano"></div>
+            </div>
+            <p>Click keys to play notes. Active cards highlight corresponding keys.</p>
+        </div>
+
+        <div id="correspondence" class="section">
+            <h3>Correspondence Table</h3>
+            <table class="correspondence-table" id="correspondence-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Card</th>
+                        <th>Hebrew</th>
+                        <th>Letter</th>
+                        <th>Planet</th>
+                        <th>Element/Planet/Zodiac</th>
+                        <th>Symbol</th>
+                        <th>Note</th>
+                        <th>Freq</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="graph" class="section">
+            <h3>3D Force-Directed Graph</h3>
+            <div class="graph-container" id="graph-container">
+                <div class="graph-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #c9a84c;"></div>
+                        Cards
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e8e8e8;"></div>
+                        Hebrew
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #6b3fa0;"></div>
+                        Planets
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4169e1;"></div>
+                        Zodiac
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #dc143c;"></div>
+                        Elements
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #32cd32;"></div>
+                        Notes
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="journal" class="section">
+            <h3>Journal & Calendar</h3>
+            <div class="journal-container">
+                <div class="toolbar">
+                    <button onclick="prevMonth()">&lt; Prev</button>
+                    <button onclick="nextMonth()">Next &gt;</button>
+                    <button onclick="playWeekMelody()">Play Week</button>
+                    <button onclick="playMonthMelody()">Play Month</button>
+                    <button onclick="copyMonthText()">Copy Month</button>
+                </div>
+                <div id="calendar-header"></div>
+                <div class="calendar-grid" id="calendar"></div>
+                <div id="month-stats"></div>
+            </div>
+        </div>
+
+        <div id="fullArcana" class="section">
+            <h3>Full Arcana Playback</h3>
+            <div class="toolbar">
+                <button onclick="playFullArcana()">Play All 22 Cards</button>
+                <button onclick="stopSequence()">Stop</button>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="sequence-progress"></div>
+            </div>
+            <div id="current-card-display"></div>
+        </div>
+
+        <div id="suno" class="section">
+            <h3>Suno AI Music Prompt Generator</h3>
+            <div class="toolbar">
+                <button onclick="generateSunoPrompt()">Generate from Last Draw</button>
+            </div>
+            <div class="suno-prompt" id="suno-output"></div>
+        </div>
+
+        <div class="history-log" id="history-log">
+            <h4>History</h4>
+        </div>
+    </div>
+
+    <script>
+        // Core Data
+        const CARDS = [
+            {id: 0, name: "The Fool", roman: "0", hebrew: "א", letterName: "Aleph", type: "mother", association: "Air", symbol: "△", note: "E", semitone: 4},
+            {id: 1, name: "The Magician", roman: "I", hebrew: "ב", letterName: "Beth", type: "double", association: "Mercury", symbol: "☿", note: "C", semitone: 0},
+            {id: 2, name: "The High Priestess", roman: "II", hebrew: "ג", letterName: "Gimel", type: "double", association: "Moon", symbol: "☽", note: "B", semitone: 11},
+            {id: 3, name: "The Empress", roman: "III", hebrew: "ד", letterName: "Daleth", type: "double", association: "Venus", symbol: "♀", note: "D", semitone: 2},
+            {id: 4, name: "The Emperor", roman: "IV", hebrew: "ה", letterName: "He", type: "simple", association: "Aries", symbol: "♈", note: "C", semitone: 0},
+            {id: 5, name: "The Hierophant", roman: "V", hebrew: "ו", letterName: "Vav", type: "simple", association: "Taurus", symbol: "♉", note: "C#", semitone: 1},
+            {id: 6, name: "The Lovers", roman: "VI", hebrew: "ז", letterName: "Zayin", type: "simple", association: "Gemini", symbol: "♊", note: "D", semitone: 2},
+            {id: 7, name: "The Chariot", roman: "VII", hebrew: "ח", letterName: "Cheth", type: "simple", association: "Cancer", symbol: "♋", note: "D#", semitone: 3},
+            {id: 8, name: "Strength", roman: "VIII", hebrew: "ט", letterName: "Teth", type: "simple", association: "Leo", symbol: "♌", note: "E", semitone: 4},
+            {id: 9, name: "The Hermit", roman: "IX", hebrew: "י", letterName: "Yod", type: "simple", association: "Virgo", symbol: "♍", note: "F", semitone: 5},
+            {id: 10, name: "Wheel of Fortune", roman: "X", hebrew: "כ", letterName: "Kaph", type: "double", association: "Jupiter", symbol: "♃", note: "G", semitone: 7},
+            {id: 11, name: "Justice", roman: "XI", hebrew: "ל", letterName: "Lamed", type: "simple", association: "Libra", symbol: "♎", note: "F#", semitone: 6},
+            {id: 12, name: "The Hanged Man", roman: "XII", hebrew: "מ", letterName: "Mem", type: "mother", association: "Water", symbol: "▽", note: "G#", semitone: 8},
+            {id: 13, name: "Death", roman: "XIII", hebrew: "נ", letterName: "Nun", type: "simple", association: "Scorpio", symbol: "♏", note: "G", semitone: 7},
+            {id: 14, name: "Temperance", roman: "XIV", hebrew: "ס", letterName: "Samekh", type: "simple", association: "Sagittarius", symbol: "♐", note: "G#", semitone: 8},
+            {id: 15, name: "The Devil", roman: "XV", hebrew: "ע", letterName: "Ayin", type: "simple", association: "Capricorn", symbol: "♑", note: "A", semitone: 9},
+            {id: 16, name: "The Tower", roman: "XVI", hebrew: "פ", letterName: "Pe", type: "double", association: "Mars", symbol: "♂", note: "F", semitone: 5},
+            {id: 17, name: "The Star", roman: "XVII", hebrew: "צ", letterName: "Tzaddi", type: "simple", association: "Aquarius", symbol: "♒", note: "A#", semitone: 10},
+            {id: 18, name: "The Moon", roman: "XVIII", hebrew: "ק", letterName: "Qoph", type: "simple", association: "Pisces", symbol: "♓", note: "B", semitone: 11},
+            {id: 19, name: "The Sun", roman: "XIX", hebrew: "ר", letterName: "Resh", type: "double", association: "Sun", symbol: "☉", note: "E", semitone: 4},
+            {id: 20, name: "Judgement", roman: "XX", hebrew: "ש", letterName: "Shin", type: "mother", association: "Fire", symbol: "△", note: "C", semitone: 0},
+            {id: 21, name: "The World", roman: "XXI", hebrew: "ת", letterName: "Tav", type: "double", association: "Saturn", symbol: "♄", note: "A", semitone: 9}
+        ];
+
+        const PLANET_RULERS = {
+            "Aries": "Mars", "Taurus": "Venus", "Gemini": "Mercury", "Cancer": "Moon",
+            "Leo": "Sun", "Virgo": "Mercury", "Libra": "Venus", "Scorpio": "Mars",
+            "Sagittarius": "Jupiter", "Capricorn": "Saturn", "Aquarius": "Saturn", "Pisces": "Jupiter"
+        };
+
+        // State
+        let audioContext;
+        let currentSpread = 'single';
+        let drawnCards = [];
+        let lastDrawnCards = [];
+        let isPlaying = false;
+        let sequenceIndex = 0;
+        let sequenceInterval;
+        let currentDate = new Date();
+        let threeJS = null;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAudio();
+            createPiano();
+            buildCorrespondenceTable();
+            loadJournal();
+            updateCalendar();
+            loadHistory();
+            
+            // Lazy load Three.js when graph section is visible
+            const graphContainer = document.getElementById('graph-container');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !threeJS) {
+                        loadThreeJS();
+                    }
+                });
+            });
+            observer.observe(graphContainer);
+        });
+
+        // Audio System
+        function initializeAudio() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function getFrequency(semitone, octave = 4) {
+            return 440 * Math.pow(2, (semitone - 9) / 12 + (octave - 4));
+        }
+
+        function playCardSound(card, reversed = false) {
+            if (!audioContext) return;
+
+            const octave = reversed ? 3 : 4;
+            const freq = getFrequency(card.semitone, octave);
+            
+            // Dual detuned oscillators
+            const osc1 = audioContext.createOscillator();
+            const osc2 = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            // Convolution reverb (simplified)
+            const convolver = audioContext.createConvolver();
+            const impulse = createImpulseResponse(2, 2, false);
+            convolver.buffer = impulse;
+            
+            osc1.type = 'sine';
+            osc2.type = 'sine';
+            osc1.frequency.setValueAtTime(freq, audioContext.currentTime);
+            osc2.frequency.setValueAtTime(freq * 1.005, audioContext.currentTime); // Slight detune
+            
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.1);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
+            
+            osc1.connect(gainNode);
+            osc2.connect(gainNode);
+            gainNode.connect(convolver);
+            convolver.connect(audioContext.destination);
+            
+            osc1.start(audioContext.currentTime);
+            osc2.start(audioContext.currentTime);
+            osc1.stop(audioContext.currentTime + 2);
+            osc2.stop(audioContext.currentTime + 2);
+
+            // Drone bass
+            const bassOsc = audioContext.createOscillator();
+            const bassGain = audioContext.createGain();
+            bassOsc.type = 'sawtooth';
+            bassOsc.frequency.setValueAtTime(freq / 4, audioContext.currentTime);
+            bassGain.gain.setValueAtTime(0.1, audioContext.currentTime);
+            bassGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3);
+            
+            bassOsc.connect(bassGain);
+            bassGain.connect(audioContext.destination);
+            bassOsc.start(audioContext.currentTime);
+            bassOsc.stop(audioContext.currentTime + 3);
+
+            highlightPianoKey(card.semitone);
+        }
+
+        function playChord(semitones) {
+            if (!audioContext || semitones.length === 0) return;
+
+            semitones.forEach((semitone, index) => {
+                setTimeout(() => {
+                    const freq = getFrequency(semitone);
+                    const osc = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
+                    
+                    osc.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    osc.start(audioContext.currentTime);
+                    osc.stop(audioContext.currentTime + 1.5);
+                }, index * 200);
+            });
+        }
+
+        function createImpulseResponse(duration, decay, reverse) {
+            const length = audioContext.sampleRate * duration;
+            const impulse = audioContext.createBuffer(2, length, audioContext.sampleRate);
+            
+            for (let channel = 0; channel < 2; channel++) {
+                const channelData = impulse.getChannelData(channel);
+                for (let i = 0; i < length; i++) {
+                    const n = reverse ? length - i : i;
+                    channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
+                }
+            }
+            return impulse;
+        }
+
+        function stopAudio() {
+            if (sequenceInterval) {
+                clearInterval(sequenceInterval);
+                sequenceInterval = null;
+            }
+            isPlaying = false;
+            document.getElementById('sequence-progress').style.width = '0%';
+        }
+
+        // Card Creation and Display
+        function createCardElement(card, reversed = false) {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = `tarot-card ${reversed ? 'reversed' : ''}`;
+            
+            cardDiv.innerHTML = `
+                <div class="card-inner">
+                    <div class="card-face card-front">
+                        <div class="card-hebrew">${card.hebrew}</div>
+                        <div class="card-name">${card.name}</div>
+                        <div class="card-number">${card.roman}</div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div style="font-size: 2rem; color: var(--gold);">⧨</div>
+                    </div>
+                </div>
+            `;
+            
+            cardDiv.addEventListener('click', () => {
+                flipCard(cardDiv);
+                playCardSound(card, reversed);
+                logHistory(`Played ${card.name} (${reversed ? 'Reversed' : 'Upright'})`);
+            });
+            
+            return cardDiv;
+        }
+
+        function flipCard(cardElement) {
+            const inner = cardElement.querySelector('.card-inner');
+            inner.classList.toggle('flipped');
+        }
+
+        // Spread System
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.toolbar button').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(sectionName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function setSpread(spreadType) {
+            currentSpread = spreadType;
+            document.querySelectorAll('#spreads .toolbar button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function drawSpread() {
+            const container = document.getElementById('spread-display');
+            container.innerHTML = '';
+            
+            let numCards;
+            switch(currentSpread) {
+                case 'single': numCards = 1; break;
+                case 'three': numCards = 3; break;
+                case 'elements': numCards = 4; break;
+                case 'celtic': numCards = 10; break;
+                default: numCards = 1;
+            }
+            
+            drawnCards = [];
+            const shuffled = [...CARDS].sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < numCards; i++) {
+                const card = shuffled[i];
+                const reversed = Math.random() < 0.5;
+                drawnCards.push({card, reversed});
+                
+                const cardElement = createCardElement(card, reversed);
+                container.appendChild(cardElement);
+            }
+            
+            container.className = `spread-container active ${currentSpread}-spread`;
+            lastDrawnCards = [...drawnCards];
+            
+            logHistory(`Drew ${currentSpread} spread: ${drawnCards.map(dc => dc.card.name).join(', ')}`);
+            
+            // Auto-flip after a moment
+            setTimeout(() => {
+                container.querySelectorAll('.card-inner').forEach(inner => inner.classList.add('flipped'));
+            }, 500);
+        }
+
+        function clearSpread() {
+            document.getElementById('spread-display').innerHTML = '';
+            drawnCards = [];
+        }
+
+        // Daily Draw
+        function drawDailyCard() {
+            const today = new Date().toDateString();
+            const journal = getJournal();
+            
+            let dailyCard;
+            if (journal[today]) {
+                dailyCard = journal[today];
+            } else {
+                const seed = today.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+                const cardIndex = seed % CARDS.length;
+                const reversed = (seed % 7) < 3;
+                
+                dailyCard = {
+                    card: CARDS[cardIndex],
+                    reversed: reversed,
+                    date: today
+                };
+                
+                journal[today] = dailyCard;
+                saveJournal(journal);
+            }
+            
+            const container = document.getElementById('daily-card-display');
+            container.innerHTML = '';
+            
+            const cardElement = createCardElement(dailyCard.card, dailyCard.reversed);
+            container.appendChild(cardElement);
+            
+            setTimeout(() => {
+                cardElement.querySelector('.card-inner').classList.add('flipped');
+            }, 300);
+            
+            const journalDiv = document.getElementById('daily-journal');
+            journalDiv.innerHTML = `
+                <p><strong>Your card for ${today}:</strong></p>
+                <p><strong>${dailyCard.card.name}</strong> (${dailyCard.reversed ? 'Reversed' : 'Upright'})</p>
+                <p><strong>Hebrew:</strong> ${dailyCard.card.hebrew} (${dailyCard.card.letterName})</p>
+                <p><strong>Association:</strong> ${dailyCard.card.association}</p>
+                <p><strong>Musical Note:</strong> ${dailyCard.card.note}</p>
+            `;
+            
+            playCardSound(dailyCard.card, dailyCard.reversed);
+            logHistory(`Drew daily card: ${dailyCard.card.name} (${dailyCard.reversed ? 'Reversed' : 'Upright'})`);
+        }
+
+        // Piano System
+        function createPiano() {
+            const piano = document.getElementById('piano');
+            const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+            
+            for (let octave = 3; octave <= 5; octave++) {
+                for (let i = 0; i < notes.length; i++) {
+                    const note = notes[i];
+                    const semitone = i + (octave - 4) * 12;
+                    const isBlack = note.includes('#');
+                    
+                    const key = document.createElement('div');
+                    key.className = `piano-key ${isBlack ? 'black' : 'white'}`;
+                    key.textContent = `${note}${octave}`;
+                    key.dataset.semitone = semitone;
+                    
+                    key.addEventListener('click', () => {
+                        playPianoNote(semitone);
+                        highlightPianoKey(semitone);
+                    });
+                    
+                    piano.appendChild(key);
+                }
+            }
+        }
+
+        function playPianoNote(semitone) {
+            if (!audioContext) return;
+            
+            const freq = getFrequency(semitone);
+            const osc = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + 0.8);
+        }
+
+        function highlightPianoKey(semitone) {
+            document.querySelectorAll('.piano-key').forEach(key => key.classList.remove('active'));
+            const targetKey = document.querySelector(`[data-semitone="${semitone}"]`);
+            if (targetKey) {
+                targetKey.classList.add('active');
+                setTimeout(() => targetKey.classList.remove('active'), 1000);
+            }
+        }
+
+        // Correspondence Table
+        function buildCorrespondenceTable() {
+            const tbody = document.querySelector('#correspondence-table tbody');
+            tbody.innerHTML = '';
+            
+            CARDS.forEach(card => {
+                const row = document.createElement('tr');
+                
+                let planet = '—';
+                if (card.type === 'double') {
+                    if (card.association === 'Mercury') planet = 'Mercury';
+                    else if (card.association === 'Moon') planet = 'Moon';
+                    else if (card.association === 'Venus') planet = 'Venus';
+                    else if (card.association === 'Jupiter') planet = 'Jupiter';
+                    else if (card.association === 'Mars') planet = 'Mars';
+                    else if (card.association === 'Sun') planet = 'Sun';
+                    else if (card.association === 'Saturn') planet = 'Saturn';
+                } else if (card.type === 'simple') {
+                    planet = PLANET_RULERS[card.association] || '—';
+                }
+                
+                const freq = getFrequency(card.semitone).toFixed(2);
+                
+                row.innerHTML = `
+                    <td>${card.id}</td>
+                    <td>${card.name}</td>
+                    <td>${card.hebrew}</td>
+                    <td>${card.letterName}</td>
+                    <td>${planet}</td>
+                    <td>${card.association}</td>
+                    <td>${card.symbol}</td>
+                    <td>${card.note}</td>
+                    <td>${freq} Hz</td>
+                `;
+                
+                row.addEventListener('click', () => {
+                    playCardSound(card);
+                    highlightPianoKey(card.semitone);
+                });
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // 3D Graph
+        function loadThreeJS() {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+            script.onload = initializeGraph;
+            document.head.appendChild(script);
+        }
+
+        function initializeGraph() {
+            const container = document.getElementById('graph-container');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0x050507);
+            container.appendChild(renderer.domElement);
+            
+            // Create nodes
+            const nodes = [];
+            const edges = [];
+            
+            // Card nodes
+            CARDS.forEach(card => {
+                const geometry = new THREE.SphereGeometry(0.5, 8, 6);
+                const material = new THREE.MeshBasicMaterial({ color: 0xc9a84c });
+                const mesh = new THREE.Mesh(geometry, material);
+                
+                mesh.position.set(
+                    (Math.random() - 0.5) * 20,
+                    (Math.random() - 0.5) * 20,
+                    (Math.random() - 0.5) * 20
+                );
+                
+                mesh.userData = { type: 'card', data: card };
+                scene.add(mesh);
+                nodes.push(mesh);
+                
+                // Hebrew letter nodes
+                const hebrewGeometry = new THREE.SphereGeometry(0.3, 8, 6);
+                const hebrewMaterial = new THREE.MeshBasicMaterial({ color: 0xe8e8e8 });
+                const hebrewMesh = new THREE.Mesh(hebrewGeometry, hebrewMaterial);
+                
+                hebrewMesh.position.set(
+                    mesh.position.x + (Math.random() - 0.5) * 4,
+                    mesh.position.y + (Math.random() - 0.5) * 4,
+                    mesh.position.z + (Math.random() - 0.5) * 4
+                );
+                
+                hebrewMesh.userData = { type: 'hebrew', data: card.letterName };
+                scene.add(hebrewMesh);
+                nodes.push(hebrewMesh);
+                
+                // Edge between card and hebrew
+                const edgeGeometry = new THREE.BufferGeometry().setFromPoints([
+                    mesh.position,
+                    hebrewMesh.position
+                ]);
+                const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x555555 });
+                const edge = new THREE.Line(edgeGeometry, edgeMaterial);
+                scene.add(edge);
+                edges.push(edge);
+            });
+            
+            camera.position.z = 25;
+            
+            // Mouse controls
+            let mouseX = 0, mouseY = 0;
+            let mouseDown = false;
+            
+            container.addEventListener('mousedown', (e) => {
+                mouseDown = true;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            
+            container.addEventListener('mouseup', () => {
+                mouseDown = false;
+            });
+            
+            container.addEventListener('mousemove', (e) => {
+                if (mouseDown) {
+                    const deltaX = e.clientX - mouseX;
+                    const deltaY = e.clientY - mouseY;
+                    
+                    scene.rotation.y += deltaX * 0.01;
+                    scene.rotation.x += deltaY * 0.01;
+                    
+                    mouseX = e.clientX;
+                    mouseY = e.clientY;
+                }
+            });
+            
+            container.addEventListener('wheel', (e) => {
+                camera.position.z += e.deltaY * 0.01;
+                camera.position.z = Math.max(10, Math.min(50, camera.position.z));
+            });
+            
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // Auto-rotate
+                if (!mouseDown) {
+                    scene.rotation.y += 0.005;
+                }
+                
+                // Simple force simulation
+                nodes.forEach(node => {
+                    if (node.userData.type === 'card') {
+                        const targetDistance = 5;
+                        nodes.forEach(otherNode => {
+                            if (node !== otherNode) {
+                                const distance = node.position.distanceTo(otherNode.position);
+                                if (distance < targetDistance) {
+                                    const direction = new THREE.Vector3()
+                                        .subVectors(node.position, otherNode.position)
+                                        .normalize()
+                                        .multiplyScalar(0.01);
+                                    node.position.add(direction);
+                                }
+                            }
+                        });
+                    }
+                });
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            threeJS = { scene, camera, renderer, nodes, edges };
+        }
+
+        // Journal System
+        function getJournal() {
+            const stored = localStorage.getItem('harmonic_arcana_journal');
+            return stored ? JSON.parse(stored) : {};
+        }
+
+        function saveJournal(journal) {
+            localStorage.setItem('harmonic_arcana_journal', JSON.stringify(journal));
+        }
+
+        function loadJournal() {
+            // Calendar functionality will be added here
+        }
+
+        function updateCalendar() {
+            const calendar = document.getElementById('calendar');
+            const header = document.getElementById('calendar-header');
+            const stats = document.getElementById('month-stats');
+            
+            if (!calendar || !header || !stats) return;
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const today = new Date();
+            const journal = getJournal();
+            
+            header.innerHTML = `<h4>${currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h4>`;
+            
+            calendar.innerHTML = '';
+            
+            // Day headers
+            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.textContent = day;
+                dayHeader.style.fontWeight = 'bold';
+                dayHeader.style.textAlign = 'center';
+                calendar.appendChild(dayHeader);
+            });
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            let entriesThisMonth = 0;
+            
+            for (let d = new Date(startDate); d <= lastDay || d.getDay() !== 0; d.setDate(d.getDate() + 1)) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = d.getDate();
+                
+                const dateString = d.toDateString();
+                const isToday = d.toDateString() === today.toDateString();
+                const hasEntry = journal[dateString];
+                const isCurrentMonth = d.getMonth() === month;
+                
+                if (isToday) dayElement.classList.add('today');
+                if (hasEntry) {
+                    dayElement.classList.add('has-entry');
+                    if (isCurrentMonth) entriesThisMonth++;
+                }
+                if (!isCurrentMonth) dayElement.style.opacity = '0.3';
+                
+                dayElement.addEventListener('click', () => {
+                    if (hasEntry) {
+                        playCardSound(hasEntry.card, hasEntry.reversed);
+                        logHistory(`Replayed ${dateString}: ${hasEntry.card.name}`);
+                    }
+                });
+                
+                calendar.appendChild(dayElement);
+                
+                if (d.getTime() >= lastDay.getTime() && d.getDay() === 6) break;
+            }
+            
+            stats.innerHTML = `<p>Entries this month: ${entriesThisMonth}</p>`;
+        }
+
+        function prevMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            updateCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            updateCalendar();
+        }
+
+        function playWeekMelody() {
+            const journal = getJournal();
+            const notes = [];
+            const today = new Date();
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const entry = journal[date.toDateString()];
+                if (entry) {
+                    notes.push(entry.card.semitone);
+                }
+            }
+            
+            playChord(notes);
+            logHistory(`Played week melody: ${notes.length} notes`);
+        }
+
+        function playMonthMelody() {
+            const journal = getJournal();
+            const notes = [];
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            for (let day = 1; day <= 31; day++) {
+                const date = new Date(year, month, day);
+                if (date.getMonth() !== month) break;
+                
+                const entry = journal[date.toDateString()];
+                if (entry) {
+                    notes.push(entry.card.semitone);
+                }
+            }
+            
+            playChord(notes);
+            logHistory(`Played month melody: ${notes.length} notes`);
+        }
+
+        function copyMonthText() {
+            const journal = getJournal();
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            let text = `Harmonic Arcana Journal - ${currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}\n\n`;
+            
+            for (let day = 1; day <= 31; day++) {
+                const date = new Date(year, month, day);
+                if (date.getMonth() !== month) break;
+                
+                const entry = journal[date.toDateString()];
+                if (entry) {
+                    text += `${date.toLocaleDateString()}: ${entry.card.name} (${entry.reversed ? 'Reversed' : 'Upright'})\n`;
+                }
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                logHistory('Copied month text to clipboard');
+            });
+        }
+
+        // Full Arcana Playback
+        function playFullArcana() {
+            if (isPlaying) return;
+            
+            isPlaying = true;
+            sequenceIndex = 0;
+            
+            const container = document.getElementById('current-card-display');
+            const progress = document.getElementById('sequence-progress');
+            
+            sequenceInterval = setInterval(() => {
+                if (sequenceIndex >= CARDS.length) {
+                    stopAudio();
+                    return;
+                }
+                
+                const card = CARDS[sequenceIndex];
+                const reversed = Math.random() < 0.3;
+                
+                container.innerHTML = '';
+                const cardElement = createCardElement(card, reversed);
+                container.appendChild(cardElement);
+                
+                setTimeout(() => {
+                    cardElement.querySelector('.card-inner').classList.add('flipped');
+                }, 100);
+                
+                playCardSound(card, reversed);
+                
+                progress.style.width = `${((sequenceIndex + 1) / CARDS.length) * 100}%`;
+                
+                sequenceIndex++;
+            }, 2000);
+            
+            logHistory('Started Full Arcana playback');
+        }
+
+        function stopSequence() {
+            stopAudio();
+            document.getElementById('current-card-display').innerHTML = '';
+        }
+
+        function shuffleAndPlay() {
+            if (lastDrawnCards.length === 0) {
+                logHistory('No cards drawn yet - draw a spread first');
+                return;
+            }
+            
+            lastDrawnCards.forEach((dc, index) => {
+                setTimeout(() => {
+                    playCardSound(dc.card, dc.reversed);
+                }, index * 800);
+            });
+            
+            logHistory(`Shuffled and played ${lastDrawnCards.length} cards`);
+        }
+
+        // Suno AI Prompt Generator
+        function generateSunoPrompt() {
+            if (lastDrawnCards.length === 0) {
+                document.getElementById('suno-output').innerHTML = '<p>Draw cards first to generate a prompt!</p>';
+                return;
+            }
+            
+            const genres = ['ambient', 'cinematic', 'electronic', 'orchestral', 'mystical', 'dark ambient', 'new age', 'ethereal'];
+            const moods = ['mysterious', 'contemplative', 'transcendent', 'haunting', 'peaceful', 'intense', 'otherworldly', 'sacred'];
+            const keys = ['C major', 'A minor', 'D minor', 'G major', 'F major', 'E minor', 'B minor', 'F# minor'];
+            
+            const cardNotes = lastDrawnCards.map(dc => dc.card.note);
+            const uniqueNotes = [...new Set(cardNotes)];
+            
+            const genre = genres[Math.floor(Math.random() * genres.length)];
+            const mood = moods[Math.floor(Math.random() * moods.length)];
+            const key = keys[Math.floor(Math.random() * keys.length)];
+            const bpm = 60 + Math.floor(Math.random() * 60); // 60-120 BPM
+            
+            const cardNames = lastDrawnCards.map(dc => dc.card.name.toLowerCase()).join(', ');
+            
+            const prompt = `Create a ${genre} track in ${key} at ${bpm} BPM. The mood should be ${mood} and mystical, inspired by tarot cards: ${cardNames}. Include musical notes: ${uniqueNotes.join(', ')}. The composition should reflect the esoteric wisdom and archetypal energies of these cards, with ethereal textures and cosmic resonance.`;
+            
+            document.getElementById('suno-output').innerHTML = `
+                <h4>Generated Suno AI Prompt:</h4>
+                <p><strong>Genre:</strong> ${genre}</p>
+                <p><strong>Key:</strong> ${key}</p>
+                <p><strong>BPM:</strong> ${bpm}</p>
+                <p><strong>Mood:</strong> ${mood}</p>
+                <p><strong>Cards:</strong> ${cardNames}</p>
+                <p><strong>Notes:</strong> ${uniqueNotes.join(', ')}</p>
+                <hr>
+                <p><strong>Full Prompt:</strong></p>
+                <textarea rows="4" cols="50" readonly style="width:100%; background: var(--obsidian); color: var(--white); border: 1px solid var(--gold); padding: 10px;">${prompt}</textarea>
+                <br><br>
+                <button onclick="navigator.clipboard.writeText('${prompt.replace(/'/g, '\\\')}').then(() => logHistory('Copied Suno prompt to clipboard'))">Copy to Clipboard</button>
+            `;
+            
+            logHistory('Generated Suno AI prompt from drawn cards');
+        }
+
+        // History System
+        function logHistory(message) {
+            const log = document.getElementById('history-log');
+            const entry = document.createElement('div');
+            entry.className = 'history-entry';
+            entry.innerHTML = `<span style="color: var(--dim)">[${new Date().toLocaleTimeString()}]</span> ${message}`;
+            
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+            
+            // Keep only last 50 entries
+            while (log.children.length > 51) { // +1 for header
+                log.removeChild(log.children[1]);
+            }
+        }
+
+        function loadHistory() {
+            logHistory('Harmonic Arcana initialized - ready to explore the mystical connections');
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            if (audioContext && audioContext.state === 'suspended') {
+                document.addEventListener('click', () => {
+                    audioContext.resume();
+                }, { once: true });
+            }
+        });
+    </script>
+</body>
+</html>
