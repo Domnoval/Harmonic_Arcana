@@ -9,19 +9,18 @@
         :root {
             --obsidian: #050507;
             --gold: #c9a84c;
+            --gold-dim: rgba(201,168,76,0.25);
+            --orange: #e87a2a;
             --purple: #6b3fa0;
             --white: #e8e8e8;
             --dim: #555;
             --red: #8b2500;
+            --subtle-border: #1a1a1c;
             --table-row1: #0d0d10;
             --table-row2: #111115;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Source Code Pro', monospace;
@@ -31,231 +30,162 @@
             overflow-x: hidden;
         }
 
-        ::-webkit-scrollbar {
-            width: 4px;
-        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--obsidian); }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 0; }
 
-        ::-webkit-scrollbar-track {
-            background: var(--obsidian);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--gold);
-            border-radius: 0;
-        }
-
-        .app-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        .app-container { max-width: 1600px; margin: 0 auto; padding: 10px; }
 
         .app-title {
             font-family: 'Cinzel Decorative', serif;
-            font-size: 3rem;
+            font-size: 2.5rem;
             text-align: center;
             color: var(--gold);
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             text-shadow: 0 0 20px var(--gold);
         }
 
-        .toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 2rem;
-            padding: 15px;
-            background: var(--table-row1);
-            border: 1px solid var(--gold);
+        /* Top Navigation */
+        .top-nav {
+            display: flex; justify-content: center; gap: 30px;
+            margin-bottom: 20px; padding: 10px;
+            background: var(--table-row1); border: 1px solid var(--subtle-border);
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            cursor: pointer; padding: 8px 12px; transition: all 0.2s; position: relative;
+        }
+        .nav-item:hover { color: var(--orange); }
+        .nav-item.active { color: var(--orange); }
+        .nav-item.active::after {
+            content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 20px; height: 2px; background: var(--orange);
+        }
+        .nav-icon { font-size: 16px; }
+        .nav-label { font-size: 10px; text-transform: uppercase; }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: grid; grid-template-columns: 1fr 400px;
+            grid-template-rows: auto 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        .spread-panel {
+            grid-column: 1 / -1; background: var(--table-row1);
+            border: 1px solid var(--subtle-border); padding: 20px;
+            position: relative; transition: border-color 0.3s;
+        }
+        .spread-panel.active { border-color: var(--orange); box-shadow: 0 0 10px rgba(232,122,42,0.3); }
+        .piano-panel {
+            background: var(--table-row1); border: 1px solid var(--subtle-border);
+            padding: 15px; transition: border-color 0.3s;
+        }
+        .piano-panel.active { border-color: var(--orange); box-shadow: 0 0 10px rgba(232,122,42,0.3); }
+        .sampler-panel {
+            background: var(--table-row1); border: 1px solid var(--subtle-border);
+            padding: 15px; transition: border-color 0.3s;
+        }
+        .sampler-panel.active { border-color: var(--orange); box-shadow: 0 0 10px rgba(232,122,42,0.3); }
+        .info-bar {
+            grid-column: 1 / -1; background: var(--table-row1);
+            border: 1px solid var(--subtle-border); padding: 15px;
+            display: flex; justify-content: space-between; align-items: center; min-height: 80px;
         }
 
+        .panel-header {
+            font-size: 14px; color: var(--gold); margin-bottom: 15px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
         .toolbar button {
-            background: var(--obsidian);
-            color: var(--white);
-            border: 1px solid var(--dim);
-            padding: 8px 16px;
-            font-family: 'Source Code Pro', monospace;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
+            background: var(--obsidian); color: var(--white); border: 1px solid var(--dim);
+            padding: 6px 12px; font-family: 'Source Code Pro', monospace; font-size: 11px;
+            cursor: pointer; transition: all 0.2s;
         }
+        .toolbar button:hover { border-color: var(--orange); background: rgba(232,122,42,0.1); }
+        .toolbar button.active { border-color: var(--orange); background: var(--orange); color: var(--obsidian); }
 
-        .toolbar button:hover,
-        .toolbar button.active {
-            border-color: var(--gold);
-            background: var(--gold);
-            color: var(--obsidian);
-        }
-
-        .main-content {
-            display: grid;
-            gap: 2rem;
-            grid-template-columns: 1fr;
-        }
-
-        .card-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            margin: 2rem 0;
-        }
+        /* Card Styling */
+        .card-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 1rem 0; }
 
         .tarot-card {
-            width: 150px;
-            height: 240px;
-            position: relative;
-            cursor: pointer;
-            perspective: 1000px;
+            width: 140px; height: 220px; position: relative; cursor: pointer; perspective: 1000px;
         }
-
         .card-inner {
-            width: 100%;
-            height: 100%;
-            position: relative;
+            width: 100%; height: 100%; position: relative;
             transform-style: preserve-3d;
             transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-
-        .card-inner.flipped {
-            transform: rotateY(180deg);
-        }
+        .card-inner.flipped { transform: rotateY(180deg); }
 
         .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border: 2px solid var(--gold);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at 50% 50%, rgba(201, 168, 76, 0.1) 0%, var(--obsidian) 70%);
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            border: 2px solid var(--gold); display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: radial-gradient(circle at 50% 50%, rgba(201,168,76,0.1) 0%, var(--obsidian) 70%);
         }
-
-        .card-face::before,
-        .card-face::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--gold);
+        .card-face::before, .card-face::after {
+            content: ''; position: absolute; width: 15px; height: 15px; border: 2px solid var(--gold);
         }
-
-        .card-face::before {
-            top: 10px;
-            left: 10px;
-            border-right: none;
-            border-bottom: none;
-        }
-
-        .card-face::after {
-            bottom: 10px;
-            right: 10px;
-            border-left: none;
-            border-top: none;
-        }
-
-        .card-front {
-            transform: rotateY(180deg);
-        }
-
-        .card-back {
-            background: linear-gradient(45deg, var(--obsidian), var(--table-row1));
-        }
+        .card-face::before { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+        .card-face::after { bottom: 8px; right: 8px; border-left: none; border-top: none; }
+        .card-front { transform: rotateY(180deg); }
+        .card-back { background: linear-gradient(45deg, var(--obsidian), var(--table-row1)); }
 
         .card-hebrew {
-            font-size: 4rem;
-            color: var(--gold);
-            text-shadow: 0 0 30px var(--gold);
-            margin-bottom: 10px;
+            font-size: 3rem; color: var(--gold); text-shadow: 0 0 30px var(--gold); margin-bottom: 4px;
+            transition: all 0.5s;
         }
+        .card-hebrew.pulse {
+            animation: hebrewPulse 1.2s ease-out;
+        }
+        @keyframes hebrewPulse {
+            0% { text-shadow: 0 0 30px var(--gold); transform: scale(1); }
+            30% { text-shadow: 0 0 60px var(--gold), 0 0 90px var(--gold), 0 0 120px rgba(201,168,76,0.3); transform: scale(1.3); }
+            100% { text-shadow: 0 0 30px var(--gold); transform: scale(1); }
+        }
+
+        .card-note-badge {
+            position: absolute; top: 6px; right: 6px;
+            background: var(--gold); color: var(--obsidian);
+            font-size: 10px; font-weight: 700; padding: 2px 6px;
+            opacity: 0; transition: opacity 0.5s 0.3s;
+        }
+        .card-inner.flipped .card-note-badge { opacity: 1; }
+
+        .card-symbol-badge {
+            position: absolute; top: 6px; left: 6px;
+            color: var(--gold); font-size: 14px;
+            opacity: 0; transition: opacity 0.5s 0.5s;
+        }
+        .card-inner.flipped .card-symbol-badge { opacity: 1; }
 
         .card-name {
-            font-family: 'Cinzel Decorative', serif;
-            font-size: 14px;
-            color: var(--white);
-            text-align: center;
-            margin-bottom: 5px;
+            font-family: 'Cinzel Decorative', serif; font-size: 11px;
+            color: var(--white); text-align: center; margin-bottom: 2px;
         }
+        .card-number { font-size: 10px; color: var(--dim); }
+        .card-letter-name { font-size: 9px; color: var(--gold); opacity: 0.7; margin-top: 2px; }
+        .card-meaning { font-size: 9px; color: var(--white); text-align: center; margin-top: 4px; max-width: 120px; }
+        .card-meaning.reversed { color: var(--red); }
+        .card.reversed { transform: rotate(180deg); }
+        .card.reversed .card-face { border-color: var(--red); }
+        .card.reversed .card-hebrew { color: var(--red); text-shadow: 0 0 30px var(--red); }
 
-        .card-number {
-            font-size: 12px;
-            color: var(--dim);
-        }
-
-        .card-meaning {
-            font-size: 10px;
-            color: var(--white);
-            text-align: center;
-            margin-top: 5px;
-            max-width: 130px;
-        }
-
-        .card-meaning.reversed {
-            color: var(--red);
-        }
-
-        .card.reversed {
-            transform: rotate(180deg);
-        }
-
-        .card.reversed .card-face {
-            border-color: var(--red);
-        }
-
-        .card.reversed .card-hebrew {
-            color: var(--red);
-            text-shadow: 0 0 30px var(--red);
-        }
-
-        .spread-container {
-            display: none;
-            min-height: 400px;
-            position: relative;
-            margin: 2rem 0;
-        }
-
-        .spread-container.active {
-            display: block;
-        }
-
-        .single-spread {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 300px;
-        }
-
+        /* Spread containers */
+        .spread-container { min-height: 280px; position: relative; margin: 1rem 0; }
+        .single-spread { display: flex; justify-content: center; align-items: center; height: 280px; }
         .three-spread {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 40px;
-            height: 300px;
+            display: flex; justify-content: center; align-items: center; gap: 40px; height: 300px;
         }
-
         .four-elements-spread {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 40px;
-            justify-items: center;
-            align-items: center;
-            height: 400px;
+            display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+            gap: 30px; justify-items: center; align-items: center; height: 300px;
         }
-
         .celtic-cross {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            gap: 20px;
-            height: 500px;
-            justify-items: center;
-            align-items: center;
+            display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr);
+            gap: 15px; height: 400px; justify-items: center; align-items: center;
         }
-
         .celtic-cross .card:nth-child(1) { grid-column: 2; grid-row: 2; }
         .celtic-cross .card:nth-child(2) { grid-column: 2; grid-row: 2; transform: rotate(90deg); }
         .celtic-cross .card:nth-child(3) { grid-column: 2; grid-row: 1; }
@@ -267,518 +197,406 @@
         .celtic-cross .card:nth-child(9) { grid-column: 4; grid-row: 2; }
         .celtic-cross .card:nth-child(10) { grid-column: 4; grid-row: 1; }
 
+        /* PPF Position Labels */
         .position-label {
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: var(--gold);
-            font-size: 12px;
-            font-weight: bold;
-            opacity: 0;
-            transition: opacity 0.5s;
+            position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+            font-family: 'Cinzel Decorative', serif; color: var(--gold);
+            font-size: 12px; font-weight: 700; letter-spacing: 2px;
+            opacity: 0; transition: opacity 0.6s, transform 0.6s;
+            text-shadow: 0 0 10px var(--gold);
+            white-space: nowrap;
+        }
+        .position-label.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* PPF narrative connector */
+        .ppf-narrative {
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            margin-top: 16px; font-size: 11px; color: var(--dim);
+            opacity: 0; transition: opacity 0.8s;
+        }
+        .ppf-narrative.visible { opacity: 1; }
+        .ppf-narrative .arrow-line {
+            width: 60px; height: 1px; background: linear-gradient(to right, var(--gold), var(--orange));
+        }
+        .ppf-narrative .phase { color: var(--gold); font-family: 'Cinzel Decorative', serif; font-size: 10px; }
+
+        /* Hebrew reveal overlay */
+        .hebrew-reveal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none; z-index: 999;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .hebrew-reveal-overlay.active { opacity: 1; }
+        .hebrew-reveal-glyph {
+            font-size: 12rem; color: var(--gold);
+            text-shadow: 0 0 80px var(--gold), 0 0 160px rgba(201,168,76,0.4);
+            animation: glyphFlash 1s ease-out forwards;
+        }
+        @keyframes glyphFlash {
+            0% { opacity: 0; transform: scale(0.5); }
+            20% { opacity: 1; transform: scale(1.1); }
+            60% { opacity: 0.8; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.2); }
         }
 
-        .position-label.visible {
+        /* Harmonic vis ring */
+        .harmonic-ring {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+            width: 300px; height: 300px; border-radius: 50%;
+            border: 2px solid var(--gold); pointer-events: none; z-index: 998;
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .harmonic-ring.active {
             opacity: 1;
+            animation: ringExpand 1s ease-out forwards;
+        }
+        @keyframes ringExpand {
+            0% { width: 100px; height: 100px; opacity: 0.8; border-width: 3px; }
+            100% { width: 500px; height: 500px; opacity: 0; border-width: 1px; }
         }
 
-        .connection-chain {
-            text-align: center;
-            color: var(--gold);
-            font-size: 12px;
-            margin-top: 20px;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        .connection-chain.visible {
-            opacity: 1;
-        }
-
-        .spread-summary {
-            margin-top: 30px;
-            padding: 20px;
-            background: var(--table-row1);
-            border: 1px solid var(--gold);
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        .spread-summary.visible {
-            opacity: 1;
-        }
-
-        .spread-summary h4 {
-            color: var(--gold);
-            margin-bottom: 10px;
-        }
-
-        .summary-card {
-            margin-bottom: 10px;
-            font-size: 11px;
-        }
-
-        .summary-chord {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid var(--dim);
-            color: var(--gold);
-        }
-
-        .piano-container {
-            margin: 2rem 0;
-            display: flex;
-            justify-content: center;
-        }
-
+        /* Piano Styling */
+        .piano-container { display: flex; justify-content: center; }
         .piano {
-            display: inline-flex;
-            flex-wrap: nowrap;
-            border: 1px solid var(--gold);
-            height: 80px;
-            overflow-x: auto;
-            position: relative;
+            display: inline-flex; flex-wrap: nowrap; border: 1px solid var(--gold);
+            height: 60px; overflow-x: auto; position: relative;
         }
-
         .piano-key {
-            border: 1px solid var(--dim);
-            cursor: pointer;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding-bottom: 5px;
-            font-size: 10px;
-            color: var(--dim);
-            transition: all 0.1s;
+            border: 1px solid var(--dim); cursor: pointer; display: flex;
+            align-items: flex-end; justify-content: center; padding-bottom: 4px;
+            font-size: 8px; color: var(--dim); transition: all 0.2s;
         }
+        .piano-key.white { width: 25px; min-width: 25px; height: 60px; background: var(--white); color: var(--obsidian); z-index: 1; flex-shrink: 0; }
+        .piano-key.black { width: 18px; min-width: 18px; height: 40px; background: var(--obsidian); color: var(--white); margin-left: -9px; margin-right: -9px; z-index: 2; flex-shrink: 0; }
+        .piano-key.active { background: var(--orange) !important; color: var(--obsidian) !important; box-shadow: 0 0 8px var(--orange); }
 
-        .piano-key.white {
-            width: 30px;
-            min-width: 30px;
-            height: 80px;
-            background: var(--white);
-            color: var(--obsidian);
-            z-index: 1;
-            flex-shrink: 0;
-        }
-
-        .piano-key.black {
-            width: 20px;
-            min-width: 20px;
-            height: 50px;
-            background: var(--obsidian);
-            color: var(--white);
-            margin-left: -10px;
-            margin-right: -10px;
-            z-index: 2;
-            flex-shrink: 0;
-        }
-
-        .piano-key.active {
-            background: var(--gold) !important;
-            color: var(--obsidian) !important;
-        }
-
+        /* Sampler Pads (dashboard) */
         .sampler-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin: 20px 0;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+            margin: 10px 0; justify-items: center;
         }
-
         .sampler-pad {
-            width: 80px;
-            height: 80px;
-            background: var(--obsidian);
-            border: 2px solid var(--gold);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 12px;
+            width: 60px; height: 60px; border-radius: 50%; background: var(--obsidian);
+            border: 3px solid var(--gold); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; cursor: pointer;
+            transition: all 0.3s; font-size: 10px; position: relative; overflow: hidden;
+        }
+        .sampler-pad:hover { border-color: var(--orange); box-shadow: 0 0 15px rgba(232,122,42,0.4); }
+        .sampler-pad.empty { color: var(--dim); font-size: 20px; }
+        .sampler-pad.assigned { color: var(--gold); }
+        .sampler-pad.active { border-color: var(--orange); box-shadow: 0 0 20px var(--orange); animation: ring-pulse 0.3s ease-out; }
+        @keyframes ring-pulse {
+            0% { box-shadow: 0 0 20px var(--orange); transform: scale(1); }
+            50% { box-shadow: 0 0 30px var(--orange); transform: scale(1.1); }
+            100% { box-shadow: 0 0 20px var(--orange); transform: scale(1); }
+        }
+        .sampler-pad.active::before {
+            content: ''; position: absolute; inset: -3px; border-radius: 50%;
+            background: conic-gradient(from 0deg, var(--orange), transparent, var(--orange));
+            z-index: -1; animation: ring-fill 0.3s ease-out;
+        }
+        @keyframes ring-fill { 0% { opacity: 0; } 100% { opacity: 0.8; } }
+        .sampler-pad .hebrew { font-size: 16px; margin-bottom: 2px; }
+        .sampler-pad .name { font-size: 7px; text-align: center; line-height: 1; }
+
+        /* === MIDI LAUNCHPAD TAB === */
+        .launchpad-container {
+            display: flex; gap: 30px; align-items: flex-start; flex-wrap: wrap;
+        }
+        .launchpad-grid-wrap {
+            flex: 0 0 auto;
+        }
+        .launchpad-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+            padding: 20px; background: #0a0a0e; border: 2px solid var(--gold);
+        }
+        .launch-pad {
+            width: 90px; height: 90px; border: 2px solid var(--dim);
+            background: linear-gradient(145deg, #0d0d12, #08080b);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden;
+            font-family: 'Source Code Pro', monospace;
+        }
+        .launch-pad:hover { border-color: var(--gold); }
+        .launch-pad.assigned {
+            border-color: var(--gold); background: linear-gradient(145deg, #151510, #0d0d08);
+            box-shadow: inset 0 0 20px rgba(201,168,76,0.1);
+        }
+        .launch-pad.assigned .lp-hebrew {
+            font-size: 2rem; color: var(--gold); text-shadow: 0 0 15px var(--gold);
+        }
+        .launch-pad.assigned .lp-name {
+            font-size: 9px; color: var(--white); margin-top: 2px;
+        }
+        .launch-pad.assigned .lp-note {
+            font-size: 8px; color: var(--orange); margin-top: 1px;
+        }
+        .launch-pad.empty { color: var(--dim); font-size: 24px; }
+        .launch-pad.playing {
+            border-color: var(--orange) !important;
+            box-shadow: 0 0 30px var(--orange), inset 0 0 30px rgba(232,122,42,0.2) !important;
+            animation: padHit 0.35s ease-out;
+        }
+        .launch-pad.playing .lp-hebrew {
+            color: var(--orange) !important; text-shadow: 0 0 30px var(--orange) !important;
+        }
+        @keyframes padHit {
+            0% { transform: scale(1); }
+            15% { transform: scale(0.92); }
+            40% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .launch-pad .hit-ripple {
+            position: absolute; border-radius: 50%; background: rgba(232,122,42,0.4);
+            width: 10px; height: 10px; animation: ripple 0.5s ease-out forwards;
+            pointer-events: none;
+        }
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(12); opacity: 0; }
         }
 
-        .sampler-pad:hover {
-            background: var(--table-row1);
+        .launchpad-sidebar {
+            flex: 1; min-width: 250px;
         }
+        .lp-info-card {
+            background: var(--table-row2); border: 1px solid var(--subtle-border);
+            padding: 15px; margin-bottom: 15px;
+        }
+        .lp-info-card h4 { color: var(--gold); margin-bottom: 8px; font-family: 'Cinzel Decorative', serif; }
+        .lp-assigned-list { font-size: 11px; }
+        .lp-assigned-list .lp-entry { padding: 4px 0; border-bottom: 1px solid var(--subtle-border); display: flex; justify-content: space-between; }
 
-        .sampler-pad.empty {
-            color: var(--dim);
-            font-size: 24px;
-        }
+        /* Frequency Bar Chart */
+        .frequency-chart { display: flex; align-items: flex-end; gap: 3px; height: 50px; padding: 10px; }
+        .freq-bar { width: 8px; background: var(--orange); border-radius: 1px; opacity: 0.8; transition: all 0.3s; }
+        .freq-bar.active { box-shadow: 0 0 6px var(--orange); opacity: 1; }
+        .freq-label { font-size: 8px; color: var(--dim); margin-top: 2px; text-align: center; }
 
-        .sampler-pad.assigned {
-            color: var(--gold);
+        /* Connection Chain */
+        .connection-chain {
+            color: var(--orange); font-size: 12px; opacity: 0; transition: opacity 0.5s;
+            display: flex; align-items: center; gap: 10px;
         }
+        .connection-chain.visible { opacity: 1; }
+        .connection-chain .arrow { color: var(--gold); }
 
-        .sampler-pad.active {
-            background: var(--gold);
-            color: var(--obsidian);
+        /* Secondary Sections */
+        .secondary-nav {
+            display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 10px 0;
+            padding: 10px; background: var(--table-row1); border: 1px solid var(--subtle-border);
         }
-
-        .sampler-pad .hebrew {
-            font-size: 18px;
-            margin-bottom: 2px;
+        .secondary-nav button {
+            background: var(--obsidian); color: var(--white); border: 1px solid var(--dim);
+            padding: 8px 16px; font-family: 'Source Code Pro', monospace; font-size: 12px;
+            cursor: pointer; transition: all 0.2s;
         }
-
-        .sampler-pad .name {
-            font-size: 8px;
-            text-align: center;
-        }
-
-        .card-selector {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--obsidian);
-            border: 2px solid var(--gold);
-            padding: 20px;
-            max-height: 400px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-        }
-
-        .card-selector.visible {
-            display: block;
-        }
-
-        .card-selector h4 {
-            color: var(--gold);
-            margin-bottom: 10px;
-        }
-
-        .card-option {
-            padding: 8px;
-            margin: 2px 0;
-            cursor: pointer;
-            border: 1px solid var(--dim);
-        }
-
-        .card-option:hover {
-            background: var(--table-row1);
-            border-color: var(--gold);
-        }
-
-        .correspondence-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 2rem 0;
-            font-size: 11px;
-        }
-
-        .correspondence-table th {
-            background: var(--gold);
-            color: var(--obsidian);
-            padding: 8px 4px;
-            text-align: left;
-            font-weight: 600;
-        }
-
-        .correspondence-table td {
-            padding: 6px 4px;
-            border-bottom: 1px solid var(--dim);
-        }
-
-        .correspondence-table tr:nth-child(even) {
-            background: var(--table-row1);
-        }
-
-        .correspondence-table tr:nth-child(odd) {
-            background: var(--table-row2);
-        }
-
-        .graph-container {
-            height: 600px;
-            border: 1px solid var(--gold);
-            position: relative;
-            margin: 2rem 0;
-            background: var(--obsidian);
-        }
-
-        .graph-legend {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(5, 5, 7, 0.9);
-            padding: 10px;
-            border: 1px solid var(--gold);
-            font-size: 10px;
-            z-index: 10;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 3px;
-        }
-
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            margin-right: 6px;
-        }
-
-        .history-log {
-            background: var(--table-row1);
-            border: 1px solid var(--gold);
-            padding: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin: 2rem 0;
-        }
-
-        .history-entry {
-            margin-bottom: 8px;
-            font-size: 12px;
-            border-left: 2px solid var(--gold);
-            padding-left: 10px;
-        }
-
-        .journal-container {
-            background: var(--table-row1);
-            border: 1px solid var(--gold);
-            padding: 20px;
-            margin: 2rem 0;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 2px;
-            margin-top: 10px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid var(--dim);
-            font-size: 11px;
-            cursor: pointer;
-        }
-
-        .calendar-day.today {
-            border-color: var(--gold);
-            background: var(--gold);
-            color: var(--obsidian);
-        }
-
-        .calendar-day.has-entry {
-            background: var(--purple);
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: var(--dim);
-            margin: 1rem 0;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--gold);
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-
-        .suno-prompt {
-            background: var(--table-row1);
-            border: 1px solid var(--gold);
-            padding: 15px;
-            margin: 2rem 0;
-            font-size: 12px;
-        }
+        .secondary-nav button:hover { border-color: var(--orange); background: rgba(232,122,42,0.1); }
+        .secondary-nav button.active { border-color: var(--orange); background: var(--orange); color: var(--obsidian); }
 
         .section {
-            display: none;
-            padding: 20px;
-            border: 1px solid var(--gold);
-            margin: 1rem 0;
+            display: none; padding: 20px; border: 1px solid var(--subtle-border);
+            margin: 1rem 0; background: var(--table-row1);
+        }
+        .section.active { display: block; }
+
+        /* Card Selector Modal */
+        .card-selector {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--obsidian); border: 2px solid var(--gold); padding: 20px;
+            max-height: 500px; overflow-y: auto; z-index: 1000; display: none; min-width: 300px;
+        }
+        .card-selector.visible { display: block; }
+        .card-selector h4 { color: var(--gold); margin-bottom: 10px; }
+        .card-option { padding: 8px; margin: 2px 0; cursor: pointer; border: 1px solid var(--dim); display: flex; gap: 10px; align-items: center; }
+        .card-option:hover { background: var(--table-row1); border-color: var(--orange); }
+        .card-option .co-hebrew { font-size: 1.2rem; color: var(--gold); width: 30px; text-align: center; }
+
+        /* Tables */
+        .correspondence-table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 11px; }
+        .correspondence-table th { background: var(--gold); color: var(--obsidian); padding: 8px 4px; text-align: left; font-weight: 600; }
+        .correspondence-table td { padding: 6px 4px; border-bottom: 1px solid var(--subtle-border); }
+        .correspondence-table tr:nth-child(even) { background: var(--table-row1); }
+        .correspondence-table tr:nth-child(odd) { background: var(--table-row2); }
+
+        .spread-summary {
+            margin-top: 20px; padding: 15px; background: var(--table-row2);
+            border: 1px solid var(--subtle-border); opacity: 0; transition: opacity 0.5s; font-size: 11px;
+        }
+        .spread-summary.visible { opacity: 1; }
+        .spread-summary h4 { color: var(--gold); margin-bottom: 10px; }
+        .summary-card { margin-bottom: 8px; }
+        .summary-chord { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--dim); color: var(--orange); }
+
+        .graph-container {
+            height: 600px; border: 1px solid var(--subtle-border); position: relative;
+            margin: 2rem 0; background: var(--obsidian);
+        }
+        .graph-legend {
+            position: absolute; top: 10px; right: 10px; background: rgba(5,5,7,0.9);
+            padding: 10px; border: 1px solid var(--gold); font-size: 10px; z-index: 10;
+        }
+        .legend-item { display: flex; align-items: center; margin-bottom: 3px; }
+        .legend-color { width: 12px; height: 12px; margin-right: 6px; }
+
+        .history-log {
+            background: var(--table-row1); border: 1px solid var(--subtle-border);
+            padding: 15px; max-height: 200px; overflow-y: auto; margin: 2rem 0;
+        }
+        .history-entry { margin-bottom: 8px; font-size: 12px; border-left: 2px solid var(--orange); padding-left: 10px; }
+
+        .journal-container {
+            background: var(--table-row1); border: 1px solid var(--subtle-border); padding: 20px; margin: 2rem 0;
+        }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-top: 10px; }
+        .calendar-day {
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--subtle-border); font-size: 11px; cursor: pointer;
+        }
+        .calendar-day.today { border-color: var(--orange); background: var(--orange); color: var(--obsidian); }
+        .calendar-day.has-entry { background: var(--purple); }
+
+        .progress-bar { width: 100%; height: 4px; background: var(--dim); margin: 1rem 0; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--orange); width: 0%; transition: width 0.5s ease; }
+
+        .suno-prompt { background: var(--table-row1); border: 1px solid var(--subtle-border); padding: 15px; margin: 2rem 0; font-size: 12px; }
+
+        /* Suno enhanced */
+        .suno-section-block {
+            background: var(--table-row2); border: 1px solid var(--subtle-border);
+            padding: 15px; margin: 10px 0;
+        }
+        .suno-section-block h5 { color: var(--gold); margin-bottom: 8px; font-family: 'Cinzel Decorative', serif; }
+        .suno-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+        .suno-tag {
+            background: var(--obsidian); border: 1px solid var(--gold); color: var(--gold);
+            padding: 3px 8px; font-size: 10px;
+        }
+        .suno-lyrics {
+            white-space: pre-wrap; font-style: italic; color: var(--white);
+            line-height: 1.6; margin: 10px 0; padding: 10px;
+            border-left: 2px solid var(--gold); background: rgba(201,168,76,0.03);
+        }
+        .suno-copy-area {
+            width: 100%; min-height: 120px; background: var(--obsidian); color: var(--white);
+            border: 1px solid var(--gold); padding: 10px; font-family: 'Source Code Pro', monospace;
+            font-size: 11px; resize: vertical;
         }
 
-        .section.active {
-            display: block;
+        /* Mobile */
+        @media (max-width: 1200px) {
+            .dashboard { grid-template-columns: 1fr; grid-template-rows: auto auto auto auto; }
+            .sampler-grid { grid-template-columns: repeat(3, 1fr); }
+            .sampler-pad { width: 50px; height: 50px; }
         }
-
         @media (max-width: 700px) {
-            .app-title {
-                font-size: 2rem;
-            }
-            
-            .toolbar {
-                flex-direction: column;
-            }
-            
-            .tarot-card {
-                width: 120px;
-                height: 190px;
-            }
-            
-            .three-spread {
-                flex-direction: column;
-                gap: 20px;
-            }
-            
-            .four-elements-spread {
-                grid-template-columns: 1fr;
-                grid-template-rows: repeat(4, 1fr);
-            }
-            
-            .piano {
-                height: 60px;
-            }
-            
-            .piano-key.white {
-                width: 20px;
-                height: 60px;
-            }
-            
-            .piano-key.black {
-                width: 15px;
-                height: 40px;
-            }
-            
-            .sampler-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .sampler-pad {
-                width: 60px;
-                height: 60px;
-            }
-            
-            .correspondence-table {
-                font-size: 9px;
-            }
-            
-            .graph-container {
-                height: 400px;
-            }
+            .app-title { font-size: 2rem; }
+            .dashboard { grid-template-columns: 1fr; gap: 10px; }
+            .top-nav { flex-wrap: wrap; gap: 15px; }
+            .tarot-card { width: 110px; height: 180px; }
+            .three-spread { flex-direction: column; gap: 15px; }
+            .four-elements-spread { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
+            .piano { height: 50px; }
+            .piano-key.white { width: 20px; height: 50px; }
+            .piano-key.black { width: 15px; height: 35px; }
+            .sampler-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+            .sampler-pad { width: 45px; height: 45px; }
+            .info-bar { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .launch-pad { width: 70px; height: 70px; }
+            .launch-pad.assigned .lp-hebrew { font-size: 1.4rem; }
         }
     </style>
 </head>
 <body>
     <div class="app-container">
         <h1 class="app-title">⧨ HARMONIC ARCANA ⧨</h1>
-        
-        <div class="toolbar">
-            <button onclick="showSection('spreads')" class="active">Spreads</button>
-            <button onclick="showSection('daily')">Daily Draw</button>
-            <button onclick="showSection('piano-section')">Piano</button>
-            <button onclick="showSection('sampler')">Sampler</button>
-            <button onclick="showSection('correspondence')">Correspondence</button>
-            <button onclick="showSection('graph')">3D Graph</button>
-            <button onclick="showSection('journal')">Journal</button>
-            <button onclick="showSection('fullArcana')">Full Arcana</button>
-            <button onclick="showSection('suno')">Suno Generator</button>
-            <button onclick="shuffleAndPlay()">Shuffle & Play</button>
-            <button onclick="stopAudio()">Stop Audio</button>
-        </div>
 
-        <div id="spreads" class="section active">
-            <div class="toolbar">
-                <button onclick="setSpread('single')">Single Card</button>
-                <button onclick="setSpread('three')">Past/Present/Future</button>
-                <button onclick="setSpread('elements')">Four Elements</button>
-                <button onclick="setSpread('celtic')">Celtic Cross</button>
-                <button onclick="drawSpread()">Draw Cards</button>
-                <button onclick="clearSpread()">Clear</button>
+        <!-- Hebrew Reveal Overlay -->
+        <div class="hebrew-reveal-overlay" id="hebrew-overlay">
+            <div class="hebrew-reveal-glyph" id="hebrew-overlay-glyph"></div>
+        </div>
+        <div class="harmonic-ring" id="harmonic-ring"></div>
+
+        <!-- Main Navigation -->
+        <div class="top-nav">
+            <div class="nav-item active" onclick="showDashboard()">
+                <div class="nav-icon">⧨</div>
+                <div class="nav-label">Dashboard</div>
             </div>
-            <div class="spread-container active" id="spread-display"></div>
-            <div class="connection-chain" id="connection-chain"></div>
-            <div class="spread-summary" id="spread-summary"></div>
+            <div class="nav-item" onclick="showSection('daily')">
+                <div class="nav-icon">☽</div>
+                <div class="nav-label">Daily</div>
+            </div>
+            <div class="nav-item" onclick="shuffleAndPlay()">
+                <div class="nav-icon">♪</div>
+                <div class="nav-label">Shuffle</div>
+            </div>
+            <div class="nav-item" onclick="stopAudio()">
+                <div class="nav-icon">■</div>
+                <div class="nav-label">Stop</div>
+            </div>
         </div>
 
+        <!-- Dashboard Layout -->
+        <div class="dashboard" id="dashboard">
+            <div class="spread-panel active">
+                <div class="panel-header">Mystical Spreads</div>
+                <div class="toolbar">
+                    <button onclick="setSpread('single')" class="active">Single</button>
+                    <button onclick="setSpread('three')">Past/Present/Future</button>
+                    <button onclick="setSpread('elements')">Four Elements</button>
+                    <button onclick="setSpread('celtic')">Celtic Cross</button>
+                    <button onclick="drawSpread()">Draw Cards</button>
+                    <button onclick="clearSpread()">Clear</button>
+                </div>
+                <div class="spread-container" id="spread-display"></div>
+                <div id="ppf-narrative" class="ppf-narrative"></div>
+                <div class="spread-summary" id="spread-summary"></div>
+            </div>
+
+            <div class="piano-panel">
+                <div class="panel-header">Harmonic Keys</div>
+                <div class="piano-container">
+                    <div class="piano" id="piano-keys"></div>
+                </div>
+            </div>
+
+            <div class="sampler-panel">
+                <div class="panel-header">Arcana Sampler</div>
+                <div class="toolbar">
+                    <button onclick="playSequence()">Play Sequence</button>
+                    <button onclick="randomFill()">Random Fill</button>
+                    <button onclick="clearSampler()">Clear All</button>
+                </div>
+                <div class="sampler-grid" id="sampler-grid"></div>
+            </div>
+
+            <div class="info-bar">
+                <div class="connection-chain" id="connection-chain"></div>
+                <div class="frequency-chart" id="frequency-chart"></div>
+            </div>
+        </div>
+
+        <!-- Secondary Navigation -->
+        <div class="secondary-nav">
+            <button onclick="showSection('journal')" class="active">Journal & Calendar</button>
+            <button onclick="showSection('correspondence')">Correspondence Table</button>
+            <button onclick="showSection('graph')">3D Graph</button>
+            <button onclick="showSection('fullArcana')">Full Arcana</button>
+            <button onclick="showSection('launchpad')">MIDI Launchpad</button>
+            <button onclick="showSection('suno')">Suno Generator</button>
+        </div>
+
+        <!-- Sections -->
         <div id="daily" class="section">
             <h3>Daily Card Draw</h3>
-            <div class="toolbar">
-                <button onclick="drawDailyCard()">Draw Today's Card</button>
-            </div>
+            <div class="toolbar"><button onclick="drawDailyCard()">Draw Today's Card</button></div>
             <div id="daily-card-display"></div>
             <div id="daily-journal"></div>
         </div>
 
-        <div id="piano-section" class="section">
-            <h3>Piano Keyboard</h3>
-            <div class="piano-container">
-                <div class="piano" id="piano-keys"></div>
-            </div>
-            <p>Click keys to play notes. Active cards highlight corresponding keys.</p>
-        </div>
-
-        <div id="sampler" class="section">
-            <h3>MIDI Sampler</h3>
-            <div class="toolbar">
-                <button onclick="playSequence()">Play Sequence</button>
-                <button onclick="randomFill()">Random Fill</button>
-                <button onclick="clearSampler()">Clear All</button>
-            </div>
-            <div class="sampler-grid" id="sampler-grid"></div>
-        </div>
-
-        <div id="correspondence" class="section">
-            <h3>Correspondence Table</h3>
-            <table class="correspondence-table" id="correspondence-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Card</th>
-                        <th>Hebrew</th>
-                        <th>Letter</th>
-                        <th>Planet</th>
-                        <th>Element/Planet/Zodiac</th>
-                        <th>Symbol</th>
-                        <th>Note</th>
-                        <th>Freq</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <div id="graph" class="section">
-            <h3>3D Force-Directed Graph</h3>
-            <div class="graph-container" id="graph-container">
-                <div class="graph-legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #c9a84c;"></div>
-                        Cards
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #e8e8e8;"></div>
-                        Hebrew
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #6b3fa0;"></div>
-                        Planets
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #4169e1;"></div>
-                        Zodiac
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #dc143c;"></div>
-                        Elements
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #32cd32;"></div>
-                        Notes
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="journal" class="section">
+        <div id="journal" class="section active">
             <h3>Journal & Calendar</h3>
             <div class="journal-container">
                 <div class="toolbar">
@@ -794,103 +612,158 @@
             </div>
         </div>
 
+        <div id="correspondence" class="section">
+            <h3>Correspondence Table</h3>
+            <table class="correspondence-table" id="correspondence-table">
+                <thead>
+                    <tr>
+                        <th>#</th><th>Card</th><th>Hebrew</th><th>Letter</th>
+                        <th>Planet</th><th>Element/Planet/Zodiac</th><th>Symbol</th><th>Note</th><th>Freq</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div id="graph" class="section">
+            <h3>3D Force-Directed Graph</h3>
+            <div class="graph-container" id="graph-container">
+                <div class="graph-legend">
+                    <div class="legend-item"><div class="legend-color" style="background:#c9a84c;"></div>Cards</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#e8e8e8;"></div>Hebrew</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#6b3fa0;"></div>Planets</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#4169e1;"></div>Zodiac</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#dc143c;"></div>Elements</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#32cd32;"></div>Notes</div>
+                </div>
+            </div>
+        </div>
+
         <div id="fullArcana" class="section">
             <h3>Full Arcana Playback</h3>
             <div class="toolbar">
                 <button onclick="playFullArcana()">Play All 22 Cards</button>
                 <button onclick="stopSequence()">Stop</button>
             </div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="sequence-progress"></div>
-            </div>
+            <div class="progress-bar"><div class="progress-fill" id="sequence-progress"></div></div>
             <div id="current-card-display"></div>
         </div>
 
+        <!-- MIDI Launchpad Tab -->
+        <div id="launchpad" class="section">
+            <h3 style="font-family:'Cinzel Decorative',serif; color:var(--gold); margin-bottom:15px;">⧨ MIDI LAUNCHPAD ⧨</h3>
+            <div class="toolbar">
+                <button onclick="lpPlayAll()">▶ Play All</button>
+                <button onclick="lpRandomFill()">⟳ Random Fill</button>
+                <button onclick="lpClearAll()">✕ Clear All</button>
+                <button onclick="lpFromSpread()">← Load from Last Spread</button>
+            </div>
+            <div class="launchpad-container">
+                <div class="launchpad-grid-wrap">
+                    <div class="launchpad-grid" id="lp-grid"></div>
+                </div>
+                <div class="launchpad-sidebar">
+                    <div class="lp-info-card">
+                        <h4>Assigned Pads</h4>
+                        <div class="lp-assigned-list" id="lp-assigned-list"><em style="color:var(--dim)">No pads assigned</em></div>
+                    </div>
+                    <div class="lp-info-card">
+                        <h4>Controls</h4>
+                        <p style="font-size:11px;color:var(--dim);margin-bottom:8px;">Click empty pad → assign card<br>Click assigned pad → play note<br>Right-click → remove card</p>
+                        <div class="toolbar">
+                            <button onclick="lpPlayChord()">Play as Chord</button>
+                            <button onclick="lpPlayArpeggio()">Arpeggiate</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suno Generator Tab -->
         <div id="suno" class="section">
-            <h3>Suno AI Music Prompt Generator</h3>
+            <h3 style="font-family:'Cinzel Decorative',serif; color:var(--gold); margin-bottom:15px;">⧨ SUNO AI MUSIC GENERATOR ⧨</h3>
             <div class="toolbar">
                 <button onclick="generateSunoPrompt()">Generate from Last Draw</button>
+                <button onclick="generateSunoNarrative()">Generate Narrative Lyrics</button>
             </div>
-            <div class="suno-prompt" id="suno-output"></div>
+            <div id="suno-output"></div>
         </div>
 
-        <div class="history-log" id="history-log">
-            <h4>History</h4>
-        </div>
+        <div class="history-log" id="history-log"><h4>Command Log</h4></div>
 
         <div class="card-selector" id="card-selector">
-            <h4>Select Card</h4>
+            <h4>Select Card for Pad</h4>
             <div id="card-options"></div>
-            <button onclick="closeCardSelector()">Cancel</button>
+            <button onclick="closeCardSelector()" style="margin-top:10px;background:var(--obsidian);color:var(--white);border:1px solid var(--dim);padding:6px 16px;cursor:pointer;">Cancel</button>
         </div>
     </div>
 
     <script>
-        // Core Data
+        // ============ CORE DATA ============
         const CARDS = [
-            {id: 0, name: "The Fool", roman: "0", hebrew: "א", letterName: "Aleph", type: "mother", association: "Air", symbol: "△", note: "E", semitone: 4},
-            {id: 1, name: "The Magician", roman: "I", hebrew: "ב", letterName: "Beth", type: "double", association: "Mercury", symbol: "☿", note: "C", semitone: 0},
-            {id: 2, name: "The High Priestess", roman: "II", hebrew: "ג", letterName: "Gimel", type: "double", association: "Moon", symbol: "☽", note: "B", semitone: 11},
-            {id: 3, name: "The Empress", roman: "III", hebrew: "ד", letterName: "Daleth", type: "double", association: "Venus", symbol: "♀", note: "D", semitone: 2},
-            {id: 4, name: "The Emperor", roman: "IV", hebrew: "ה", letterName: "He", type: "simple", association: "Aries", symbol: "♈", note: "C", semitone: 0},
-            {id: 5, name: "The Hierophant", roman: "V", hebrew: "ו", letterName: "Vav", type: "simple", association: "Taurus", symbol: "♉", note: "C#", semitone: 1},
-            {id: 6, name: "The Lovers", roman: "VI", hebrew: "ז", letterName: "Zayin", type: "simple", association: "Gemini", symbol: "♊", note: "D", semitone: 2},
-            {id: 7, name: "The Chariot", roman: "VII", hebrew: "ח", letterName: "Cheth", type: "simple", association: "Cancer", symbol: "♋", note: "D#", semitone: 3},
-            {id: 8, name: "Strength", roman: "VIII", hebrew: "ט", letterName: "Teth", type: "simple", association: "Leo", symbol: "♌", note: "E", semitone: 4},
-            {id: 9, name: "The Hermit", roman: "IX", hebrew: "י", letterName: "Yod", type: "simple", association: "Virgo", symbol: "♍", note: "F", semitone: 5},
-            {id: 10, name: "Wheel of Fortune", roman: "X", hebrew: "כ", letterName: "Kaph", type: "double", association: "Jupiter", symbol: "♃", note: "G", semitone: 7},
-            {id: 11, name: "Justice", roman: "XI", hebrew: "ל", letterName: "Lamed", type: "simple", association: "Libra", symbol: "♎", note: "F#", semitone: 6},
-            {id: 12, name: "The Hanged Man", roman: "XII", hebrew: "מ", letterName: "Mem", type: "mother", association: "Water", symbol: "▽", note: "G#", semitone: 8},
-            {id: 13, name: "Death", roman: "XIII", hebrew: "נ", letterName: "Nun", type: "simple", association: "Scorpio", symbol: "♏", note: "G", semitone: 7},
-            {id: 14, name: "Temperance", roman: "XIV", hebrew: "ס", letterName: "Samekh", type: "simple", association: "Sagittarius", symbol: "♐", note: "G#", semitone: 8},
-            {id: 15, name: "The Devil", roman: "XV", hebrew: "ע", letterName: "Ayin", type: "simple", association: "Capricorn", symbol: "♑", note: "A", semitone: 9},
-            {id: 16, name: "The Tower", roman: "XVI", hebrew: "פ", letterName: "Pe", type: "double", association: "Mars", symbol: "♂", note: "F", semitone: 5},
-            {id: 17, name: "The Star", roman: "XVII", hebrew: "צ", letterName: "Tzaddi", type: "simple", association: "Aquarius", symbol: "♒", note: "A#", semitone: 10},
-            {id: 18, name: "The Moon", roman: "XVIII", hebrew: "ק", letterName: "Qoph", type: "simple", association: "Pisces", symbol: "♓", note: "B", semitone: 11},
-            {id: 19, name: "The Sun", roman: "XIX", hebrew: "ר", letterName: "Resh", type: "double", association: "Sun", symbol: "☉", note: "E", semitone: 4},
-            {id: 20, name: "Judgement", roman: "XX", hebrew: "ש", letterName: "Shin", type: "mother", association: "Fire", symbol: "△", note: "C", semitone: 0},
-            {id: 21, name: "The World", roman: "XXI", hebrew: "ת", letterName: "Tav", type: "double", association: "Saturn", symbol: "♄", note: "A", semitone: 9}
+            {id:0,name:"The Fool",roman:"0",hebrew:"א",letterName:"Aleph",type:"mother",association:"Air",symbol:"△",note:"E",semitone:4},
+            {id:1,name:"The Magician",roman:"I",hebrew:"ב",letterName:"Beth",type:"double",association:"Mercury",symbol:"☿",note:"C",semitone:0},
+            {id:2,name:"The High Priestess",roman:"II",hebrew:"ג",letterName:"Gimel",type:"double",association:"Moon",symbol:"☽",note:"B",semitone:11},
+            {id:3,name:"The Empress",roman:"III",hebrew:"ד",letterName:"Daleth",type:"double",association:"Venus",symbol:"♀",note:"D",semitone:2},
+            {id:4,name:"The Emperor",roman:"IV",hebrew:"ה",letterName:"He",type:"simple",association:"Aries",symbol:"♈",note:"C",semitone:0},
+            {id:5,name:"The Hierophant",roman:"V",hebrew:"ו",letterName:"Vav",type:"simple",association:"Taurus",symbol:"♉",note:"C#",semitone:1},
+            {id:6,name:"The Lovers",roman:"VI",hebrew:"ז",letterName:"Zayin",type:"simple",association:"Gemini",symbol:"♊",note:"D",semitone:2},
+            {id:7,name:"The Chariot",roman:"VII",hebrew:"ח",letterName:"Cheth",type:"simple",association:"Cancer",symbol:"♋",note:"D#",semitone:3},
+            {id:8,name:"Strength",roman:"VIII",hebrew:"ט",letterName:"Teth",type:"simple",association:"Leo",symbol:"♌",note:"E",semitone:4},
+            {id:9,name:"The Hermit",roman:"IX",hebrew:"י",letterName:"Yod",type:"simple",association:"Virgo",symbol:"♍",note:"F",semitone:5},
+            {id:10,name:"Wheel of Fortune",roman:"X",hebrew:"כ",letterName:"Kaph",type:"double",association:"Jupiter",symbol:"♃",note:"G",semitone:7},
+            {id:11,name:"Justice",roman:"XI",hebrew:"ל",letterName:"Lamed",type:"simple",association:"Libra",symbol:"♎",note:"F#",semitone:6},
+            {id:12,name:"The Hanged Man",roman:"XII",hebrew:"מ",letterName:"Mem",type:"mother",association:"Water",symbol:"▽",note:"G#",semitone:8},
+            {id:13,name:"Death",roman:"XIII",hebrew:"נ",letterName:"Nun",type:"simple",association:"Scorpio",symbol:"♏",note:"G",semitone:7},
+            {id:14,name:"Temperance",roman:"XIV",hebrew:"ס",letterName:"Samekh",type:"simple",association:"Sagittarius",symbol:"♐",note:"G#",semitone:8},
+            {id:15,name:"The Devil",roman:"XV",hebrew:"ע",letterName:"Ayin",type:"simple",association:"Capricorn",symbol:"♑",note:"A",semitone:9},
+            {id:16,name:"The Tower",roman:"XVI",hebrew:"פ",letterName:"Pe",type:"double",association:"Mars",symbol:"♂",note:"F",semitone:5},
+            {id:17,name:"The Star",roman:"XVII",hebrew:"צ",letterName:"Tzaddi",type:"simple",association:"Aquarius",symbol:"♒",note:"A#",semitone:10},
+            {id:18,name:"The Moon",roman:"XVIII",hebrew:"ק",letterName:"Qoph",type:"simple",association:"Pisces",symbol:"♓",note:"B",semitone:11},
+            {id:19,name:"The Sun",roman:"XIX",hebrew:"ר",letterName:"Resh",type:"double",association:"Sun",symbol:"☉",note:"E",semitone:4},
+            {id:20,name:"Judgement",roman:"XX",hebrew:"ש",letterName:"Shin",type:"mother",association:"Fire",symbol:"△",note:"C",semitone:0},
+            {id:21,name:"The World",roman:"XXI",hebrew:"ת",letterName:"Tav",type:"double",association:"Saturn",symbol:"♄",note:"A",semitone:9}
         ];
 
         const CARD_MEANINGS = {
-            0: {upright: "new beginnings, innocence", reversed: "recklessness, chaos"},
-            1: {upright: "manifestation, skill", reversed: "manipulation, deception"},
-            2: {upright: "intuition, mystery", reversed: "secrets, withdrawal"},
-            3: {upright: "fertility, abundance", reversed: "dependence, emptiness"},
-            4: {upright: "authority, stability", reversed: "tyranny, rigidity"},
-            5: {upright: "tradition, conformity", reversed: "rebellion, unconventional"},
-            6: {upright: "love, relationships", reversed: "disharmony, imbalance"},
-            7: {upright: "determination, control", reversed: "lack of direction"},
-            8: {upright: "inner strength, courage", reversed: "weakness, self-doubt"},
-            9: {upright: "introspection, guidance", reversed: "isolation, lost"},
-            10: {upright: "fate, cycles", reversed: "bad luck, lack of control"},
-            11: {upright: "fairness, truth", reversed: "injustice, bias"},
-            12: {upright: "surrender, patience", reversed: "stalling, indecision"},
-            13: {upright: "transformation, endings", reversed: "resistance, stagnation"},
-            14: {upright: "balance, moderation", reversed: "imbalance, excess"},
-            15: {upright: "bondage, addiction", reversed: "breaking free, release"},
-            16: {upright: "sudden change, upheaval", reversed: "avoiding disaster, fear"},
-            17: {upright: "hope, inspiration", reversed: "despair, disconnection"},
-            18: {upright: "illusion, intuition", reversed: "confusion, fear"},
-            19: {upright: "joy, success", reversed: "negativity, depression"},
-            20: {upright: "rebirth, inner calling", reversed: "self-doubt, harsh judgment"},
-            21: {upright: "completion, accomplishment", reversed: "incomplete, lack of closure"}
+            0:{upright:"new beginnings, innocence",reversed:"recklessness, chaos"},
+            1:{upright:"manifestation, skill",reversed:"manipulation, deception"},
+            2:{upright:"intuition, mystery",reversed:"secrets, withdrawal"},
+            3:{upright:"fertility, abundance",reversed:"dependence, emptiness"},
+            4:{upright:"authority, stability",reversed:"tyranny, rigidity"},
+            5:{upright:"tradition, conformity",reversed:"rebellion, unconventional"},
+            6:{upright:"love, relationships",reversed:"disharmony, imbalance"},
+            7:{upright:"determination, control",reversed:"lack of direction"},
+            8:{upright:"inner strength, courage",reversed:"weakness, self-doubt"},
+            9:{upright:"introspection, guidance",reversed:"isolation, lost"},
+            10:{upright:"fate, cycles",reversed:"bad luck, lack of control"},
+            11:{upright:"fairness, truth",reversed:"injustice, bias"},
+            12:{upright:"surrender, patience",reversed:"stalling, indecision"},
+            13:{upright:"transformation, endings",reversed:"resistance, stagnation"},
+            14:{upright:"balance, moderation",reversed:"imbalance, excess"},
+            15:{upright:"bondage, addiction",reversed:"breaking free, release"},
+            16:{upright:"sudden change, upheaval",reversed:"avoiding disaster, fear"},
+            17:{upright:"hope, inspiration",reversed:"despair, disconnection"},
+            18:{upright:"illusion, intuition",reversed:"confusion, fear"},
+            19:{upright:"joy, success",reversed:"negativity, depression"},
+            20:{upright:"rebirth, inner calling",reversed:"self-doubt, harsh judgment"},
+            21:{upright:"completion, accomplishment",reversed:"incomplete, lack of closure"}
         };
 
         const PLANET_RULERS = {
-            "Aries": "Mars", "Taurus": "Venus", "Gemini": "Mercury", "Cancer": "Moon",
-            "Leo": "Sun", "Virgo": "Mercury", "Libra": "Venus", "Scorpio": "Mars",
-            "Sagittarius": "Jupiter", "Capricorn": "Saturn", "Aquarius": "Saturn", "Pisces": "Jupiter"
+            "Aries":"Mars","Taurus":"Venus","Gemini":"Mercury","Cancer":"Moon",
+            "Leo":"Sun","Virgo":"Mercury","Libra":"Venus","Scorpio":"Mars",
+            "Sagittarius":"Jupiter","Capricorn":"Saturn","Aquarius":"Saturn","Pisces":"Jupiter"
         };
 
         const POSITION_LABELS = {
             single: ["Present"],
             three: ["Past", "Present", "Future"],
             elements: ["Fire", "Water", "Air", "Earth"],
-            celtic: ["Present", "Cross", "Distant Past", "Possible Future", "Crown", "Foundation", "Your Approach", "External Influences", "Hopes & Fears", "Final Outcome"]
+            celtic: ["Present","Cross","Distant Past","Possible Future","Crown","Foundation","Your Approach","External Influences","Hopes & Fears","Final Outcome"]
         };
 
-        // State
+        // ============ STATE ============
         let audioContext;
         let currentSpread = 'single';
         let drawnCards = [];
@@ -902,8 +775,11 @@
         let threeJS = null;
         let samplerPads = [];
         let selectedPadIndex = null;
+        let currentView = 'dashboard';
+        let lpPads = new Array(16).fill(null);
+        let cardSelectorTarget = 'sampler'; // 'sampler' | 'launchpad'
 
-        // Initialize app
+        // ============ INIT ============
         document.addEventListener('DOMContentLoaded', function() {
             initializeAudio();
             createPiano();
@@ -912,20 +788,43 @@
             updateCalendar();
             loadHistory();
             initializeSampler();
-            
-            // Lazy load Three.js when graph section is visible
+            initializeFrequencyChart();
+            initializeLaunchpad();
+
             const graphContainer = document.getElementById('graph-container');
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
-                    if (entry.isIntersecting && !threeJS) {
-                        loadThreeJS();
-                    }
+                    if (entry.isIntersecting && !threeJS) loadThreeJS();
                 });
             });
             observer.observe(graphContainer);
         });
 
-        // Audio System
+        // ============ NAVIGATION ============
+        function showDashboard() {
+            currentView = 'dashboard';
+            document.getElementById('dashboard').style.display = 'grid';
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            updateNavigation();
+        }
+
+        function showSection(sectionName) {
+            currentView = sectionName;
+            document.getElementById('dashboard').style.display = 'none';
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.secondary-nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(sectionName).classList.add('active');
+            var e = window.event;
+            if (e && e.target && e.target.tagName === 'BUTTON') e.target.classList.add('active');
+            updateNavigation();
+        }
+
+        function updateNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            if (currentView === 'dashboard') document.querySelector('.nav-item').classList.add('active');
+        }
+
+        // ============ AUDIO SYSTEM ============
         function initializeAudio() {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
@@ -936,73 +835,54 @@
 
         function playCardSound(card, reversed = false) {
             if (!audioContext) return;
-
             const octave = reversed ? 3 : 4;
             const freq = getFrequency(card.semitone, octave);
-            
-            // Dual detuned oscillators
+
             const osc1 = audioContext.createOscillator();
             const osc2 = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            
-            // Convolution reverb (simplified)
             const convolver = audioContext.createConvolver();
-            const impulse = createImpulseResponse(2, 2, false);
-            convolver.buffer = impulse;
-            
-            osc1.type = 'sine';
-            osc2.type = 'sine';
+            convolver.buffer = createImpulseResponse(2, 2, false);
+
+            osc1.type = 'sine'; osc2.type = 'sine';
             osc1.frequency.setValueAtTime(freq, audioContext.currentTime);
-            osc2.frequency.setValueAtTime(freq * 1.005, audioContext.currentTime); // Slight detune
-            
+            osc2.frequency.setValueAtTime(freq * 1.005, audioContext.currentTime);
+
             gainNode.gain.setValueAtTime(0, audioContext.currentTime);
             gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.1);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
-            
-            osc1.connect(gainNode);
-            osc2.connect(gainNode);
-            gainNode.connect(convolver);
-            convolver.connect(audioContext.destination);
-            
-            osc1.start(audioContext.currentTime);
-            osc2.start(audioContext.currentTime);
-            osc1.stop(audioContext.currentTime + 2);
-            osc2.stop(audioContext.currentTime + 2);
 
-            // Drone bass
+            osc1.connect(gainNode); osc2.connect(gainNode);
+            gainNode.connect(convolver); convolver.connect(audioContext.destination);
+            osc1.start(); osc2.start();
+            osc1.stop(audioContext.currentTime + 2); osc2.stop(audioContext.currentTime + 2);
+
             const bassOsc = audioContext.createOscillator();
             const bassGain = audioContext.createGain();
             bassOsc.type = 'sawtooth';
             bassOsc.frequency.setValueAtTime(freq / 4, audioContext.currentTime);
             bassGain.gain.setValueAtTime(0.1, audioContext.currentTime);
             bassGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3);
-            
-            bassOsc.connect(bassGain);
-            bassGain.connect(audioContext.destination);
-            bassOsc.start(audioContext.currentTime);
-            bassOsc.stop(audioContext.currentTime + 3);
+            bassOsc.connect(bassGain); bassGain.connect(audioContext.destination);
+            bassOsc.start(); bassOsc.stop(audioContext.currentTime + 3);
 
             highlightPianoKey(card.semitone);
+            updateFrequencyChart();
         }
 
         function playChord(semitones) {
             if (!audioContext || semitones.length === 0) return;
-
             semitones.forEach((semitone, index) => {
                 setTimeout(() => {
                     const freq = getFrequency(semitone);
                     const osc = audioContext.createOscillator();
                     const gainNode = audioContext.createGain();
-                    
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(freq, audioContext.currentTime);
                     gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.5);
-                    
-                    osc.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
-                    osc.start(audioContext.currentTime);
-                    osc.stop(audioContext.currentTime + 1.5);
+                    osc.connect(gainNode); gainNode.connect(audioContext.destination);
+                    osc.start(); osc.stop(audioContext.currentTime + 1.5);
                 }, index * 200);
             });
         }
@@ -1010,98 +890,114 @@
         function createImpulseResponse(duration, decay, reverse) {
             const length = audioContext.sampleRate * duration;
             const impulse = audioContext.createBuffer(2, length, audioContext.sampleRate);
-            
-            for (let channel = 0; channel < 2; channel++) {
-                const channelData = impulse.getChannelData(channel);
+            for (let ch = 0; ch < 2; ch++) {
+                const data = impulse.getChannelData(ch);
                 for (let i = 0; i < length; i++) {
                     const n = reverse ? length - i : i;
-                    channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
+                    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
                 }
             }
             return impulse;
         }
 
         function stopAudio() {
-            if (sequenceInterval) {
-                clearInterval(sequenceInterval);
-                sequenceInterval = null;
-            }
+            if (sequenceInterval) { clearInterval(sequenceInterval); sequenceInterval = null; }
             isPlaying = false;
-            document.getElementById('sequence-progress').style.width = '0%';
+            const progress = document.getElementById('sequence-progress');
+            if (progress) progress.style.width = '0%';
         }
 
-        // Card Creation and Display
+        // ============ HEBREW / HARMONIC REVEAL ============
+        function triggerHebrewReveal(card) {
+            const overlay = document.getElementById('hebrew-overlay');
+            const glyph = document.getElementById('hebrew-overlay-glyph');
+            const ring = document.getElementById('harmonic-ring');
+
+            glyph.textContent = card.hebrew;
+            // Re-trigger animation
+            glyph.style.animation = 'none';
+            glyph.offsetHeight;
+            glyph.style.animation = '';
+
+            overlay.classList.add('active');
+            setTimeout(() => overlay.classList.remove('active'), 1000);
+
+            ring.style.animation = 'none';
+            ring.offsetHeight;
+            ring.style.animation = '';
+            ring.classList.add('active');
+            setTimeout(() => ring.classList.remove('active'), 1000);
+        }
+
+        // ============ CARD CREATION ============
         function createCardElement(card, reversed = false) {
             const cardDiv = document.createElement('div');
             cardDiv.className = `tarot-card ${reversed ? 'reversed' : ''}`;
-            
             const meaning = CARD_MEANINGS[card.id];
             const meaningText = reversed ? meaning.reversed : meaning.upright;
-            
+
             cardDiv.innerHTML = `
                 <div class="card-inner">
                     <div class="card-face card-front">
-                        <div class="card-hebrew">${card.hebrew}</div>
+                        <div class="card-note-badge">${card.note}</div>
+                        <div class="card-symbol-badge">${card.symbol}</div>
+                        <div class="card-hebrew" id="hebrew-${card.id}">${card.hebrew}</div>
                         <div class="card-name">${card.name}</div>
                         <div class="card-number">${card.roman}</div>
+                        <div class="card-letter-name">${card.letterName}</div>
                         <div class="card-meaning ${reversed ? 'reversed' : ''}">${meaningText}</div>
                     </div>
                     <div class="card-face card-back">
-                        <div style="font-size: 2rem; color: var(--gold);">⧨</div>
+                        <div style="font-size:2rem;color:var(--gold);">⧨</div>
                     </div>
                 </div>
             `;
-            
+
             cardDiv.addEventListener('click', () => {
-                flipCard(cardDiv);
-                playCardSound(card, reversed);
+                const inner = cardDiv.querySelector('.card-inner');
+                const wasFlipped = inner.classList.contains('flipped');
+                inner.classList.toggle('flipped');
+                if (!wasFlipped) {
+                    playCardSound(card, reversed);
+                    triggerHebrewReveal(card);
+                    // Pulse the hebrew on card
+                    const heb = cardDiv.querySelector('.card-hebrew');
+                    heb.classList.remove('pulse');
+                    heb.offsetHeight;
+                    heb.classList.add('pulse');
+                }
                 highlightPianoKey(card.semitone);
                 showConnectionChain(card, reversed);
+                activatePanel('spread-panel');
                 logHistory(`Played ${card.name} (${reversed ? 'Reversed' : 'Upright'})`);
             });
-            
-            return cardDiv;
-        }
 
-        function flipCard(cardElement) {
-            const inner = cardElement.querySelector('.card-inner');
-            inner.classList.toggle('flipped');
+            return cardDiv;
         }
 
         function showConnectionChain(card, reversed) {
             const chain = document.getElementById('connection-chain');
             const planet = getPlanetForCard(card);
-            chain.innerHTML = `${card.name} → ${card.hebrew} (${card.letterName}) → ${card.note} → ${planet}`;
+            chain.innerHTML = `${card.name} <span class="arrow">→</span> ${card.hebrew} (${card.letterName}) <span class="arrow">→</span> ♪ ${card.note} <span class="arrow">→</span> ${card.symbol} ${planet}`;
             chain.classList.add('visible');
-            
-            setTimeout(() => {
-                chain.classList.remove('visible');
-            }, 3000);
+            setTimeout(() => chain.classList.remove('visible'), 5000);
         }
 
         function getPlanetForCard(card) {
-            if (card.type === 'double') {
-                return card.association;
-            } else if (card.type === 'simple') {
-                return PLANET_RULERS[card.association] || card.association;
-            } else {
-                return card.association;
-            }
+            if (card.type === 'double') return card.association;
+            if (card.type === 'simple') return PLANET_RULERS[card.association] || card.association;
+            return card.association;
         }
 
-        // Spread System
-        function showSection(sectionName) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.app-container > .toolbar > button').forEach(b => b.classList.remove('active'));
-            
-            document.getElementById(sectionName).classList.add('active');
-            var e = window.event;
-            if (e && e.target && e.target.tagName === 'BUTTON') e.target.classList.add('active');
+        function activatePanel(panelClass) {
+            document.querySelectorAll('.spread-panel,.piano-panel,.sampler-panel').forEach(p => p.classList.remove('active'));
+            document.querySelector('.' + panelClass)?.classList.add('active');
         }
 
+        // ============ SPREAD SYSTEM ============
         function setSpread(spreadType) {
             currentSpread = spreadType;
-            document.querySelectorAll('#spreads .toolbar button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.spread-panel .toolbar button').forEach(b => b.classList.remove('active'));
             var e = window.event;
             if (e && e.target && e.target.tagName === 'BUTTON') e.target.classList.add('active');
         }
@@ -1109,10 +1005,13 @@
         function drawSpread() {
             const container = document.getElementById('spread-display');
             const summary = document.getElementById('spread-summary');
+            const ppfNarr = document.getElementById('ppf-narrative');
             container.innerHTML = '';
             summary.innerHTML = '';
             summary.classList.remove('visible');
-            
+            ppfNarr.innerHTML = '';
+            ppfNarr.classList.remove('visible');
+
             let numCards;
             switch(currentSpread) {
                 case 'single': numCards = 1; break;
@@ -1121,84 +1020,116 @@
                 case 'celtic': numCards = 10; break;
                 default: numCards = 1;
             }
-            
+
             drawnCards = [];
             const shuffled = [...CARDS].sort(() => Math.random() - 0.5);
-            
+
             for (let i = 0; i < numCards; i++) {
                 const card = shuffled[i];
                 const reversed = Math.random() < 0.5;
                 drawnCards.push({card, reversed});
-                
+
+                const wrapper = document.createElement('div');
+                wrapper.style.position = 'relative';
+                wrapper.style.opacity = '0';
+                wrapper.style.transform = 'translateY(20px)';
+                wrapper.style.transition = 'opacity 0.5s, transform 0.5s';
+
                 const cardElement = createCardElement(card, reversed);
-                
-                // Add position label
+
                 const positionLabel = document.createElement('div');
                 positionLabel.className = 'position-label';
                 positionLabel.textContent = POSITION_LABELS[currentSpread][i] || `Position ${i + 1}`;
-                cardElement.appendChild(positionLabel);
-                
-                container.appendChild(cardElement);
+                wrapper.appendChild(positionLabel);
+                wrapper.appendChild(cardElement);
+                container.appendChild(wrapper);
             }
-            
-            container.className = `spread-container active ${currentSpread}-spread`;
+
+            container.className = `spread-container ${currentSpread === 'three' ? 'three' : currentSpread}-spread`;
             lastDrawnCards = [...drawnCards];
-            
+
+            activatePanel('spread-panel');
             logHistory(`Drew ${currentSpread} spread: ${drawnCards.map(dc => dc.card.name).join(', ')}`);
-            
-            // Sequential reveal with ceremony
+
+            // Sequential reveal
             drawnCards.forEach((dc, index) => {
                 setTimeout(() => {
-                    const cardElement = container.children[index];
-                    const inner = cardElement.querySelector('.card-inner');
-                    const label = cardElement.querySelector('.position-label');
-                    
-                    // Show position label
+                    const wrapper = container.children[index];
+                    // Fade in wrapper
+                    wrapper.style.opacity = '1';
+                    wrapper.style.transform = 'translateY(0)';
+
+                    const label = wrapper.querySelector('.position-label');
                     label.classList.add('visible');
-                    
-                    // Flip card
+
                     setTimeout(() => {
+                        const inner = wrapper.querySelector('.card-inner');
                         inner.classList.add('flipped');
                         playCardSound(dc.card, dc.reversed);
-                    }, 300);
-                    
-                }, index * 600);
+                        triggerHebrewReveal(dc.card);
+
+                        const heb = wrapper.querySelector('.card-hebrew');
+                        heb.classList.add('pulse');
+                    }, 400);
+                }, index * 900);
             });
-            
-            // Show spread summary after all cards are revealed
+
+            // Show summary + PPF narrative
             setTimeout(() => {
                 showSpreadSummary();
-            }, numCards * 600 + 1000);
+                updateFrequencyChart();
+                if (currentSpread === 'three') showPPFNarrative();
+            }, numCards * 900 + 1200);
+        }
+
+        function showPPFNarrative() {
+            if (drawnCards.length < 3) return;
+            const past = drawnCards[0], present = drawnCards[1], future = drawnCards[2];
+            const ppfNarr = document.getElementById('ppf-narrative');
+
+            const pastM = CARD_MEANINGS[past.card.id];
+            const presM = CARD_MEANINGS[present.card.id];
+            const futM = CARD_MEANINGS[future.card.id];
+
+            ppfNarr.innerHTML = `
+                <span class="phase">${past.card.hebrew} ${past.card.note}</span>
+                <div class="arrow-line"></div>
+                <span style="color:var(--dim);font-size:10px;">${past.reversed ? pastM.reversed : pastM.upright}</span>
+                <div class="arrow-line"></div>
+                <span class="phase">${present.card.hebrew} ${present.card.note}</span>
+                <div class="arrow-line"></div>
+                <span style="color:var(--dim);font-size:10px;">${present.reversed ? presM.reversed : presM.upright}</span>
+                <div class="arrow-line"></div>
+                <span class="phase">${future.card.hebrew} ${future.card.note}</span>
+            `;
+            ppfNarr.classList.add('visible');
         }
 
         function showSpreadSummary() {
             const summary = document.getElementById('spread-summary');
             let html = '<h4>SPREAD SUMMARY</h4>';
-            
+
             drawnCards.forEach((dc, index) => {
                 const planet = getPlanetForCard(dc.card);
                 const meaning = CARD_MEANINGS[dc.card.id];
                 const meaningText = dc.reversed ? meaning.reversed : meaning.upright;
-                html += `<div class="summary-card"><strong>${POSITION_LABELS[currentSpread][index]}:</strong> ${dc.card.name} (${dc.card.hebrew}) - ${dc.card.note} - ${planet} - "${meaningText}"</div>`;
+                html += `<div class="summary-card"><strong>${POSITION_LABELS[currentSpread][index]}:</strong> ${dc.card.name} (${dc.card.hebrew} · ${dc.card.letterName}) — ♪ ${dc.card.note} — ${dc.card.symbol} ${planet} — <em>"${meaningText}"</em></div>`;
             });
-            
+
             const notes = drawnCards.map(dc => dc.card.note);
             const uniqueNotes = [...new Set(notes)];
-            html += `<div class="summary-chord"><strong>Chord:</strong> ${notes.join(' → ')} (${uniqueNotes.join(', ')})</div>`;
-            
-            // Add interpretive phrase based on spread
-            let interpretive = '';
+            html += `<div class="summary-chord"><strong>Harmonic Sequence:</strong> ${notes.join(' → ')} (${uniqueNotes.join(', ')})</div>`;
+
             if (currentSpread === 'three') {
-                interpretive = 'A journey through time revealing the threads of destiny.';
+                html += `<div style="margin-top:10px;font-style:italic;color:var(--gold);">From ${drawnCards[0].card.name} through ${drawnCards[1].card.name} into ${drawnCards[2].card.name} — the thread of time reveals itself in ${notes.join(', ')}.</div>`;
             } else if (currentSpread === 'elements') {
-                interpretive = 'The elemental forces in balance and tension.';
+                html += `<div style="margin-top:10px;font-style:italic;color:var(--gold);">The elemental forces in balance and tension.</div>`;
             } else if (currentSpread === 'celtic') {
-                interpretive = 'The complete pattern of influences surrounding your question.';
+                html += `<div style="margin-top:10px;font-style:italic;color:var(--gold);">The complete pattern of influences surrounding your question.</div>`;
             } else {
-                interpretive = 'A moment of clarity in the present.';
+                html += `<div style="margin-top:10px;font-style:italic;color:var(--gold);">A moment of clarity in the present.</div>`;
             }
-            html += `<div style="margin-top: 10px; font-style: italic; color: var(--gold);">${interpretive}</div>`;
-            
+
             summary.innerHTML = html;
             summary.classList.add('visible');
         }
@@ -1207,14 +1138,48 @@
             document.getElementById('spread-display').innerHTML = '';
             document.getElementById('spread-summary').classList.remove('visible');
             document.getElementById('connection-chain').classList.remove('visible');
+            document.getElementById('ppf-narrative').classList.remove('visible');
             drawnCards = [];
+            updateFrequencyChart();
         }
 
-        // Daily Draw
+        // ============ FREQUENCY CHART ============
+        function initializeFrequencyChart() {
+            const chart = document.getElementById('frequency-chart');
+            chart.innerHTML = '<div style="font-size:10px;color:var(--dim);margin-right:10px;">FREQ</div>';
+            const notes = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+            notes.forEach((note, index) => {
+                const bc = document.createElement('div');
+                bc.style.cssText = 'display:flex;flex-direction:column;align-items:center;';
+                const bar = document.createElement('div');
+                bar.className = 'freq-bar'; bar.style.height = '5px'; bar.dataset.semitone = index;
+                const label = document.createElement('div');
+                label.className = 'freq-label'; label.textContent = note;
+                bc.appendChild(bar); bc.appendChild(label);
+                chart.appendChild(bc);
+            });
+        }
+
+        function updateFrequencyChart() {
+            const bars = document.querySelectorAll('.freq-bar');
+            bars.forEach(bar => { bar.classList.remove('active'); bar.style.height = '5px'; });
+            if (drawnCards.length > 0) {
+                const semitones = drawnCards.map(dc => dc.card.semitone);
+                const maxFreq = Math.max(...semitones.map(s => getFrequency(s)));
+                semitones.forEach(semitone => {
+                    const bar = document.querySelector(`[data-semitone="${semitone}"]`);
+                    if (bar) {
+                        const height = Math.max(15, (getFrequency(semitone) / maxFreq) * 40);
+                        bar.style.height = height + 'px'; bar.classList.add('active');
+                    }
+                });
+            }
+        }
+
+        // ============ DAILY DRAW ============
         function drawDailyCard() {
             const today = new Date().toDateString();
             const journal = getJournal();
-            
             let dailyCard;
             if (journal[today]) {
                 dailyCard = journal[today];
@@ -1222,65 +1187,47 @@
                 const seed = today.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
                 const cardIndex = seed % CARDS.length;
                 const reversed = (seed % 7) < 3;
-                
-                dailyCard = {
-                    card: CARDS[cardIndex],
-                    reversed: reversed,
-                    date: today
-                };
-                
+                dailyCard = { card: CARDS[cardIndex], reversed, date: today };
                 journal[today] = dailyCard;
                 saveJournal(journal);
             }
-            
+
             const container = document.getElementById('daily-card-display');
             container.innerHTML = '';
-            
             const cardElement = createCardElement(dailyCard.card, dailyCard.reversed);
             container.appendChild(cardElement);
-            
             setTimeout(() => {
                 cardElement.querySelector('.card-inner').classList.add('flipped');
+                triggerHebrewReveal(dailyCard.card);
             }, 300);
-            
+
             const meaning = CARD_MEANINGS[dailyCard.card.id];
             const meaningText = dailyCard.reversed ? meaning.reversed : meaning.upright;
-            
-            const journalDiv = document.getElementById('daily-journal');
-            journalDiv.innerHTML = `
+            document.getElementById('daily-journal').innerHTML = `
                 <p><strong>Your card for ${today}:</strong></p>
                 <p><strong>${dailyCard.card.name}</strong> (${dailyCard.reversed ? 'Reversed' : 'Upright'})</p>
+                <p><strong>Hebrew:</strong> ${dailyCard.card.hebrew} (${dailyCard.card.letterName}) · <strong>Note:</strong> ${dailyCard.card.note} · <strong>Symbol:</strong> ${dailyCard.card.symbol}</p>
                 <p><strong>Meaning:</strong> ${meaningText}</p>
-                <p><strong>Hebrew:</strong> ${dailyCard.card.hebrew} (${dailyCard.card.letterName})</p>
                 <p><strong>Association:</strong> ${dailyCard.card.association}</p>
-                <p><strong>Musical Note:</strong> ${dailyCard.card.note}</p>
             `;
-            
             playCardSound(dailyCard.card, dailyCard.reversed);
-            logHistory(`Drew daily card: ${dailyCard.card.name} (${dailyCard.reversed ? 'Reversed' : 'Upright'})`);
+            logHistory(`Drew daily card: ${dailyCard.card.name}`);
         }
 
-        // Piano System
+        // ============ PIANO ============
         function createPiano() {
             const piano = document.getElementById('piano-keys');
-            const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-            
+            const notes = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
             for (let octave = 3; octave <= 5; octave++) {
                 for (let i = 0; i < notes.length; i++) {
                     const note = notes[i];
                     const semitone = i + (octave - 4) * 12;
                     const isBlack = note.includes('#');
-                    
                     const key = document.createElement('div');
                     key.className = `piano-key ${isBlack ? 'black' : 'white'}`;
                     key.textContent = `${note}${octave}`;
                     key.dataset.semitone = semitone;
-                    
-                    key.addEventListener('click', () => {
-                        playPianoNote(semitone);
-                        highlightPianoKey(semitone);
-                    });
-                    
+                    key.addEventListener('click', () => { playPianoNote(semitone); highlightPianoKey(semitone); activatePanel('piano-panel'); });
                     piano.appendChild(key);
                 }
             }
@@ -1288,67 +1235,45 @@
 
         function playPianoNote(semitone) {
             if (!audioContext) return;
-            
             const freq = getFrequency(semitone);
             const osc = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
-            
-            osc.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            osc.start(audioContext.currentTime);
-            osc.stop(audioContext.currentTime + 0.8);
+            const gain = audioContext.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+            osc.connect(gain); gain.connect(audioContext.destination);
+            osc.start(); osc.stop(audioContext.currentTime + 0.8);
         }
 
         function highlightPianoKey(semitone) {
             document.querySelectorAll('.piano-key').forEach(key => key.classList.remove('active'));
-            const targetKey = document.querySelector(`[data-semitone="${semitone}"]`);
-            if (targetKey) {
-                targetKey.classList.add('active');
-                setTimeout(() => targetKey.classList.remove('active'), 1000);
-            }
+            const targetKey = document.querySelector(`.piano-key[data-semitone="${semitone}"]`);
+            if (targetKey) { targetKey.classList.add('active'); setTimeout(() => targetKey.classList.remove('active'), 1500); }
         }
 
-        // Sampler System
+        // ============ DASHBOARD SAMPLER ============
         function initializeSampler() {
             const grid = document.getElementById('sampler-grid');
             samplerPads = [];
-            
             for (let i = 0; i < 16; i++) {
                 const pad = document.createElement('div');
-                pad.className = 'sampler-pad empty';
-                pad.textContent = '+';
-                pad.dataset.index = i;
-                
-                pad.addEventListener('click', () => {
-                    handlePadClick(i);
-                });
-                
-                pad.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                    unassignPad(i);
-                });
-                
+                pad.className = 'sampler-pad empty'; pad.textContent = '+'; pad.dataset.index = i;
+                pad.addEventListener('click', () => handlePadClick(i));
+                pad.addEventListener('contextmenu', e => { e.preventDefault(); unassignPad(i); });
                 grid.appendChild(pad);
                 samplerPads.push(null);
             }
-            
             loadSamplerState();
         }
 
         function handlePadClick(index) {
             if (samplerPads[index]) {
-                // Play assigned card
-                const cardData = samplerPads[index];
-                playCardSound(cardData.card, false);
+                playCardSound(samplerPads[index].card, false);
                 highlightPad(index);
+                activatePanel('sampler-panel');
             } else {
-                // Open card selector
                 selectedPadIndex = index;
+                cardSelectorTarget = 'sampler';
                 showCardSelector();
             }
         }
@@ -1356,19 +1281,18 @@
         function showCardSelector() {
             const selector = document.getElementById('card-selector');
             const options = document.getElementById('card-options');
-            
             options.innerHTML = '';
             CARDS.forEach(card => {
                 const option = document.createElement('div');
                 option.className = 'card-option';
-                option.innerHTML = `<strong>${card.name}</strong> (${card.hebrew}) - ${card.note}`;
+                option.innerHTML = `<span class="co-hebrew">${card.hebrew}</span><span><strong>${card.name}</strong> — ${card.note} — ${card.symbol} ${card.association}</span>`;
                 option.addEventListener('click', () => {
-                    assignPad(selectedPadIndex, card);
+                    if (cardSelectorTarget === 'sampler') assignPad(selectedPadIndex, card);
+                    else if (cardSelectorTarget === 'launchpad') lpAssignPad(selectedPadIndex, card);
                     closeCardSelector();
                 });
                 options.appendChild(option);
             });
-            
             selector.classList.add('visible');
         }
 
@@ -1380,130 +1304,192 @@
         function assignPad(index, card) {
             const pad = document.getElementById('sampler-grid').children[index];
             samplerPads[index] = { card };
-            
-            pad.classList.remove('empty');
-            pad.classList.add('assigned');
+            pad.classList.remove('empty'); pad.classList.add('assigned');
             pad.innerHTML = `<div class="hebrew">${card.hebrew}</div><div class="name">${card.name}</div>`;
-            
             saveSamplerState();
-            logHistory(`Assigned ${card.name} to pad ${index + 1}`);
         }
 
         function unassignPad(index) {
             const pad = document.getElementById('sampler-grid').children[index];
             samplerPads[index] = null;
-            
-            pad.classList.remove('assigned');
-            pad.classList.add('empty');
-            pad.textContent = '+';
-            
+            pad.classList.remove('assigned'); pad.classList.add('empty'); pad.textContent = '+';
             saveSamplerState();
-            logHistory(`Unassigned pad ${index + 1}`);
         }
 
         function highlightPad(index) {
             const pad = document.getElementById('sampler-grid').children[index];
-            pad.classList.add('active');
-            setTimeout(() => pad.classList.remove('active'), 200);
+            pad.classList.add('active'); setTimeout(() => pad.classList.remove('active'), 400);
         }
 
         function playSequence() {
-            const assignedPads = samplerPads.map((pad, index) => ({ pad, index })).filter(p => p.pad);
-            
-            assignedPads.forEach((p, i) => {
-                setTimeout(() => {
-                    playCardSound(p.pad.card, false);
-                    highlightPad(p.index);
-                }, i * 300);
-            });
-            
-            logHistory(`Played sequence: ${assignedPads.length} pads`);
+            const assigned = samplerPads.map((p, i) => ({p, i})).filter(x => x.p);
+            assigned.forEach((x, n) => { setTimeout(() => { playCardSound(x.p.card, false); highlightPad(x.i); }, n * 300); });
+            activatePanel('sampler-panel');
         }
 
         function randomFill() {
             const shuffled = [...CARDS].sort(() => Math.random() - 0.5);
-            
-            for (let i = 0; i < 16; i++) {
-                if (i < shuffled.length) {
-                    assignPad(i, shuffled[i]);
-                }
-            }
-            
-            logHistory('Random filled sampler pads');
+            for (let i = 0; i < 16; i++) { if (i < shuffled.length) assignPad(i, shuffled[i]); }
         }
 
-        function clearSampler() {
-            for (let i = 0; i < 16; i++) {
-                unassignPad(i);
-            }
-            logHistory('Cleared all sampler pads');
-        }
+        function clearSampler() { for (let i = 0; i < 16; i++) unassignPad(i); }
 
         function saveSamplerState() {
-            const state = samplerPads.map(pad => pad ? pad.card.id : null);
-            localStorage.setItem('harmonic_arcana_sampler', JSON.stringify(state));
+            localStorage.setItem('harmonic_arcana_sampler', JSON.stringify(samplerPads.map(p => p ? p.card.id : null)));
         }
 
         function loadSamplerState() {
             const stored = localStorage.getItem('harmonic_arcana_sampler');
             if (stored) {
-                const state = JSON.parse(stored);
-                state.forEach((cardId, index) => {
-                    if (cardId !== null) {
-                        const card = CARDS.find(c => c.id === cardId);
-                        if (card) {
-                            assignPad(index, card);
-                        }
-                    }
+                JSON.parse(stored).forEach((cardId, index) => {
+                    if (cardId !== null) { const card = CARDS.find(c => c.id === cardId); if (card) assignPad(index, card); }
                 });
             }
         }
 
-        // Correspondence Table
+        // ============ MIDI LAUNCHPAD ============
+        function initializeLaunchpad() {
+            const grid = document.getElementById('lp-grid');
+            for (let i = 0; i < 16; i++) {
+                const pad = document.createElement('div');
+                pad.className = 'launch-pad empty';
+                pad.textContent = '+';
+                pad.dataset.index = i;
+                pad.addEventListener('click', () => lpHandleClick(i));
+                pad.addEventListener('contextmenu', e => { e.preventDefault(); lpUnassign(i); });
+                grid.appendChild(pad);
+            }
+            loadLPState();
+        }
+
+        function lpHandleClick(index) {
+            if (lpPads[index]) {
+                lpPlayPad(index);
+            } else {
+                selectedPadIndex = index;
+                cardSelectorTarget = 'launchpad';
+                showCardSelector();
+            }
+        }
+
+        function lpAssignPad(index, card) {
+            lpPads[index] = { card };
+            const pad = document.getElementById('lp-grid').children[index];
+            pad.classList.remove('empty'); pad.classList.add('assigned');
+            pad.innerHTML = `<div class="lp-hebrew">${card.hebrew}</div><div class="lp-name">${card.name}</div><div class="lp-note">♪ ${card.note}</div>`;
+            saveLPState();
+            updateLPSidebar();
+        }
+
+        function lpUnassign(index) {
+            lpPads[index] = null;
+            const pad = document.getElementById('lp-grid').children[index];
+            pad.classList.remove('assigned','playing'); pad.classList.add('empty');
+            pad.innerHTML = '+';
+            saveLPState();
+            updateLPSidebar();
+        }
+
+        function lpPlayPad(index) {
+            const data = lpPads[index];
+            if (!data) return;
+            playCardSound(data.card, false);
+
+            const pad = document.getElementById('lp-grid').children[index];
+            pad.classList.add('playing');
+
+            // Ripple effect
+            const ripple = document.createElement('div');
+            ripple.className = 'hit-ripple';
+            ripple.style.left = '50%'; ripple.style.top = '50%';
+            ripple.style.transform = 'translate(-50%,-50%)';
+            pad.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 500);
+
+            setTimeout(() => pad.classList.remove('playing'), 350);
+        }
+
+        function lpPlayAll() {
+            const assigned = lpPads.map((p, i) => ({p, i})).filter(x => x.p);
+            assigned.forEach((x, n) => { setTimeout(() => lpPlayPad(x.i), n * 250); });
+        }
+
+        function lpPlayChord() {
+            const semitones = lpPads.filter(p => p).map(p => p.card.semitone);
+            playChord([...new Set(semitones)]);
+            // Flash all assigned
+            lpPads.forEach((p, i) => {
+                if (p) {
+                    const pad = document.getElementById('lp-grid').children[i];
+                    pad.classList.add('playing');
+                    setTimeout(() => pad.classList.remove('playing'), 500);
+                }
+            });
+        }
+
+        function lpPlayArpeggio() {
+            const assigned = lpPads.map((p, i) => ({p, i})).filter(x => x.p);
+            assigned.forEach((x, n) => { setTimeout(() => lpPlayPad(x.i), n * 180); });
+        }
+
+        function lpRandomFill() {
+            const shuffled = [...CARDS].sort(() => Math.random() - 0.5);
+            for (let i = 0; i < 16; i++) lpAssignPad(i, shuffled[i % shuffled.length]);
+        }
+
+        function lpClearAll() {
+            for (let i = 0; i < 16; i++) lpUnassign(i);
+        }
+
+        function lpFromSpread() {
+            if (lastDrawnCards.length === 0) { logHistory('No spread drawn yet'); return; }
+            lpClearAll();
+            lastDrawnCards.forEach((dc, i) => { if (i < 16) lpAssignPad(i, dc.card); });
+            logHistory(`Loaded ${lastDrawnCards.length} cards from last spread to launchpad`);
+        }
+
+        function updateLPSidebar() {
+            const list = document.getElementById('lp-assigned-list');
+            const assigned = lpPads.map((p, i) => ({p, i})).filter(x => x.p);
+            if (assigned.length === 0) {
+                list.innerHTML = '<em style="color:var(--dim)">No pads assigned</em>';
+                return;
+            }
+            list.innerHTML = assigned.map(x =>
+                `<div class="lp-entry"><span>${x.p.card.hebrew} ${x.p.card.name}</span><span style="color:var(--orange)">♪ ${x.p.card.note}</span></div>`
+            ).join('');
+        }
+
+        function saveLPState() {
+            localStorage.setItem('harmonic_arcana_lp', JSON.stringify(lpPads.map(p => p ? p.card.id : null)));
+        }
+
+        function loadLPState() {
+            const stored = localStorage.getItem('harmonic_arcana_lp');
+            if (stored) {
+                JSON.parse(stored).forEach((cardId, i) => {
+                    if (cardId !== null) { const card = CARDS.find(c => c.id === cardId); if (card) lpAssignPad(i, card); }
+                });
+            }
+        }
+
+        // ============ CORRESPONDENCE TABLE ============
         function buildCorrespondenceTable() {
             const tbody = document.querySelector('#correspondence-table tbody');
             tbody.innerHTML = '';
-            
             CARDS.forEach(card => {
                 const row = document.createElement('tr');
-                
                 let planet = '—';
-                if (card.type === 'double') {
-                    if (card.association === 'Mercury') planet = 'Mercury';
-                    else if (card.association === 'Moon') planet = 'Moon';
-                    else if (card.association === 'Venus') planet = 'Venus';
-                    else if (card.association === 'Jupiter') planet = 'Jupiter';
-                    else if (card.association === 'Mars') planet = 'Mars';
-                    else if (card.association === 'Sun') planet = 'Sun';
-                    else if (card.association === 'Saturn') planet = 'Saturn';
-                } else if (card.type === 'simple') {
-                    planet = PLANET_RULERS[card.association] || '—';
-                }
-                
+                if (card.type === 'double') planet = card.association;
+                else if (card.type === 'simple') planet = PLANET_RULERS[card.association] || '—';
                 const freq = getFrequency(card.semitone).toFixed(2);
-                
-                row.innerHTML = `
-                    <td>${card.id}</td>
-                    <td>${card.name}</td>
-                    <td>${card.hebrew}</td>
-                    <td>${card.letterName}</td>
-                    <td>${planet}</td>
-                    <td>${card.association}</td>
-                    <td>${card.symbol}</td>
-                    <td>${card.note}</td>
-                    <td>${freq} Hz</td>
-                `;
-                
-                row.addEventListener('click', () => {
-                    playCardSound(card);
-                    highlightPianoKey(card.semitone);
-                });
-                
+                row.innerHTML = `<td>${card.id}</td><td>${card.name}</td><td style="font-size:1.2rem">${card.hebrew}</td><td>${card.letterName}</td><td>${planet}</td><td>${card.association}</td><td>${card.symbol}</td><td>${card.note}</td><td>${freq} Hz</td>`;
+                row.addEventListener('click', () => { playCardSound(card); highlightPianoKey(card.semitone); triggerHebrewReveal(card); });
                 tbody.appendChild(row);
             });
         }
 
-        // 3D Graph
+        // ============ 3D GRAPH ============
         function loadThreeJS() {
             const script = document.createElement('script');
             script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
@@ -1516,483 +1502,359 @@
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({ antialias: true });
-            
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setClearColor(0x050507);
             container.appendChild(renderer.domElement);
-            
-            // Create nodes
-            const nodes = [];
-            const edges = [];
-            
-            // Card nodes
+
+            const nodes = [], edges = [];
             CARDS.forEach(card => {
-                const geometry = new THREE.SphereGeometry(0.5, 8, 6);
-                const material = new THREE.MeshBasicMaterial({ color: 0xc9a84c });
-                const mesh = new THREE.Mesh(geometry, material);
-                
-                mesh.position.set(
-                    (Math.random() - 0.5) * 20,
-                    (Math.random() - 0.5) * 20,
-                    (Math.random() - 0.5) * 20
-                );
-                
+                const geo = new THREE.SphereGeometry(0.5, 8, 6);
+                const mat = new THREE.MeshBasicMaterial({ color: 0xc9a84c });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.position.set((Math.random()-0.5)*20, (Math.random()-0.5)*20, (Math.random()-0.5)*20);
                 mesh.userData = { type: 'card', data: card };
-                scene.add(mesh);
-                nodes.push(mesh);
-                
-                // Hebrew letter nodes
-                const hebrewGeometry = new THREE.SphereGeometry(0.3, 8, 6);
-                const hebrewMaterial = new THREE.MeshBasicMaterial({ color: 0xe8e8e8 });
-                const hebrewMesh = new THREE.Mesh(hebrewGeometry, hebrewMaterial);
-                
-                hebrewMesh.position.set(
-                    mesh.position.x + (Math.random() - 0.5) * 4,
-                    mesh.position.y + (Math.random() - 0.5) * 4,
-                    mesh.position.z + (Math.random() - 0.5) * 4
-                );
-                
-                hebrewMesh.userData = { type: 'hebrew', data: card.letterName };
-                scene.add(hebrewMesh);
-                nodes.push(hebrewMesh);
-                
-                // Edge between card and hebrew
-                const edgeGeometry = new THREE.BufferGeometry().setFromPoints([
-                    mesh.position,
-                    hebrewMesh.position
-                ]);
-                const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x555555 });
-                const edge = new THREE.Line(edgeGeometry, edgeMaterial);
-                scene.add(edge);
-                edges.push(edge);
+                scene.add(mesh); nodes.push(mesh);
+
+                const hGeo = new THREE.SphereGeometry(0.3, 8, 6);
+                const hMat = new THREE.MeshBasicMaterial({ color: 0xe8e8e8 });
+                const hMesh = new THREE.Mesh(hGeo, hMat);
+                hMesh.position.set(mesh.position.x+(Math.random()-0.5)*4, mesh.position.y+(Math.random()-0.5)*4, mesh.position.z+(Math.random()-0.5)*4);
+                hMesh.userData = { type: 'hebrew', data: card.letterName };
+                scene.add(hMesh); nodes.push(hMesh);
+
+                const eGeo = new THREE.BufferGeometry().setFromPoints([mesh.position, hMesh.position]);
+                const eMat = new THREE.LineBasicMaterial({ color: 0x555555 });
+                const edge = new THREE.Line(eGeo, eMat);
+                scene.add(edge); edges.push(edge);
             });
-            
+
             camera.position.z = 25;
-            
-            // Mouse controls
-            let mouseX = 0, mouseY = 0;
-            let mouseDown = false;
-            
-            container.addEventListener('mousedown', (e) => {
-                mouseDown = true;
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-            });
-            
-            container.addEventListener('mouseup', () => {
-                mouseDown = false;
-            });
-            
-            container.addEventListener('mousemove', (e) => {
+            let mouseX = 0, mouseY = 0, mouseDown = false;
+            container.addEventListener('mousedown', e => { mouseDown = true; mouseX = e.clientX; mouseY = e.clientY; });
+            container.addEventListener('mouseup', () => { mouseDown = false; });
+            container.addEventListener('mousemove', e => {
                 if (mouseDown) {
-                    const deltaX = e.clientX - mouseX;
-                    const deltaY = e.clientY - mouseY;
-                    
-                    scene.rotation.y += deltaX * 0.01;
-                    scene.rotation.x += deltaY * 0.01;
-                    
-                    mouseX = e.clientX;
-                    mouseY = e.clientY;
+                    scene.rotation.y += (e.clientX - mouseX) * 0.01;
+                    scene.rotation.x += (e.clientY - mouseY) * 0.01;
+                    mouseX = e.clientX; mouseY = e.clientY;
                 }
             });
-            
-            container.addEventListener('wheel', (e) => {
+            container.addEventListener('wheel', e => {
                 camera.position.z += e.deltaY * 0.01;
                 camera.position.z = Math.max(10, Math.min(50, camera.position.z));
             });
-            
-            // Animation loop
+
             function animate() {
                 requestAnimationFrame(animate);
-                
-                // Auto-rotate
-                if (!mouseDown) {
-                    scene.rotation.y += 0.005;
-                }
-                
-                // Simple force simulation
+                if (!mouseDown) scene.rotation.y += 0.005;
                 nodes.forEach(node => {
                     if (node.userData.type === 'card') {
-                        const targetDistance = 5;
-                        nodes.forEach(otherNode => {
-                            if (node !== otherNode) {
-                                const distance = node.position.distanceTo(otherNode.position);
-                                if (distance < targetDistance) {
-                                    const direction = new THREE.Vector3()
-                                        .subVectors(node.position, otherNode.position)
-                                        .normalize()
-                                        .multiplyScalar(0.01);
-                                    node.position.add(direction);
-                                }
+                        nodes.forEach(other => {
+                            if (node !== other && node.position.distanceTo(other.position) < 5) {
+                                node.position.add(new THREE.Vector3().subVectors(node.position, other.position).normalize().multiplyScalar(0.01));
                             }
                         });
                     }
                 });
-                
                 renderer.render(scene, camera);
             }
-            
             animate();
             threeJS = { scene, camera, renderer, nodes, edges };
         }
 
-        // Journal System
-        function getJournal() {
-            const stored = localStorage.getItem('harmonic_arcana_journal');
-            return stored ? JSON.parse(stored) : {};
-        }
-
-        function saveJournal(journal) {
-            localStorage.setItem('harmonic_arcana_journal', JSON.stringify(journal));
-        }
-
-        function loadJournal() {
-            // Calendar functionality will be added here
-        }
+        // ============ JOURNAL ============
+        function getJournal() { const s = localStorage.getItem('harmonic_arcana_journal'); return s ? JSON.parse(s) : {}; }
+        function saveJournal(j) { localStorage.setItem('harmonic_arcana_journal', JSON.stringify(j)); }
+        function loadJournal() {}
 
         function updateCalendar() {
             const calendar = document.getElementById('calendar');
             const header = document.getElementById('calendar-header');
             const stats = document.getElementById('month-stats');
-            
             if (!calendar || !header || !stats) return;
-            
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const today = new Date();
-            const journal = getJournal();
-            
-            header.innerHTML = `<h4>${currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h4>`;
-            
+
+            const year = currentDate.getFullYear(), month = currentDate.getMonth();
+            const today = new Date(), journal = getJournal();
+            header.innerHTML = `<h4>${currentDate.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</h4>`;
             calendar.innerHTML = '';
-            
-            // Day headers
-            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
-                const dayHeader = document.createElement('div');
-                dayHeader.textContent = day;
-                dayHeader.style.fontWeight = 'bold';
-                dayHeader.style.textAlign = 'center';
-                calendar.appendChild(dayHeader);
+
+            ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(day => {
+                const dh = document.createElement('div');
+                dh.textContent = day; dh.style.fontWeight = 'bold'; dh.style.textAlign = 'center';
+                calendar.appendChild(dh);
             });
-            
+
             const firstDay = new Date(year, month, 1);
             const lastDay = new Date(year, month + 1, 0);
             const startDate = new Date(firstDay);
             startDate.setDate(startDate.getDate() - firstDay.getDay());
-            
             let entriesThisMonth = 0;
-            
+
             for (let d = new Date(startDate); d <= lastDay || d.getDay() !== 0; d.setDate(d.getDate() + 1)) {
-                const dayElement = document.createElement('div');
-                dayElement.className = 'calendar-day';
-                dayElement.textContent = d.getDate();
-                
-                const dateString = d.toDateString();
-                const isToday = d.toDateString() === today.toDateString();
-                const hasEntry = journal[dateString];
+                const de = document.createElement('div');
+                de.className = 'calendar-day'; de.textContent = d.getDate();
+                const ds = d.toDateString();
+                const isToday = ds === today.toDateString();
+                const hasEntry = journal[ds];
                 const isCurrentMonth = d.getMonth() === month;
-                
-                if (isToday) dayElement.classList.add('today');
-                if (hasEntry) {
-                    dayElement.classList.add('has-entry');
-                    if (isCurrentMonth) entriesThisMonth++;
-                }
-                if (!isCurrentMonth) dayElement.style.opacity = '0.3';
-                
-                dayElement.addEventListener('click', () => {
-                    if (hasEntry) {
-                        playCardSound(hasEntry.card, hasEntry.reversed);
-                        logHistory(`Replayed ${dateString}: ${hasEntry.card.name}`);
-                    }
-                });
-                
-                calendar.appendChild(dayElement);
-                
+                if (isToday) de.classList.add('today');
+                if (hasEntry) { de.classList.add('has-entry'); if (isCurrentMonth) entriesThisMonth++; }
+                if (!isCurrentMonth) de.style.opacity = '0.3';
+                de.addEventListener('click', () => { if (hasEntry) playCardSound(hasEntry.card, hasEntry.reversed); });
+                calendar.appendChild(de);
                 if (d.getTime() >= lastDay.getTime() && d.getDay() === 6) break;
             }
-            
             stats.innerHTML = `<p>Entries this month: ${entriesThisMonth}</p>`;
         }
 
-        function prevMonth() {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            updateCalendar();
-        }
-
-        function nextMonth() {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            updateCalendar();
-        }
+        function prevMonth() { currentDate.setMonth(currentDate.getMonth() - 1); updateCalendar(); }
+        function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1); updateCalendar(); }
 
         function playWeekMelody() {
-            const journal = getJournal();
-            const notes = [];
-            const today = new Date();
-            
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(today);
-                date.setDate(date.getDate() - i);
-                const entry = journal[date.toDateString()];
-                if (entry) {
-                    notes.push(entry.card.semitone);
-                }
-            }
-            
+            const journal = getJournal(), notes = [], today = new Date();
+            for (let i = 6; i >= 0; i--) { const d = new Date(today); d.setDate(d.getDate()-i); const e = journal[d.toDateString()]; if (e) notes.push(e.card.semitone); }
             playChord(notes);
-            logHistory(`Played week melody: ${notes.length} notes`);
         }
 
         function playMonthMelody() {
-            const journal = getJournal();
-            const notes = [];
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            
-            for (let day = 1; day <= 31; day++) {
-                const date = new Date(year, month, day);
-                if (date.getMonth() !== month) break;
-                
-                const entry = journal[date.toDateString()];
-                if (entry) {
-                    notes.push(entry.card.semitone);
-                }
-            }
-            
+            const journal = getJournal(), notes = [], year = currentDate.getFullYear(), month = currentDate.getMonth();
+            for (let day = 1; day <= 31; day++) { const d = new Date(year, month, day); if (d.getMonth() !== month) break; const e = journal[d.toDateString()]; if (e) notes.push(e.card.semitone); }
             playChord(notes);
-            logHistory(`Played month melody: ${notes.length} notes`);
         }
 
         function copyMonthText() {
-            const journal = getJournal();
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            let text = `Harmonic Arcana Journal - ${currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}\n\n`;
-            
-            for (let day = 1; day <= 31; day++) {
-                const date = new Date(year, month, day);
-                if (date.getMonth() !== month) break;
-                
-                const entry = journal[date.toDateString()];
-                if (entry) {
-                    text += `${date.toLocaleDateString()}: ${entry.card.name} (${entry.reversed ? 'Reversed' : 'Upright'})\n`;
-                }
-            }
-            
-            navigator.clipboard.writeText(text).then(() => {
-                logHistory('Copied month text to clipboard');
-            });
+            const journal = getJournal(), year = currentDate.getFullYear(), month = currentDate.getMonth();
+            let text = `Harmonic Arcana Journal - ${currentDate.toLocaleDateString('en-US',{month:'long',year:'numeric'})}\n\n`;
+            for (let day = 1; day <= 31; day++) { const d = new Date(year, month, day); if (d.getMonth() !== month) break; const e = journal[d.toDateString()]; if (e) text += `${d.toLocaleDateString()}: ${e.card.name} (${e.reversed ? 'Reversed' : 'Upright'})\n`; }
+            navigator.clipboard.writeText(text).then(() => logHistory('Copied month text'));
         }
 
-        // Full Arcana Playback
+        // ============ FULL ARCANA PLAYBACK ============
         function playFullArcana() {
             if (isPlaying) return;
-            
-            isPlaying = true;
-            sequenceIndex = 0;
-            
+            isPlaying = true; sequenceIndex = 0;
             const container = document.getElementById('current-card-display');
             const progress = document.getElementById('sequence-progress');
-            
             sequenceInterval = setInterval(() => {
-                if (sequenceIndex >= CARDS.length) {
-                    stopAudio();
-                    return;
-                }
-                
+                if (sequenceIndex >= CARDS.length) { stopAudio(); return; }
                 const card = CARDS[sequenceIndex];
                 const reversed = Math.random() < 0.3;
-                
                 container.innerHTML = '';
-                const cardElement = createCardElement(card, reversed);
-                container.appendChild(cardElement);
-                
-                setTimeout(() => {
-                    cardElement.querySelector('.card-inner').classList.add('flipped');
-                }, 100);
-                
+                const ce = createCardElement(card, reversed);
+                container.appendChild(ce);
+                setTimeout(() => { ce.querySelector('.card-inner').classList.add('flipped'); triggerHebrewReveal(card); }, 100);
                 playCardSound(card, reversed);
-                
                 progress.style.width = `${((sequenceIndex + 1) / CARDS.length) * 100}%`;
-                
                 sequenceIndex++;
             }, 2000);
-            
-            logHistory('Started Full Arcana playback');
         }
 
-        function stopSequence() {
-            stopAudio();
-            document.getElementById('current-card-display').innerHTML = '';
-        }
+        function stopSequence() { stopAudio(); const c = document.getElementById('current-card-display'); if (c) c.innerHTML = ''; }
 
         function shuffleAndPlay() {
-            if (lastDrawnCards.length === 0) {
-                logHistory('No cards drawn yet - draw a spread first');
-                return;
-            }
-            
-            lastDrawnCards.forEach((dc, index) => {
-                setTimeout(() => {
-                    playCardSound(dc.card, dc.reversed);
-                }, index * 800);
-            });
-            
-            logHistory(`Shuffled and played ${lastDrawnCards.length} cards`);
+            if (lastDrawnCards.length === 0) { logHistory('No cards drawn yet'); return; }
+            lastDrawnCards.forEach((dc, i) => { setTimeout(() => playCardSound(dc.card, dc.reversed), i * 800); });
         }
 
-        // Suno AI Prompt Generator
+        // ============ SUNO AI PROMPT GENERATOR (ENHANCED) ============
         function generateSunoPrompt() {
             if (lastDrawnCards.length === 0) {
-                document.getElementById('suno-output').innerHTML = '<p>Draw cards first to generate a prompt!</p>';
+                document.getElementById('suno-output').innerHTML = '<p style="color:var(--dim)">Draw cards first to generate a prompt.</p>';
                 return;
             }
+            const prompt = buildSunoPromptData();
+            renderSunoOutput(prompt);
+        }
 
-            // Build narrative based on spread
-            let narrative = '';
-            let lyricThemes = [];
-            
-            if (currentSpread === 'three') {
-                const past = lastDrawnCards[0];
-                const present = lastDrawnCards[1];
-                const future = lastDrawnCards[2];
-                
-                const pastMeaning = CARD_MEANINGS[past.card.id];
-                const presentMeaning = CARD_MEANINGS[present.card.id];
-                const futureMeaning = CARD_MEANINGS[future.card.id];
-                
-                const pastText = past.reversed ? pastMeaning.reversed : pastMeaning.upright;
-                const presentText = present.reversed ? presentMeaning.reversed : presentMeaning.upright;
-                const futureText = future.reversed ? futureMeaning.reversed : futureMeaning.upright;
-                
-                narrative = `From the ${pastText} of ${past.card.name} (${past.card.note}, ${getPlanetForCard(past.card)}) through the ${presentText} of ${present.card.name} (${present.card.note}, ${getPlanetForCard(present.card)}) toward the ${futureText} of ${future.card.name} (${future.card.note}, ${getPlanetForCard(future.card)}). A journey of transformation across the planes of existence.`;
-                
-                lyricThemes.push(pastText, presentText, futureText, 'transformation', 'temporal journey');
-            } else {
-                const cardNames = lastDrawnCards.map(dc => dc.card.name);
-                const meanings = lastDrawnCards.map(dc => {
-                    const meaning = CARD_MEANINGS[dc.card.id];
-                    return dc.reversed ? meaning.reversed : meaning.upright;
-                });
-                
-                narrative = `A mystical convergence of ${cardNames.join(', ')} bringing themes of ${meanings.join(', ')}. The archetypal forces align in cosmic harmony.`;
-                
-                lyricThemes.push(...meanings, 'mystical convergence', 'archetypal forces');
+        function generateSunoNarrative() {
+            if (lastDrawnCards.length === 0) {
+                document.getElementById('suno-output').innerHTML = '<p style="color:var(--dim)">Draw cards first to generate narrative lyrics.</p>';
+                return;
             }
-            
-            // Determine key and mode from notes
-            const notes = lastDrawnCards.map(dc => dc.card.note);
+            const prompt = buildSunoPromptData();
+            prompt.lyrics = buildNarrativeLyrics();
+            renderSunoOutput(prompt);
+        }
+
+        function buildSunoPromptData() {
+            const cards = lastDrawnCards;
+            const notes = cards.map(dc => dc.card.note);
             const uniqueNotes = [...new Set(notes)];
             const rootNote = uniqueNotes[0];
-            
-            // Determine if major or minor based on card meanings
-            let isMajor = true;
-            lastDrawnCards.forEach(dc => {
-                const meaning = CARD_MEANINGS[dc.card.id];
-                const text = dc.reversed ? meaning.reversed : meaning.upright;
-                if (text.includes('death') || text.includes('fear') || text.includes('chaos') || text.includes('despair')) {
-                    isMajor = false;
-                }
+
+            // Key determination
+            let darkScore = 0;
+            cards.forEach(dc => {
+                const m = CARD_MEANINGS[dc.card.id];
+                const txt = dc.reversed ? m.reversed : m.upright;
+                if (/death|fear|chaos|despair|bondage|addiction|upheaval|isolation|stagnation|deception/i.test(txt)) darkScore++;
+                else darkScore--;
             });
-            
-            const key = `${rootNote} ${isMajor ? 'major' : 'minor'}`;
-            
-            // Determine tempo from energy level
+            const mode = darkScore > 0 ? 'minor' : 'major';
+            const key = `${rootNote} ${mode}`;
+
+            // Tempo
             let energy = 0;
-            lastDrawnCards.forEach(dc => {
-                if (dc.card.name.includes('Tower') || dc.card.name.includes('Devil') || dc.card.name.includes('Chariot')) {
-                    energy += 20;
-                } else if (dc.card.name.includes('Hermit') || dc.card.name.includes('Hanged Man') || dc.card.name.includes('High Priestess')) {
-                    energy -= 20;
-                }
+            cards.forEach(dc => {
+                if (/Tower|Devil|Chariot|Wheel|Judgement|Sun/.test(dc.card.name)) energy += 15;
+                else if (/Hermit|Hanged|Priestess|Moon|Star/.test(dc.card.name)) energy -= 15;
             });
-            
-            const baseBPM = 80;
-            const bpm = Math.max(60, Math.min(120, baseBPM + energy));
-            
-            // Determine genre from dominant element
+            const bpm = Math.max(55, Math.min(130, 80 + energy));
+
+            // Genre from elements
             const elements = { Fire: 0, Water: 0, Air: 0, Earth: 0 };
-            lastDrawnCards.forEach(dc => {
+            cards.forEach(dc => {
                 if (dc.card.type === 'mother') {
                     if (dc.card.association === 'Fire') elements.Fire += 2;
                     else if (dc.card.association === 'Water') elements.Water += 2;
                     else if (dc.card.association === 'Air') elements.Air += 2;
                 } else if (dc.card.type === 'simple') {
-                    // Assign zodiac signs to elements
-                    const sign = dc.card.association;
-                    if (['Aries', 'Leo', 'Sagittarius'].includes(sign)) elements.Fire++;
-                    else if (['Cancer', 'Scorpio', 'Pisces'].includes(sign)) elements.Water++;
-                    else if (['Gemini', 'Libra', 'Aquarius'].includes(sign)) elements.Air++;
-                    else if (['Taurus', 'Virgo', 'Capricorn'].includes(sign)) elements.Earth++;
+                    const s = dc.card.association;
+                    if (['Aries','Leo','Sagittarius'].includes(s)) elements.Fire++;
+                    else if (['Cancer','Scorpio','Pisces'].includes(s)) elements.Water++;
+                    else if (['Gemini','Libra','Aquarius'].includes(s)) elements.Air++;
+                    else if (['Taurus','Virgo','Capricorn'].includes(s)) elements.Earth++;
                 }
             });
-            
-            const dominantElement = Object.keys(elements).reduce((a, b) => elements[a] > elements[b] ? a : b);
-            const genreMap = {
-                Fire: 'cinematic orchestral',
-                Water: 'ambient ethereal',
-                Air: 'electronic atmospheric',
-                Earth: 'dark ambient drone'
-            };
-            const genre = genreMap[dominantElement];
-            
-            // Build chord progression
-            const chordProgression = notes.join(' → ');
-            
-            // Create unique lyric themes
-            const uniqueThemes = [...new Set(lyricThemes)].slice(0, 5);
-            
-            const fullPrompt = `${genre} in ${key}, ${bpm} BPM. ${narrative}. Themes of ${uniqueThemes.join(', ')}.`;
-            
-            document.getElementById('suno-output').innerHTML = `
-                <h4>SUNO PROMPT</h4>
-                <p style="text-align: center; margin: 10px 0;">══════════</p>
-                <p><strong>Narrative:</strong> ${narrative}</p>
-                <p><strong>Lyric Themes:</strong> ${uniqueThemes.join(', ')}</p>
-                <p><strong>Key:</strong> ${key}</p>
-                <p><strong>Tempo:</strong> ${bpm} BPM</p>
-                <p><strong>Chord Progression:</strong> ${chordProgression}</p>
-                <p><strong>Genre:</strong> ${genre}</p>
-                <br>
-                <p><strong>Full Prompt:</strong></p>
-                <textarea rows="4" cols="50" readonly style="width:100%; background: var(--obsidian); color: var(--white); border: 1px solid var(--gold); padding: 10px;">${fullPrompt}</textarea>
-                <br><br>
-                <button id="copy-suno-btn">Copy to Clipboard</button>
-            `;
-            
-            document.getElementById('copy-suno-btn').addEventListener('click', function() {
-                navigator.clipboard.writeText(fullPrompt).then(function() { 
-                    logHistory('Copied narrative Suno prompt to clipboard'); 
+            const domElement = Object.entries(elements).sort((a,b) => b[1] - a[1])[0][0];
+            const genreMap = { Fire: 'cinematic orchestral', Water: 'ambient ethereal', Air: 'electronic atmospheric', Earth: 'dark ambient drone' };
+            const genre = genreMap[domElement];
+
+            // Mood tags
+            const moodMap = { Fire: ['epic','powerful','ascending','triumphant'], Water: ['flowing','mysterious','deep','oceanic'], Air: ['airy','cerebral','bright','swift'], Earth: ['grounded','heavy','ancient','primal'] };
+            const moods = moodMap[domElement];
+
+            // Style tags
+            const styleTags = [genre, `${key}`, `${bpm} BPM`, domElement.toLowerCase() + ' energy'];
+            if (darkScore > 0) styleTags.push('dark', 'minor key', 'haunting');
+            else styleTags.push('luminous', 'major key', 'uplifting');
+
+            // Narrative
+            let narrative = '';
+            if (currentSpread === 'three' && cards.length >= 3) {
+                const [past, present, future] = cards;
+                const pm = CARD_MEANINGS[past.card.id], prm = CARD_MEANINGS[present.card.id], fm = CARD_MEANINGS[future.card.id];
+                const pt = past.reversed ? pm.reversed : pm.upright;
+                const prt = present.reversed ? prm.reversed : prm.upright;
+                const ft = future.reversed ? fm.reversed : fm.upright;
+                narrative = `[Verse 1: The Past — ${past.card.name}]\nFrom the ${pt} of ${past.card.name}, the ${past.card.letterName} letter speaks in ${past.card.note}.\n\n[Verse 2: The Present — ${present.card.name}]\nNow the ${prt} of ${present.card.name} resounds, ${present.card.letterName} vibrating at ${present.card.note}.\n\n[Verse 3: The Future — ${future.card.name}]\nToward the ${ft} of ${future.card.name}, ${future.card.letterName} calls in ${future.card.note}.\n\n[Outro]\nThe harmonic thread: ${notes.join(' → ')} — a journey through time.`;
+            } else {
+                const cardDescs = cards.map(dc => {
+                    const m = CARD_MEANINGS[dc.card.id];
+                    return `${dc.card.name} (${dc.reversed ? m.reversed : m.upright})`;
                 });
-            });
-            logHistory('Generated narrative Suno AI prompt from drawn cards');
+                narrative = `A convergence of ${cardDescs.join(', ')}. Notes ${notes.join(', ')} weave through the archetype. The ${domElement} element dominates.`;
+            }
+
+            const fullPrompt = `[Style: ${styleTags.join(', ')}]\n[Mood: ${moods.join(', ')}]\n[Key: ${key} | BPM: ${bpm}]\n[Notes: ${notes.join(' → ')}]\n\n${narrative}`;
+
+            return { key, bpm, genre, domElement, moods, styleTags, notes, uniqueNotes, narrative, fullPrompt, cards, darkScore };
         }
 
-        // History System
+        function buildNarrativeLyrics() {
+            const cards = lastDrawnCards;
+            if (currentSpread === 'three' && cards.length >= 3) {
+                const [past, present, future] = cards;
+                const pm = CARD_MEANINGS[past.card.id], prm = CARD_MEANINGS[present.card.id], fm = CARD_MEANINGS[future.card.id];
+                const pt = past.reversed ? pm.reversed : pm.upright;
+                const prt = present.reversed ? prm.reversed : prm.upright;
+                const ft = future.reversed ? fm.reversed : fm.upright;
+
+                return `[Intro]
+(${past.card.note} drone, building...)
+
+[Verse 1 — ${past.card.hebrew} ${past.card.letterName}]
+In the house of ${past.card.name}
+Where ${pt} still echoes
+The letter ${past.card.letterName} was carved in stone
+Singing ${past.card.note} to the ${getPlanetForCard(past.card)}
+
+[Chorus]
+Three gates, three tones, three truths
+${past.card.note} to ${present.card.note} to ${future.card.note}
+The path is written in light
+
+[Verse 2 — ${present.card.hebrew} ${present.card.letterName}]
+Now standing in ${present.card.name}
+The ${prt} burns bright
+${present.card.letterName} pulses through the veil
+A ${present.card.note} that shakes the ${getPlanetForCard(present.card)}
+
+[Bridge]
+From ${past.card.hebrew} through ${present.card.hebrew} into ${future.card.hebrew}
+The sacred tongue speaks harmony
+
+[Verse 3 — ${future.card.hebrew} ${future.card.letterName}]
+And ${future.card.name} awaits
+With ${ft} on the horizon
+${future.card.letterName} completes the word
+${future.card.note} rings across ${getPlanetForCard(future.card)}
+
+[Outro]
+(${cards.map(dc => dc.card.note).join(', ')} fade together...)
+The arcana has spoken.`;
+            } else {
+                const lines = cards.map((dc, i) => {
+                    const m = CARD_MEANINGS[dc.card.id];
+                    const meaning = dc.reversed ? m.reversed : m.upright;
+                    return `[Verse ${i+1} — ${dc.card.hebrew}]\n${dc.card.name} speaks of ${meaning}\n${dc.card.letterName} resonates at ${dc.card.note}\nUnder the sign of ${dc.card.symbol} ${dc.card.association}`;
+                });
+                return `[Intro]\n(Harmonic drone...)\n\n${lines.join('\n\n')}\n\n[Outro]\nThe circle closes. ${cards.map(dc => dc.card.note).join(' → ')}`;
+            }
+        }
+
+        function renderSunoOutput(prompt) {
+            const out = document.getElementById('suno-output');
+            let html = `
+                <div class="suno-section-block">
+                    <h5>Style & Mood</h5>
+                    <div class="suno-tags">${prompt.styleTags.map(t => `<span class="suno-tag">${t}</span>`).join('')}</div>
+                    <div class="suno-tags">${prompt.moods.map(t => `<span class="suno-tag" style="border-color:var(--orange);color:var(--orange);">${t}</span>`).join('')}</div>
+                </div>
+                <div class="suno-section-block">
+                    <h5>Musical Parameters</h5>
+                    <p><strong>Key:</strong> ${prompt.key} · <strong>BPM:</strong> ${prompt.bpm} · <strong>Genre:</strong> ${prompt.genre}</p>
+                    <p><strong>Notes:</strong> ${prompt.notes.join(' → ')} · <strong>Element:</strong> ${prompt.domElement}</p>
+                </div>`;
+
+            if (prompt.lyrics) {
+                html += `<div class="suno-section-block">
+                    <h5>Narrative Lyrics</h5>
+                    <div class="suno-lyrics">${prompt.lyrics}</div>
+                </div>`;
+            }
+
+            html += `<div class="suno-section-block">
+                <h5>Full Prompt (copy this)</h5>
+                <textarea class="suno-copy-area" readonly>${prompt.lyrics ? prompt.fullPrompt + '\n\n--- LYRICS ---\n' + prompt.lyrics : prompt.fullPrompt}</textarea>
+                <button onclick="copySunoPrompt()" style="margin-top:8px;background:var(--gold);color:var(--obsidian);border:none;padding:8px 20px;cursor:pointer;font-family:'Source Code Pro',monospace;font-weight:600;">⧨ Copy to Clipboard</button>
+            </div>`;
+
+            out.innerHTML = html;
+            logHistory('Generated Suno prompt');
+        }
+
+        function copySunoPrompt() {
+            const ta = document.querySelector('.suno-copy-area');
+            if (ta) navigator.clipboard.writeText(ta.value).then(() => logHistory('Copied Suno prompt to clipboard'));
+        }
+
+        // ============ HISTORY ============
         function logHistory(message) {
             const log = document.getElementById('history-log');
             const entry = document.createElement('div');
             entry.className = 'history-entry';
-            entry.innerHTML = `<span style="color: var(--dim)">[${new Date().toLocaleTimeString()}]</span> ${message}`;
-            
+            entry.innerHTML = `<span style="color:var(--dim)">[${new Date().toLocaleTimeString()}]</span> ${message}`;
             log.appendChild(entry);
             log.scrollTop = log.scrollHeight;
-            
-            // Keep only last 50 entries
-            while (log.children.length > 51) { // +1 for header
-                log.removeChild(log.children[1]);
-            }
+            while (log.children.length > 51) log.removeChild(log.children[1]);
         }
 
-        function loadHistory() {
-            logHistory('Harmonic Arcana initialized - ready to explore the mystical connections');
-        }
+        function loadHistory() { logHistory('Harmonic Arcana v4 initialized — all systems operational'); }
 
-        // Initialize on load
         window.addEventListener('load', () => {
             if (audioContext && audioContext.state === 'suspended') {
-                document.addEventListener('click', () => {
-                    audioContext.resume();
-                }, { once: true });
+                document.addEventListener('click', () => audioContext.resume(), { once: true });
             }
         });
     </script>
