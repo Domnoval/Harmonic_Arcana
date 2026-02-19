@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -502,12 +502,12 @@
 </head>
 <body>
     <div class="app-container">
-        <h1 class="app-title">⧨ HARMONIC ARCANA ⧨</h1>
+        <h1 class="app-title">â§¨ HARMONIC ARCANA â§¨</h1>
         
         <div class="toolbar">
             <button onclick="showSection('spreads')" class="active">Spreads</button>
             <button onclick="showSection('daily')">Daily Draw</button>
-            <button onclick="showSection('piano')">Piano</button>
+            <button onclick="showSection('piano-section')">Piano</button>
             <button onclick="showSection('correspondence')">Correspondence</button>
             <button onclick="showSection('graph')">3D Graph</button>
             <button onclick="showSection('journal')">Journal</button>
@@ -538,7 +538,7 @@
             <div id="daily-journal"></div>
         </div>
 
-        <div id="piano" class="section">
+        <div id="piano-section" class="section">
             <h3>Piano Keyboard</h3>
             <div class="piano-container">
                 <div class="piano" id="piano"></div>
@@ -642,28 +642,28 @@
     <script>
         // Core Data
         const CARDS = [
-            {id: 0, name: "The Fool", roman: "0", hebrew: "א", letterName: "Aleph", type: "mother", association: "Air", symbol: "△", note: "E", semitone: 4},
-            {id: 1, name: "The Magician", roman: "I", hebrew: "ב", letterName: "Beth", type: "double", association: "Mercury", symbol: "☿", note: "C", semitone: 0},
-            {id: 2, name: "The High Priestess", roman: "II", hebrew: "ג", letterName: "Gimel", type: "double", association: "Moon", symbol: "☽", note: "B", semitone: 11},
-            {id: 3, name: "The Empress", roman: "III", hebrew: "ד", letterName: "Daleth", type: "double", association: "Venus", symbol: "♀", note: "D", semitone: 2},
-            {id: 4, name: "The Emperor", roman: "IV", hebrew: "ה", letterName: "He", type: "simple", association: "Aries", symbol: "♈", note: "C", semitone: 0},
-            {id: 5, name: "The Hierophant", roman: "V", hebrew: "ו", letterName: "Vav", type: "simple", association: "Taurus", symbol: "♉", note: "C#", semitone: 1},
-            {id: 6, name: "The Lovers", roman: "VI", hebrew: "ז", letterName: "Zayin", type: "simple", association: "Gemini", symbol: "♊", note: "D", semitone: 2},
-            {id: 7, name: "The Chariot", roman: "VII", hebrew: "ח", letterName: "Cheth", type: "simple", association: "Cancer", symbol: "♋", note: "D#", semitone: 3},
-            {id: 8, name: "Strength", roman: "VIII", hebrew: "ט", letterName: "Teth", type: "simple", association: "Leo", symbol: "♌", note: "E", semitone: 4},
-            {id: 9, name: "The Hermit", roman: "IX", hebrew: "י", letterName: "Yod", type: "simple", association: "Virgo", symbol: "♍", note: "F", semitone: 5},
-            {id: 10, name: "Wheel of Fortune", roman: "X", hebrew: "כ", letterName: "Kaph", type: "double", association: "Jupiter", symbol: "♃", note: "G", semitone: 7},
-            {id: 11, name: "Justice", roman: "XI", hebrew: "ל", letterName: "Lamed", type: "simple", association: "Libra", symbol: "♎", note: "F#", semitone: 6},
-            {id: 12, name: "The Hanged Man", roman: "XII", hebrew: "מ", letterName: "Mem", type: "mother", association: "Water", symbol: "▽", note: "G#", semitone: 8},
-            {id: 13, name: "Death", roman: "XIII", hebrew: "נ", letterName: "Nun", type: "simple", association: "Scorpio", symbol: "♏", note: "G", semitone: 7},
-            {id: 14, name: "Temperance", roman: "XIV", hebrew: "ס", letterName: "Samekh", type: "simple", association: "Sagittarius", symbol: "♐", note: "G#", semitone: 8},
-            {id: 15, name: "The Devil", roman: "XV", hebrew: "ע", letterName: "Ayin", type: "simple", association: "Capricorn", symbol: "♑", note: "A", semitone: 9},
-            {id: 16, name: "The Tower", roman: "XVI", hebrew: "פ", letterName: "Pe", type: "double", association: "Mars", symbol: "♂", note: "F", semitone: 5},
-            {id: 17, name: "The Star", roman: "XVII", hebrew: "צ", letterName: "Tzaddi", type: "simple", association: "Aquarius", symbol: "♒", note: "A#", semitone: 10},
-            {id: 18, name: "The Moon", roman: "XVIII", hebrew: "ק", letterName: "Qoph", type: "simple", association: "Pisces", symbol: "♓", note: "B", semitone: 11},
-            {id: 19, name: "The Sun", roman: "XIX", hebrew: "ר", letterName: "Resh", type: "double", association: "Sun", symbol: "☉", note: "E", semitone: 4},
-            {id: 20, name: "Judgement", roman: "XX", hebrew: "ש", letterName: "Shin", type: "mother", association: "Fire", symbol: "△", note: "C", semitone: 0},
-            {id: 21, name: "The World", roman: "XXI", hebrew: "ת", letterName: "Tav", type: "double", association: "Saturn", symbol: "♄", note: "A", semitone: 9}
+            {id: 0, name: "The Fool", roman: "0", hebrew: "×", letterName: "Aleph", type: "mother", association: "Air", symbol: "â–³", note: "E", semitone: 4},
+            {id: 1, name: "The Magician", roman: "I", hebrew: "×‘", letterName: "Beth", type: "double", association: "Mercury", symbol: "â˜¿", note: "C", semitone: 0},
+            {id: 2, name: "The High Priestess", roman: "II", hebrew: "×’", letterName: "Gimel", type: "double", association: "Moon", symbol: "â˜½", note: "B", semitone: 11},
+            {id: 3, name: "The Empress", roman: "III", hebrew: "×“", letterName: "Daleth", type: "double", association: "Venus", symbol: "â™€", note: "D", semitone: 2},
+            {id: 4, name: "The Emperor", roman: "IV", hebrew: "×”", letterName: "He", type: "simple", association: "Aries", symbol: "â™ˆ", note: "C", semitone: 0},
+            {id: 5, name: "The Hierophant", roman: "V", hebrew: "×•", letterName: "Vav", type: "simple", association: "Taurus", symbol: "â™‰", note: "C#", semitone: 1},
+            {id: 6, name: "The Lovers", roman: "VI", hebrew: "×–", letterName: "Zayin", type: "simple", association: "Gemini", symbol: "â™Š", note: "D", semitone: 2},
+            {id: 7, name: "The Chariot", roman: "VII", hebrew: "×—", letterName: "Cheth", type: "simple", association: "Cancer", symbol: "â™‹", note: "D#", semitone: 3},
+            {id: 8, name: "Strength", roman: "VIII", hebrew: "×˜", letterName: "Teth", type: "simple", association: "Leo", symbol: "â™Œ", note: "E", semitone: 4},
+            {id: 9, name: "The Hermit", roman: "IX", hebrew: "×™", letterName: "Yod", type: "simple", association: "Virgo", symbol: "â™", note: "F", semitone: 5},
+            {id: 10, name: "Wheel of Fortune", roman: "X", hebrew: "×›", letterName: "Kaph", type: "double", association: "Jupiter", symbol: "â™ƒ", note: "G", semitone: 7},
+            {id: 11, name: "Justice", roman: "XI", hebrew: "×œ", letterName: "Lamed", type: "simple", association: "Libra", symbol: "â™Ž", note: "F#", semitone: 6},
+            {id: 12, name: "The Hanged Man", roman: "XII", hebrew: "×ž", letterName: "Mem", type: "mother", association: "Water", symbol: "â–½", note: "G#", semitone: 8},
+            {id: 13, name: "Death", roman: "XIII", hebrew: "× ", letterName: "Nun", type: "simple", association: "Scorpio", symbol: "â™", note: "G", semitone: 7},
+            {id: 14, name: "Temperance", roman: "XIV", hebrew: "×¡", letterName: "Samekh", type: "simple", association: "Sagittarius", symbol: "â™", note: "G#", semitone: 8},
+            {id: 15, name: "The Devil", roman: "XV", hebrew: "×¢", letterName: "Ayin", type: "simple", association: "Capricorn", symbol: "â™‘", note: "A", semitone: 9},
+            {id: 16, name: "The Tower", roman: "XVI", hebrew: "×¤", letterName: "Pe", type: "double", association: "Mars", symbol: "â™‚", note: "F", semitone: 5},
+            {id: 17, name: "The Star", roman: "XVII", hebrew: "×¦", letterName: "Tzaddi", type: "simple", association: "Aquarius", symbol: "â™’", note: "A#", semitone: 10},
+            {id: 18, name: "The Moon", roman: "XVIII", hebrew: "×§", letterName: "Qoph", type: "simple", association: "Pisces", symbol: "â™“", note: "B", semitone: 11},
+            {id: 19, name: "The Sun", roman: "XIX", hebrew: "×¨", letterName: "Resh", type: "double", association: "Sun", symbol: "â˜‰", note: "E", semitone: 4},
+            {id: 20, name: "Judgement", roman: "XX", hebrew: "×©", letterName: "Shin", type: "mother", association: "Fire", symbol: "â–³", note: "C", semitone: 0},
+            {id: 21, name: "The World", roman: "XXI", hebrew: "×ª", letterName: "Tav", type: "double", association: "Saturn", symbol: "â™„", note: "A", semitone: 9}
         ];
 
         const PLANET_RULERS = {
@@ -822,7 +822,7 @@
                         <div class="card-number">${card.roman}</div>
                     </div>
                     <div class="card-face card-back">
-                        <div style="font-size: 2rem; color: var(--gold);">⧨</div>
+                        <div style="font-size: 2rem; color: var(--gold);">â§¨</div>
                     </div>
                 </div>
             `;
@@ -1006,7 +1006,7 @@
             CARDS.forEach(card => {
                 const row = document.createElement('tr');
                 
-                let planet = '—';
+                let planet = 'â€”';
                 if (card.type === 'double') {
                     if (card.association === 'Mercury') planet = 'Mercury';
                     else if (card.association === 'Moon') planet = 'Moon';
@@ -1016,7 +1016,7 @@
                     else if (card.association === 'Sun') planet = 'Sun';
                     else if (card.association === 'Saturn') planet = 'Saturn';
                 } else if (card.type === 'simple') {
-                    planet = PLANET_RULERS[card.association] || '—';
+                    planet = PLANET_RULERS[card.association] || 'â€”';
                 }
                 
                 const freq = getFrequency(card.semitone).toFixed(2);
