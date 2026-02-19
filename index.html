@@ -185,6 +185,18 @@
             color: var(--dim);
         }
 
+        .card-meaning {
+            font-size: 10px;
+            color: var(--white);
+            text-align: center;
+            margin-top: 5px;
+            max-width: 130px;
+        }
+
+        .card-meaning.reversed {
+            color: var(--red);
+        }
+
         .card.reversed {
             transform: rotate(180deg);
         }
@@ -255,6 +267,65 @@
         .celtic-cross .card:nth-child(9) { grid-column: 4; grid-row: 2; }
         .celtic-cross .card:nth-child(10) { grid-column: 4; grid-row: 1; }
 
+        .position-label {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--gold);
+            font-size: 12px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .position-label.visible {
+            opacity: 1;
+        }
+
+        .connection-chain {
+            text-align: center;
+            color: var(--gold);
+            font-size: 12px;
+            margin-top: 20px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .connection-chain.visible {
+            opacity: 1;
+        }
+
+        .spread-summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--table-row1);
+            border: 1px solid var(--gold);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .spread-summary.visible {
+            opacity: 1;
+        }
+
+        .spread-summary h4 {
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        .summary-card {
+            margin-bottom: 10px;
+            font-size: 11px;
+        }
+
+        .summary-chord {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--dim);
+            color: var(--gold);
+        }
+
         .piano-container {
             margin: 2rem 0;
             display: flex;
@@ -307,6 +378,93 @@
         .piano-key.active {
             background: var(--gold) !important;
             color: var(--obsidian) !important;
+        }
+
+        .sampler-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .sampler-pad {
+            width: 80px;
+            height: 80px;
+            background: var(--obsidian);
+            border: 2px solid var(--gold);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+        }
+
+        .sampler-pad:hover {
+            background: var(--table-row1);
+        }
+
+        .sampler-pad.empty {
+            color: var(--dim);
+            font-size: 24px;
+        }
+
+        .sampler-pad.assigned {
+            color: var(--gold);
+        }
+
+        .sampler-pad.active {
+            background: var(--gold);
+            color: var(--obsidian);
+        }
+
+        .sampler-pad .hebrew {
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+
+        .sampler-pad .name {
+            font-size: 8px;
+            text-align: center;
+        }
+
+        .card-selector {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--obsidian);
+            border: 2px solid var(--gold);
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .card-selector.visible {
+            display: block;
+        }
+
+        .card-selector h4 {
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        .card-option {
+            padding: 8px;
+            margin: 2px 0;
+            cursor: pointer;
+            border: 1px solid var(--dim);
+        }
+
+        .card-option:hover {
+            background: var(--table-row1);
+            border-color: var(--gold);
         }
 
         .correspondence-table {
@@ -490,6 +648,15 @@
                 height: 40px;
             }
             
+            .sampler-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .sampler-pad {
+                width: 60px;
+                height: 60px;
+            }
+            
             .correspondence-table {
                 font-size: 9px;
             }
@@ -508,6 +675,7 @@
             <button onclick="showSection('spreads')" class="active">Spreads</button>
             <button onclick="showSection('daily')">Daily Draw</button>
             <button onclick="showSection('piano-section')">Piano</button>
+            <button onclick="showSection('sampler')">Sampler</button>
             <button onclick="showSection('correspondence')">Correspondence</button>
             <button onclick="showSection('graph')">3D Graph</button>
             <button onclick="showSection('journal')">Journal</button>
@@ -527,6 +695,8 @@
                 <button onclick="clearSpread()">Clear</button>
             </div>
             <div class="spread-container active" id="spread-display"></div>
+            <div class="connection-chain" id="connection-chain"></div>
+            <div class="spread-summary" id="spread-summary"></div>
         </div>
 
         <div id="daily" class="section">
@@ -544,6 +714,16 @@
                 <div class="piano" id="piano-keys"></div>
             </div>
             <p>Click keys to play notes. Active cards highlight corresponding keys.</p>
+        </div>
+
+        <div id="sampler" class="section">
+            <h3>MIDI Sampler</h3>
+            <div class="toolbar">
+                <button onclick="playSequence()">Play Sequence</button>
+                <button onclick="randomFill()">Random Fill</button>
+                <button onclick="clearSampler()">Clear All</button>
+            </div>
+            <div class="sampler-grid" id="sampler-grid"></div>
         </div>
 
         <div id="correspondence" class="section">
@@ -637,6 +817,12 @@
         <div class="history-log" id="history-log">
             <h4>History</h4>
         </div>
+
+        <div class="card-selector" id="card-selector">
+            <h4>Select Card</h4>
+            <div id="card-options"></div>
+            <button onclick="closeCardSelector()">Cancel</button>
+        </div>
     </div>
 
     <script>
@@ -666,10 +852,42 @@
             {id: 21, name: "The World", roman: "XXI", hebrew: "ת", letterName: "Tav", type: "double", association: "Saturn", symbol: "♄", note: "A", semitone: 9}
         ];
 
+        const CARD_MEANINGS = {
+            0: {upright: "new beginnings, innocence", reversed: "recklessness, chaos"},
+            1: {upright: "manifestation, skill", reversed: "manipulation, deception"},
+            2: {upright: "intuition, mystery", reversed: "secrets, withdrawal"},
+            3: {upright: "fertility, abundance", reversed: "dependence, emptiness"},
+            4: {upright: "authority, stability", reversed: "tyranny, rigidity"},
+            5: {upright: "tradition, conformity", reversed: "rebellion, unconventional"},
+            6: {upright: "love, relationships", reversed: "disharmony, imbalance"},
+            7: {upright: "determination, control", reversed: "lack of direction"},
+            8: {upright: "inner strength, courage", reversed: "weakness, self-doubt"},
+            9: {upright: "introspection, guidance", reversed: "isolation, lost"},
+            10: {upright: "fate, cycles", reversed: "bad luck, lack of control"},
+            11: {upright: "fairness, truth", reversed: "injustice, bias"},
+            12: {upright: "surrender, patience", reversed: "stalling, indecision"},
+            13: {upright: "transformation, endings", reversed: "resistance, stagnation"},
+            14: {upright: "balance, moderation", reversed: "imbalance, excess"},
+            15: {upright: "bondage, addiction", reversed: "breaking free, release"},
+            16: {upright: "sudden change, upheaval", reversed: "avoiding disaster, fear"},
+            17: {upright: "hope, inspiration", reversed: "despair, disconnection"},
+            18: {upright: "illusion, intuition", reversed: "confusion, fear"},
+            19: {upright: "joy, success", reversed: "negativity, depression"},
+            20: {upright: "rebirth, inner calling", reversed: "self-doubt, harsh judgment"},
+            21: {upright: "completion, accomplishment", reversed: "incomplete, lack of closure"}
+        };
+
         const PLANET_RULERS = {
             "Aries": "Mars", "Taurus": "Venus", "Gemini": "Mercury", "Cancer": "Moon",
             "Leo": "Sun", "Virgo": "Mercury", "Libra": "Venus", "Scorpio": "Mars",
             "Sagittarius": "Jupiter", "Capricorn": "Saturn", "Aquarius": "Saturn", "Pisces": "Jupiter"
+        };
+
+        const POSITION_LABELS = {
+            single: ["Present"],
+            three: ["Past", "Present", "Future"],
+            elements: ["Fire", "Water", "Air", "Earth"],
+            celtic: ["Present", "Cross", "Distant Past", "Possible Future", "Crown", "Foundation", "Your Approach", "External Influences", "Hopes & Fears", "Final Outcome"]
         };
 
         // State
@@ -682,6 +900,8 @@
         let sequenceInterval;
         let currentDate = new Date();
         let threeJS = null;
+        let samplerPads = [];
+        let selectedPadIndex = null;
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
@@ -691,6 +911,7 @@
             loadJournal();
             updateCalendar();
             loadHistory();
+            initializeSampler();
             
             // Lazy load Three.js when graph section is visible
             const graphContainer = document.getElementById('graph-container');
@@ -814,12 +1035,16 @@
             const cardDiv = document.createElement('div');
             cardDiv.className = `tarot-card ${reversed ? 'reversed' : ''}`;
             
+            const meaning = CARD_MEANINGS[card.id];
+            const meaningText = reversed ? meaning.reversed : meaning.upright;
+            
             cardDiv.innerHTML = `
                 <div class="card-inner">
                     <div class="card-face card-front">
                         <div class="card-hebrew">${card.hebrew}</div>
                         <div class="card-name">${card.name}</div>
                         <div class="card-number">${card.roman}</div>
+                        <div class="card-meaning ${reversed ? 'reversed' : ''}">${meaningText}</div>
                     </div>
                     <div class="card-face card-back">
                         <div style="font-size: 2rem; color: var(--gold);">⧨</div>
@@ -830,6 +1055,8 @@
             cardDiv.addEventListener('click', () => {
                 flipCard(cardDiv);
                 playCardSound(card, reversed);
+                highlightPianoKey(card.semitone);
+                showConnectionChain(card, reversed);
                 logHistory(`Played ${card.name} (${reversed ? 'Reversed' : 'Upright'})`);
             });
             
@@ -839,6 +1066,27 @@
         function flipCard(cardElement) {
             const inner = cardElement.querySelector('.card-inner');
             inner.classList.toggle('flipped');
+        }
+
+        function showConnectionChain(card, reversed) {
+            const chain = document.getElementById('connection-chain');
+            const planet = getPlanetForCard(card);
+            chain.innerHTML = `${card.name} → ${card.hebrew} (${card.letterName}) → ${card.note} → ${planet}`;
+            chain.classList.add('visible');
+            
+            setTimeout(() => {
+                chain.classList.remove('visible');
+            }, 3000);
+        }
+
+        function getPlanetForCard(card) {
+            if (card.type === 'double') {
+                return card.association;
+            } else if (card.type === 'simple') {
+                return PLANET_RULERS[card.association] || card.association;
+            } else {
+                return card.association;
+            }
         }
 
         // Spread System
@@ -860,7 +1108,10 @@
 
         function drawSpread() {
             const container = document.getElementById('spread-display');
+            const summary = document.getElementById('spread-summary');
             container.innerHTML = '';
+            summary.innerHTML = '';
+            summary.classList.remove('visible');
             
             let numCards;
             switch(currentSpread) {
@@ -880,6 +1131,13 @@
                 drawnCards.push({card, reversed});
                 
                 const cardElement = createCardElement(card, reversed);
+                
+                // Add position label
+                const positionLabel = document.createElement('div');
+                positionLabel.className = 'position-label';
+                positionLabel.textContent = POSITION_LABELS[currentSpread][i] || `Position ${i + 1}`;
+                cardElement.appendChild(positionLabel);
+                
                 container.appendChild(cardElement);
             }
             
@@ -888,14 +1146,67 @@
             
             logHistory(`Drew ${currentSpread} spread: ${drawnCards.map(dc => dc.card.name).join(', ')}`);
             
-            // Auto-flip after a moment
+            // Sequential reveal with ceremony
+            drawnCards.forEach((dc, index) => {
+                setTimeout(() => {
+                    const cardElement = container.children[index];
+                    const inner = cardElement.querySelector('.card-inner');
+                    const label = cardElement.querySelector('.position-label');
+                    
+                    // Show position label
+                    label.classList.add('visible');
+                    
+                    // Flip card
+                    setTimeout(() => {
+                        inner.classList.add('flipped');
+                        playCardSound(dc.card, dc.reversed);
+                    }, 300);
+                    
+                }, index * 600);
+            });
+            
+            // Show spread summary after all cards are revealed
             setTimeout(() => {
-                container.querySelectorAll('.card-inner').forEach(inner => inner.classList.add('flipped'));
-            }, 500);
+                showSpreadSummary();
+            }, numCards * 600 + 1000);
+        }
+
+        function showSpreadSummary() {
+            const summary = document.getElementById('spread-summary');
+            let html = '<h4>SPREAD SUMMARY</h4>';
+            
+            drawnCards.forEach((dc, index) => {
+                const planet = getPlanetForCard(dc.card);
+                const meaning = CARD_MEANINGS[dc.card.id];
+                const meaningText = dc.reversed ? meaning.reversed : meaning.upright;
+                html += `<div class="summary-card"><strong>${POSITION_LABELS[currentSpread][index]}:</strong> ${dc.card.name} (${dc.card.hebrew}) - ${dc.card.note} - ${planet} - "${meaningText}"</div>`;
+            });
+            
+            const notes = drawnCards.map(dc => dc.card.note);
+            const uniqueNotes = [...new Set(notes)];
+            html += `<div class="summary-chord"><strong>Chord:</strong> ${notes.join(' → ')} (${uniqueNotes.join(', ')})</div>`;
+            
+            // Add interpretive phrase based on spread
+            let interpretive = '';
+            if (currentSpread === 'three') {
+                interpretive = 'A journey through time revealing the threads of destiny.';
+            } else if (currentSpread === 'elements') {
+                interpretive = 'The elemental forces in balance and tension.';
+            } else if (currentSpread === 'celtic') {
+                interpretive = 'The complete pattern of influences surrounding your question.';
+            } else {
+                interpretive = 'A moment of clarity in the present.';
+            }
+            html += `<div style="margin-top: 10px; font-style: italic; color: var(--gold);">${interpretive}</div>`;
+            
+            summary.innerHTML = html;
+            summary.classList.add('visible');
         }
 
         function clearSpread() {
             document.getElementById('spread-display').innerHTML = '';
+            document.getElementById('spread-summary').classList.remove('visible');
+            document.getElementById('connection-chain').classList.remove('visible');
             drawnCards = [];
         }
 
@@ -932,10 +1243,14 @@
                 cardElement.querySelector('.card-inner').classList.add('flipped');
             }, 300);
             
+            const meaning = CARD_MEANINGS[dailyCard.card.id];
+            const meaningText = dailyCard.reversed ? meaning.reversed : meaning.upright;
+            
             const journalDiv = document.getElementById('daily-journal');
             journalDiv.innerHTML = `
                 <p><strong>Your card for ${today}:</strong></p>
                 <p><strong>${dailyCard.card.name}</strong> (${dailyCard.reversed ? 'Reversed' : 'Upright'})</p>
+                <p><strong>Meaning:</strong> ${meaningText}</p>
                 <p><strong>Hebrew:</strong> ${dailyCard.card.hebrew} (${dailyCard.card.letterName})</p>
                 <p><strong>Association:</strong> ${dailyCard.card.association}</p>
                 <p><strong>Musical Note:</strong> ${dailyCard.card.note}</p>
@@ -995,6 +1310,152 @@
             if (targetKey) {
                 targetKey.classList.add('active');
                 setTimeout(() => targetKey.classList.remove('active'), 1000);
+            }
+        }
+
+        // Sampler System
+        function initializeSampler() {
+            const grid = document.getElementById('sampler-grid');
+            samplerPads = [];
+            
+            for (let i = 0; i < 16; i++) {
+                const pad = document.createElement('div');
+                pad.className = 'sampler-pad empty';
+                pad.textContent = '+';
+                pad.dataset.index = i;
+                
+                pad.addEventListener('click', () => {
+                    handlePadClick(i);
+                });
+                
+                pad.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    unassignPad(i);
+                });
+                
+                grid.appendChild(pad);
+                samplerPads.push(null);
+            }
+            
+            loadSamplerState();
+        }
+
+        function handlePadClick(index) {
+            if (samplerPads[index]) {
+                // Play assigned card
+                const cardData = samplerPads[index];
+                playCardSound(cardData.card, false);
+                highlightPad(index);
+            } else {
+                // Open card selector
+                selectedPadIndex = index;
+                showCardSelector();
+            }
+        }
+
+        function showCardSelector() {
+            const selector = document.getElementById('card-selector');
+            const options = document.getElementById('card-options');
+            
+            options.innerHTML = '';
+            CARDS.forEach(card => {
+                const option = document.createElement('div');
+                option.className = 'card-option';
+                option.innerHTML = `<strong>${card.name}</strong> (${card.hebrew}) - ${card.note}`;
+                option.addEventListener('click', () => {
+                    assignPad(selectedPadIndex, card);
+                    closeCardSelector();
+                });
+                options.appendChild(option);
+            });
+            
+            selector.classList.add('visible');
+        }
+
+        function closeCardSelector() {
+            document.getElementById('card-selector').classList.remove('visible');
+            selectedPadIndex = null;
+        }
+
+        function assignPad(index, card) {
+            const pad = document.getElementById('sampler-grid').children[index];
+            samplerPads[index] = { card };
+            
+            pad.classList.remove('empty');
+            pad.classList.add('assigned');
+            pad.innerHTML = `<div class="hebrew">${card.hebrew}</div><div class="name">${card.name}</div>`;
+            
+            saveSamplerState();
+            logHistory(`Assigned ${card.name} to pad ${index + 1}`);
+        }
+
+        function unassignPad(index) {
+            const pad = document.getElementById('sampler-grid').children[index];
+            samplerPads[index] = null;
+            
+            pad.classList.remove('assigned');
+            pad.classList.add('empty');
+            pad.textContent = '+';
+            
+            saveSamplerState();
+            logHistory(`Unassigned pad ${index + 1}`);
+        }
+
+        function highlightPad(index) {
+            const pad = document.getElementById('sampler-grid').children[index];
+            pad.classList.add('active');
+            setTimeout(() => pad.classList.remove('active'), 200);
+        }
+
+        function playSequence() {
+            const assignedPads = samplerPads.map((pad, index) => ({ pad, index })).filter(p => p.pad);
+            
+            assignedPads.forEach((p, i) => {
+                setTimeout(() => {
+                    playCardSound(p.pad.card, false);
+                    highlightPad(p.index);
+                }, i * 300);
+            });
+            
+            logHistory(`Played sequence: ${assignedPads.length} pads`);
+        }
+
+        function randomFill() {
+            const shuffled = [...CARDS].sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < 16; i++) {
+                if (i < shuffled.length) {
+                    assignPad(i, shuffled[i]);
+                }
+            }
+            
+            logHistory('Random filled sampler pads');
+        }
+
+        function clearSampler() {
+            for (let i = 0; i < 16; i++) {
+                unassignPad(i);
+            }
+            logHistory('Cleared all sampler pads');
+        }
+
+        function saveSamplerState() {
+            const state = samplerPads.map(pad => pad ? pad.card.id : null);
+            localStorage.setItem('harmonic_arcana_sampler', JSON.stringify(state));
+        }
+
+        function loadSamplerState() {
+            const stored = localStorage.getItem('harmonic_arcana_sampler');
+            if (stored) {
+                const state = JSON.parse(stored);
+                state.forEach((cardId, index) => {
+                    if (cardId !== null) {
+                        const card = CARDS.find(c => c.id === cardId);
+                        if (card) {
+                            assignPad(index, card);
+                        }
+                    }
+                });
             }
         }
 
@@ -1385,42 +1846,125 @@
                 document.getElementById('suno-output').innerHTML = '<p>Draw cards first to generate a prompt!</p>';
                 return;
             }
+
+            // Build narrative based on spread
+            let narrative = '';
+            let lyricThemes = [];
             
-            const genres = ['ambient', 'cinematic', 'electronic', 'orchestral', 'mystical', 'dark ambient', 'new age', 'ethereal'];
-            const moods = ['mysterious', 'contemplative', 'transcendent', 'haunting', 'peaceful', 'intense', 'otherworldly', 'sacred'];
-            const keys = ['C major', 'A minor', 'D minor', 'G major', 'F major', 'E minor', 'B minor', 'F# minor'];
+            if (currentSpread === 'three') {
+                const past = lastDrawnCards[0];
+                const present = lastDrawnCards[1];
+                const future = lastDrawnCards[2];
+                
+                const pastMeaning = CARD_MEANINGS[past.card.id];
+                const presentMeaning = CARD_MEANINGS[present.card.id];
+                const futureMeaning = CARD_MEANINGS[future.card.id];
+                
+                const pastText = past.reversed ? pastMeaning.reversed : pastMeaning.upright;
+                const presentText = present.reversed ? presentMeaning.reversed : presentMeaning.upright;
+                const futureText = future.reversed ? futureMeaning.reversed : futureMeaning.upright;
+                
+                narrative = `From the ${pastText} of ${past.card.name} (${past.card.note}, ${getPlanetForCard(past.card)}) through the ${presentText} of ${present.card.name} (${present.card.note}, ${getPlanetForCard(present.card)}) toward the ${futureText} of ${future.card.name} (${future.card.note}, ${getPlanetForCard(future.card)}). A journey of transformation across the planes of existence.`;
+                
+                lyricThemes.push(pastText, presentText, futureText, 'transformation', 'temporal journey');
+            } else {
+                const cardNames = lastDrawnCards.map(dc => dc.card.name);
+                const meanings = lastDrawnCards.map(dc => {
+                    const meaning = CARD_MEANINGS[dc.card.id];
+                    return dc.reversed ? meaning.reversed : meaning.upright;
+                });
+                
+                narrative = `A mystical convergence of ${cardNames.join(', ')} bringing themes of ${meanings.join(', ')}. The archetypal forces align in cosmic harmony.`;
+                
+                lyricThemes.push(...meanings, 'mystical convergence', 'archetypal forces');
+            }
             
-            const cardNotes = lastDrawnCards.map(dc => dc.card.note);
-            const uniqueNotes = [...new Set(cardNotes)];
+            // Determine key and mode from notes
+            const notes = lastDrawnCards.map(dc => dc.card.note);
+            const uniqueNotes = [...new Set(notes)];
+            const rootNote = uniqueNotes[0];
             
-            const genre = genres[Math.floor(Math.random() * genres.length)];
-            const mood = moods[Math.floor(Math.random() * moods.length)];
-            const key = keys[Math.floor(Math.random() * keys.length)];
-            const bpm = 60 + Math.floor(Math.random() * 60); // 60-120 BPM
+            // Determine if major or minor based on card meanings
+            let isMajor = true;
+            lastDrawnCards.forEach(dc => {
+                const meaning = CARD_MEANINGS[dc.card.id];
+                const text = dc.reversed ? meaning.reversed : meaning.upright;
+                if (text.includes('death') || text.includes('fear') || text.includes('chaos') || text.includes('despair')) {
+                    isMajor = false;
+                }
+            });
             
-            const cardNames = lastDrawnCards.map(dc => dc.card.name.toLowerCase()).join(', ');
+            const key = `${rootNote} ${isMajor ? 'major' : 'minor'}`;
             
-            const prompt = `Create a ${genre} track in ${key} at ${bpm} BPM. The mood should be ${mood} and mystical, inspired by tarot cards: ${cardNames}. Include musical notes: ${uniqueNotes.join(', ')}. The composition should reflect the esoteric wisdom and archetypal energies of these cards, with ethereal textures and cosmic resonance.`;
+            // Determine tempo from energy level
+            let energy = 0;
+            lastDrawnCards.forEach(dc => {
+                if (dc.card.name.includes('Tower') || dc.card.name.includes('Devil') || dc.card.name.includes('Chariot')) {
+                    energy += 20;
+                } else if (dc.card.name.includes('Hermit') || dc.card.name.includes('Hanged Man') || dc.card.name.includes('High Priestess')) {
+                    energy -= 20;
+                }
+            });
+            
+            const baseBPM = 80;
+            const bpm = Math.max(60, Math.min(120, baseBPM + energy));
+            
+            // Determine genre from dominant element
+            const elements = { Fire: 0, Water: 0, Air: 0, Earth: 0 };
+            lastDrawnCards.forEach(dc => {
+                if (dc.card.type === 'mother') {
+                    if (dc.card.association === 'Fire') elements.Fire += 2;
+                    else if (dc.card.association === 'Water') elements.Water += 2;
+                    else if (dc.card.association === 'Air') elements.Air += 2;
+                } else if (dc.card.type === 'simple') {
+                    // Assign zodiac signs to elements
+                    const sign = dc.card.association;
+                    if (['Aries', 'Leo', 'Sagittarius'].includes(sign)) elements.Fire++;
+                    else if (['Cancer', 'Scorpio', 'Pisces'].includes(sign)) elements.Water++;
+                    else if (['Gemini', 'Libra', 'Aquarius'].includes(sign)) elements.Air++;
+                    else if (['Taurus', 'Virgo', 'Capricorn'].includes(sign)) elements.Earth++;
+                }
+            });
+            
+            const dominantElement = Object.keys(elements).reduce((a, b) => elements[a] > elements[b] ? a : b);
+            const genreMap = {
+                Fire: 'cinematic orchestral',
+                Water: 'ambient ethereal',
+                Air: 'electronic atmospheric',
+                Earth: 'dark ambient drone'
+            };
+            const genre = genreMap[dominantElement];
+            
+            // Build chord progression
+            const chordProgression = notes.join(' → ');
+            
+            // Create unique lyric themes
+            const uniqueThemes = [...new Set(lyricThemes)].slice(0, 5);
+            
+            const fullPrompt = `${genre} in ${key}, ${bpm} BPM. ${narrative}. Themes of ${uniqueThemes.join(', ')}.`;
             
             document.getElementById('suno-output').innerHTML = `
-                <h4>Generated Suno AI Prompt:</h4>
-                <p><strong>Genre:</strong> ${genre}</p>
+                <h4>SUNO PROMPT</h4>
+                <p style="text-align: center; margin: 10px 0;">══════════</p>
+                <p><strong>Narrative:</strong> ${narrative}</p>
+                <p><strong>Lyric Themes:</strong> ${uniqueThemes.join(', ')}</p>
                 <p><strong>Key:</strong> ${key}</p>
-                <p><strong>BPM:</strong> ${bpm}</p>
-                <p><strong>Mood:</strong> ${mood}</p>
-                <p><strong>Cards:</strong> ${cardNames}</p>
-                <p><strong>Notes:</strong> ${uniqueNotes.join(', ')}</p>
-                <hr>
+                <p><strong>Tempo:</strong> ${bpm} BPM</p>
+                <p><strong>Chord Progression:</strong> ${chordProgression}</p>
+                <p><strong>Genre:</strong> ${genre}</p>
+                <br>
                 <p><strong>Full Prompt:</strong></p>
-                <textarea rows="4" cols="50" readonly style="width:100%; background: var(--obsidian); color: var(--white); border: 1px solid var(--gold); padding: 10px;">${prompt}</textarea>
+                <textarea rows="4" cols="50" readonly style="width:100%; background: var(--obsidian); color: var(--white); border: 1px solid var(--gold); padding: 10px;">${fullPrompt}</textarea>
                 <br><br>
                 <button id="copy-suno-btn">Copy to Clipboard</button>
             `;
             
             document.getElementById('copy-suno-btn').addEventListener('click', function() {
-                navigator.clipboard.writeText(prompt).then(function() { logHistory('Copied Suno prompt to clipboard'); });
+                navigator.clipboard.writeText(fullPrompt).then(function() { 
+                    logHistory('Copied narrative Suno prompt to clipboard'); 
+                });
             });
-            logHistory('Generated Suno AI prompt from drawn cards');
+            logHistory('Generated narrative Suno AI prompt from drawn cards');
         }
 
         // History System
