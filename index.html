@@ -767,6 +767,29 @@
             #tree-svg .t-sname { font-size: 16px; letter-spacing: 0.04em; }
         }
 
+        .clar-display { display: flex; justify-content: center; }
+        .clar-display:empty { display: none; }
+        .clar-display > div { position: relative; margin-top: 26px; }
+        .clar-row { justify-content: center; }
+        .clar-row[hidden] { display: none; }
+        .deck-tools { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+        .deck-fields { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: flex-end; }
+        .deck-fields label, .lay-panel label, .cut-at { display: flex; flex-direction: column; gap: 4px; font-size: 11px; letter-spacing: 0.08em; color: var(--gold); }
+        .deck-fields select, .deck-fields input, .lay-panel select { min-height: 40px; min-width: 180px; max-width: 100%; background: var(--obsidian); color: var(--white); border: 1px solid var(--dim); padding: 6px 8px; font: inherit; font-size: 13px; border-radius: 0; }
+        .deck-note { font-size: 12px; line-height: 1.5; color: var(--soft); margin: 0; }
+        .deck-note:empty { display: none; }
+        .deck-fold > summary { cursor: pointer; color: var(--gold); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; padding: 10px 0; min-height: 40px; }
+        .lay-panel { display: flex; flex-direction: column; gap: 10px; padding: 6px 0 10px; }
+        .lay-row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: flex-end; }
+        .lay-row .lay-rev { flex-direction: row; align-items: center; gap: 8px; min-height: 40px; color: var(--soft); }
+        .lay-row .lay-rev input { width: 40px; height: 40px; accent-color: var(--gold); }
+        .cut-at input { accent-color: var(--gold); }
+        /* a closed fold's contents take no space and cannot be reached, in every browser */
+        .deck-fold:not([open]) > :not(summary) { display: none; }
+        .shuffle-panel { display: flex; flex-direction: column; gap: 10px; padding: 6px 0 10px; }
+        .cut-at { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--soft); }
+        .cut-at input[type=range] { width: min(320px, 100%); height: 40px; }
+        .minor-card .card-hebrew { font-family: 'Cinzel', Georgia, serif; }
     </style>
 </head>
 <body>
@@ -814,6 +837,7 @@
                     <button type="button" onclick="clearSpread()">Clear</button>
                 </div>
                 <div class="spread-container" id="spread-display" data-empty="Choose a spread to draw your cards"></div>
+                <div class="clar-display" id="clar-display"></div>
                 <div class="toolbar play-row" id="play-row" hidden>
                     <button type="button" class="active" onclick="playReadingChord()">Play as Chord</button>
                     <button type="button" class="active" onclick="playReadingArpeggio()">Arpeggio</button>
@@ -824,6 +848,9 @@
                     <button type="button" onclick="performReading('bowls')">Singing bowls</button>
                     <button type="button" onclick="performReading('drive')">Night drive</button>
                     <button type="button" onclick="performReading('drone')">Overtone drone</button>
+                </div>
+                <div class="toolbar clar-row" id="clar-row" hidden>
+                    <button type="button" id="clar-btn" onclick="drawClarifier()">Draw a clarifier</button>
                 </div>
                 <div class="tree-panel" id="tree-panel">
                     <svg id="tree-svg" viewBox="0 0 600 900" role="group" aria-label="The Tree of Life: ten spheres joined by twenty-two paths. Each path is a card and a note."></svg>
@@ -842,6 +869,33 @@
                     <summary>How a reading becomes music</summary>
                     <div class="rules-panel" id="rules-panel"></div>
                 </details>
+                <div class="deck-tools" id="deck-tools">
+                    <div class="deck-fields">
+                        <label>Significator <select id="sig-select" aria-label="Significator"></select></label>
+                        <label>Reading for <input type="text" id="rd-who" maxlength="80" autocomplete="off" aria-label="Who the reading is for"></label>
+                        <label>Question <input type="text" id="rd-q" maxlength="200" autocomplete="off" aria-label="The question asked"></label>
+                    </div>
+                    <p class="deck-note" id="sig-line" role="status"></p>
+                    <details class="deck-fold" id="lay-fold">
+                        <summary>Lay my own cards</summary>
+                        <div class="lay-panel" id="lay-panel"></div>
+                    </details>
+                    <details class="deck-fold" id="shuffle-fold">
+                        <summary>Shuffle the deck yourself</summary>
+                        <div class="shuffle-panel" id="shuffle-panel">
+                            <p class="deck-note">One deck of 78 lies here and keeps its order between visits. Shuffle it as you would in your hands; the next spread is dealt from the top, as the deck lies. A card comes out reversed only if you have turned part of the deck.</p>
+                            <div class="toolbar">
+                                <button type="button" onclick="deckMove('riffle')">Riffle</button>
+                                <button type="button" onclick="deckMove('overhand')">Overhand</button>
+                                <button type="button" onclick="deckMove('cut')">Cut</button>
+                                <button type="button" onclick="deckMove('turn')">Cut and turn</button>
+                                <button type="button" onclick="deckMove('machine')">Shuffle for me</button>
+                            </div>
+                            <label class="cut-at">Where to cut <input type="range" id="cut-at" min="1" max="77" value="39" aria-label="Where to cut: number of cards lifted off the top"> <span id="cut-at-n">39</span> cards off the top</label>
+                            <p class="deck-note" id="deck-status" role="status"></p>
+                        </div>
+                    </details>
+                </div>
             </div>
 
             <div class="piano-panel">
@@ -994,6 +1048,18 @@
                     <option value="case">Case throughout</option>
                 </select>
             </label>
+            <label>Deck
+                <select id="set-deck" aria-label="Deck">
+                    <option value="rws">Rider-Waite-Smith</option>
+                    <option value="thoth">Thoth</option>
+                </select>
+            </label>
+            <label>Cards
+                <select id="set-pool" aria-label="Cards drawn from">
+                    <option value="all">All 78</option>
+                    <option value="trumps">22 trumps only</option>
+                </select>
+            </label>
             <label>Voice
                 <select id="set-voice" aria-label="Voice">
                     <option value="bowls">Bowls (struck metal, long ring)</option>
@@ -1085,6 +1151,104 @@
             "Sagittarius":"Jupiter","Capricorn":"Saturn","Aquarius":"Saturn","Pisces":"Jupiter"
         };
 
+
+        // ============ THE 56 MINOR CARDS ============
+        // A minor card has no letter and no path of its own. It is voiced from the trumps: Two to Ten are the 36 decans
+        // (a planet in a sign: the planet's note with the sign's note), an Ace is its element, a court card is one element
+        // within another (the two element notes). Earth has no trump of its own, so it takes Saturn's note, as the Golden Dawn
+        // doubles Earth onto the last trump. The decan table is the Golden Dawn's and has NOT yet been checked against print.
+        const SUITS = [{ element: 'Fire', glyph: '△' }, { element: 'Water', glyph: '▽' }, { element: 'Air', glyph: '🜁' }, { element: 'Earth', glyph: '🜃' }];
+        const DECANS = [
+            ['Mars Aries', 'Sun Aries', 'Venus Aries', 'Saturn Leo', 'Jupiter Leo', 'Mars Leo', 'Mercury Sagittarius', 'Moon Sagittarius', 'Saturn Sagittarius'],
+            ['Venus Cancer', 'Mercury Cancer', 'Moon Cancer', 'Mars Scorpio', 'Sun Scorpio', 'Venus Scorpio', 'Saturn Pisces', 'Jupiter Pisces', 'Mars Pisces'],
+            ['Moon Libra', 'Saturn Libra', 'Jupiter Libra', 'Venus Aquarius', 'Mercury Aquarius', 'Moon Aquarius', 'Jupiter Gemini', 'Mars Gemini', 'Sun Gemini'],
+            ['Jupiter Capricorn', 'Mars Capricorn', 'Sun Capricorn', 'Mercury Taurus', 'Moon Taurus', 'Saturn Taurus', 'Sun Virgo', 'Venus Virgo', 'Mercury Virgo']
+        ];
+        const ELEMENT_CARD = { Fire: 20, Air: 0, Water: 12, Earth: 21 };
+        const COURT_ELEMENT = ['Earth', 'Air', 'Water', 'Fire'];   // court ranks 11 to 14, lowest first
+        const RANK_WORDS = ['', 'Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
+        const PLANET_CARD = {}, SIGN_CARD = {};
+        CARDS.forEach(c => { if (c.type === 'double') PLANET_CARD[c.association] = c.id; if (c.type === 'simple') SIGN_CARD[c.association] = c.id; });
+        const MINORS = [];
+        SUITS.forEach((su, si) => {
+            for (let r = 1; r <= 14; r++) {
+                const c = { id: 22 + si * 14 + r - 1, type: 'minor', suit: si, rank: r, element: su.element, name: '', roman: '', hebrew: '', letterName: '', note: '', semitone: 0 };
+                if (r === 1) { c.kind = 'ace'; c.parts = [ELEMENT_CARD[su.element]]; c.association = su.element; c.symbol = su.glyph; }
+                else if (r <= 10) { const [p, g] = DECANS[si][r - 2].split(' '); c.kind = 'pip'; c.parts = [PLANET_CARD[p], SIGN_CARD[g]]; c.association = p + ' in ' + g; c.symbol = CARDS[c.parts[0]].symbol + CARDS[c.parts[1]].symbol; }
+                else { const e = COURT_ELEMENT[r - 11]; c.kind = 'court'; c.parts = [ELEMENT_CARD[e], ELEMENT_CARD[su.element]]; c.association = e + ' of ' + su.element; c.symbol = SUITS.find(x => x.element === e).glyph + su.glyph; }
+                MINORS.push(c);
+            }
+        });
+        const ALL_CARDS = CARDS.concat(MINORS);
+        const cardOf = id => ALL_CARDS[id];
+        const isAnyCard = n => Number.isInteger(n) && n >= 0 && n < ALL_CARDS.length;
+        // The trumps a card is voiced from (itself, for a trump), then the same without two of one pitch, then its first path.
+        const partsOf = card => card.id < 22 ? [card] : [...new Set(card.parts)].map(i => CARDS[i]);
+        const voicesOf = card => partsOf(card).filter((p, i, l) => l.findIndex(q => q.semitone === p.semitone) === i);
+        const homeOf = card => card.id < 22 ? card.id : card.parts[0];
+
+        // ============ DECKS ============
+        // A deck changes names, numbering, two letters, the short meanings and the rule a reading is read by. It never changes a
+        // note: notes come from the signs, planets and elements. To add a deck, add an entry here and its meanings below.
+        const BASE_FACE = CARDS.map(c => ({ name: c.name, roman: c.roman, hebrew: c.hebrew, letterName: c.letterName }));
+        const DECKS = {
+            rws: { id: 'rws', name: 'Rider-Waite-Smith', short: 'Rider-Waite', reversals: true, swap: false, trumps: {}, romans: {}, titles: null,
+                suits: ['Wands', 'Cups', 'Swords', 'Pentacles'], courts: ['Page', 'Knight', 'Queen', 'King'], courtMarks: ['P', 'Kn', 'Q', 'K'],
+                rule: 'A reversed card sounds one octave lower than its position.',
+                source: "Card names and numbering: the Rider-Waite-Smith deck (1909). The short meanings are this tool's own one-line summaries." },
+            thoth: { id: 'thoth', name: 'Thoth', short: 'Thoth', reversals: false, swap: true,
+                trumps: { 1: 'The Magus', 2: 'The Priestess', 8: 'Lust', 10: 'Fortune', 11: 'Adjustment', 14: 'Art', 20: 'The Aeon', 21: 'The Universe' },
+                romans: { 8: 'XI', 11: 'VIII' },
+                suits: ['Wands', 'Cups', 'Swords', 'Disks'], courts: ['Princess', 'Prince', 'Queen', 'Knight'], courtMarks: ['Ps', 'Pr', 'Q', 'Kn'],
+                titles: ['Dominion', 'Virtue', 'Completion', 'Strife', 'Victory', 'Valour', 'Swiftness', 'Strength', 'Oppression',
+                         'Love', 'Abundance', 'Luxury', 'Disappointment', 'Pleasure', 'Debauch', 'Indolence', 'Happiness', 'Satiety',
+                         'Peace', 'Sorrow', 'Truce', 'Defeat', 'Science', 'Futility', 'Interference', 'Cruelty', 'Ruin',
+                         'Change', 'Works', 'Power', 'Worry', 'Success', 'Failure', 'Prudence', 'Gain', 'Wealth'],
+                rule: 'No card is reversed. A card is read by its neighbours: beside its own or a friendly element (Fire with Air, Water with Earth) it sounds in full; beside a hostile one (Fire with Water, Air with Earth) it sounds at half strength; otherwise a little under full.',
+                source: "Card names, numbering, the titles of the small cards and the exchange of the Emperor's and the Star's letters: the Thoth deck (Crowley and Harris). The short meanings are this tool's own summaries, not the deck's text." }
+        };
+        const isDeck = d => typeof d === 'string' && Object.prototype.hasOwnProperty.call(DECKS, d);
+        let deckId = 'rws', poolId = 'all', sigId = null;
+        const pathOf = id => (DECKS[deckId].swap && (id === 4 || id === 17)) ? 21 - id : id;   // Thoth: the Emperor and the Star trade paths
+        // A card's name under a given deck (a saved reading is listed in the names of the deck it was read with).
+        function nameIn(d, id) {
+            const D = DECKS[isDeck(d) ? d : 'rws'];
+            if (id < 22) return D.trumps[id] || BASE_FACE[id].name;
+            const c = MINORS[id - 22], suit = D.suits[c.suit];
+            return (c.kind === 'ace' ? 'Ace' : c.kind === 'pip' ? RANK_WORDS[c.rank] : D.courts[c.rank - 11]) + ' of ' + suit;
+        }
+        function applyDeck(d) {
+            deckId = isDeck(d) ? d : 'rws';
+            const D = DECKS[deckId];
+            CARDS.forEach(c => { const b = BASE_FACE[pathOf(c.id)]; c.name = D.trumps[c.id] || BASE_FACE[c.id].name; c.roman = D.romans[c.id] || BASE_FACE[c.id].roman; c.hebrew = b.hebrew; c.letterName = b.letterName; });
+            MINORS.forEach(c => {
+                const suit = D.suits[c.suit];
+                if (c.kind === 'ace') { c.name = 'Ace of ' + suit; c.hebrew = 'A'; c.roman = 'Root of ' + c.element; }
+                else if (c.kind === 'pip') { c.name = RANK_WORDS[c.rank] + ' of ' + suit; c.hebrew = String(c.rank); c.roman = D.titles ? D.titles[c.suit * 9 + c.rank - 2] : ''; }
+                else { c.name = D.courts[c.rank - 11] + ' of ' + suit; c.hebrew = D.courtMarks[c.rank - 11]; c.roman = ''; }
+                c.letterName = c.association;
+            });
+        }
+        const MINOR_RWS = [
+            'a spark, a new drive|a false start, delay', 'planning, the wider view|fear of the unknown', 'expansion, ships coming in|setbacks, short sight', 'celebration, homecoming|unsettled, leaving', 'rivalry, sparring|avoiding the fight', 'recognition, a win|pride before a fall', 'holding your ground|overwhelmed, giving way', 'speed, news arriving|delay, scattered effort', 'resilience, a last stand|exhaustion, suspicion', 'a heavy load, overwork|putting the load down', 'curiosity, a fresh idea|all talk, restless', 'passion, charging ahead|reckless, hasty', 'warmth, confidence|jealousy, demanding', 'vision, leadership|overbearing, impulsive',
+            'new feeling, an open heart|blocked feeling', 'partnership, attraction|imbalance, a break', 'friendship, celebration|excess, gossip', 'apathy, turning inward|new interest, waking up', 'loss, regret|acceptance, moving on', 'memory, innocence|stuck in the past', 'many choices, fantasy|clarity, a decision', 'walking away, seeking more|drifting, afraid to leave', 'contentment, a wish granted|smugness, dissatisfaction', 'harmony, shared joy|harmony broken', 'a tender message, imagination|immaturity, moodiness', 'romance, an offer|moodiness, unrealistic', 'compassion, intuition|swamped by feeling', 'emotional balance, tact|manipulation, volatility',
+            'clarity, a breakthrough|confusion, harsh words', 'stalemate, a hard choice|the deadlock breaks', 'heartbreak, grief|recovery, forgiving', 'rest, recovery|restlessness, burnout', 'a hollow victory, conflict|making peace, resentment', 'transition, calmer water|resisting the change', 'stealth, strategy|coming clean, caught out', 'feeling trapped|release, a new view', 'anxiety, sleepless nights|facing the fear, hope returns', 'a painful ending|the worst is over', 'curiosity, vigilance|gossip, all talk', 'ambition, swift action|recklessness, no plan', 'clear sight, independence|coldness, bitterness', 'authority, truth, intellect|cold logic, misuse of power',
+            'an opening, a seed of prosperity|a missed chance', 'juggling, adapting|overstretched', 'teamwork, craft|poor work, discord', 'security, holding on|greed, or letting go', 'hardship, left out in the cold|recovery, help arrives', 'generosity, giving and receiving|strings attached, debt', 'patience, weighing the harvest|impatience, wasted effort', 'diligence, skill through practice|perfectionism, cutting corners', 'self-sufficiency, comfort earned|overwork, living beyond means', 'legacy, lasting wealth|family dispute, loss', 'study, a practical start|procrastination', 'steady effort, reliability|stuck, plodding', 'practical care, nurture|self-neglect, smothering', 'abundance, discipline|greed, stubbornness'
+        ];
+        const MINOR_THOTH = [
+            'the root of fire, raw force', 'will taking hold', 'established strength, integrity', 'work brought to order', 'friction, contest', 'triumph after struggle', 'courage against the odds', 'rapid movement, messages', 'great force held in reserve', 'force turned heavy, overload', 'daring, sudden flame', 'swift, proud, intense', 'steady flame, command, attraction', 'fierce, impetuous drive',
+            'the root of water, receptivity', 'harmony of two', 'overflowing plenty', 'pleasure beginning to weaken', 'an expected joy fails', 'well-being, natural ease', 'false pleasure, delusion', 'success abandoned, stagnation', 'complete, lasting joy', 'fulfilment with nowhere left to go', 'gentle, dreaming, gracious', 'subtle, secret, intense feeling', 'reflection, dream, tranquillity', 'graceful, quick to respond',
+            'the root of air, a clear mind', 'a quarrel settled, balance', 'deep grief, the mind in pain', 'rest from strife, convention', 'loss through weakness', 'intelligence at work, a balanced mind', 'unstable effort, vacillation', 'energy wasted on detail, accident', 'the mind turned on itself', 'reason gone to destruction', 'stern, practical cleverness', 'pure intellect, ideas without anchor', 'sharp perception, a freed mind', 'attack, skill, storm',
+            'the root of earth, a material beginning', 'harmonious alternation', 'construction, material effort', 'law and order, a fortress', 'strain, intelligence under pressure', 'settled material gain', 'labour abandoned, blight', 'skill applied patiently', 'good fortune, things well managed', 'accumulation complete', 'the earth about to bring forth', 'steady energy put to practical ends', 'quiet, hardworking, kindly', 'patient, laborious, heavy'
+        ];
+        const TRUMP_THOTH = ['the leap, pure beginning', 'skill, will, the word', 'inner knowing, the veil', 'love, growth, abundance', 'rule, energy, authority', 'teaching, the inner voice', 'union of opposites, choice', 'the quest, contained force', 'passion, joy in strength', 'the inner light, withdrawal', 'change of fortune, the turn', 'balance, consequence', 'surrender, sacrifice', 'transformation, release', 'alchemy, blending', 'creative force, matter, appetite', 'destruction of the old form', 'hope, clear vision', 'illusion, the threshold', 'glory, freedom, clarity', 'a new age, the final step', 'completion, the whole'];
+        // The meaning shown for a card under the deck in use. Thoth has no reversed meanings: its cards are not read reversed.
+        function meaningOf(card, reversed) {
+            if (deckId === 'thoth') return card.id < 22 ? TRUMP_THOTH[card.id] : MINOR_THOTH[card.id - 22];
+            if (card.id < 22) return reversed ? CARD_MEANINGS[card.id].reversed : CARD_MEANINGS[card.id].upright;
+            return MINOR_RWS[card.id - 22].split('|')[reversed ? 1 : 0];
+        }
+
         const POSITION_LABELS = {
             single: ["Present"],
             three: ["Past", "Present", "Future"],
@@ -1107,7 +1271,7 @@
             celtic: 'Distant Past and Foundation sound low (octave 3), Crown, Possible Future and Final Outcome high (5), the other five in the middle (4).'
         };
         const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-        const KEYS = { journal: 'harmonic_arcana_journal', lp: 'harmonic_arcana_lp', sampler: 'harmonic_arcana_sampler', reading: 'harmonic_arcana_reading', settings: 'harmonic_arcana_settings', days: 'harmonic_arcana_days' };
+        const KEYS = { journal: 'harmonic_arcana_journal', lp: 'harmonic_arcana_lp', sampler: 'harmonic_arcana_sampler', reading: 'harmonic_arcana_reading', settings: 'harmonic_arcana_settings', days: 'harmonic_arcana_days', deck: 'harmonic_arcana_deck' };
         const MASTER_LEVEL = 0.8;
 
         // ============ TONE SYSTEMS ============
@@ -1126,6 +1290,7 @@
         const VOICES = ['bowls', 'arcana', 'pure', 'original'], PAPERS = ['letter', 'a4'];
         const SPREAD_NAMES = { single: 'Single card', three: 'Past / Present / Future', elements: 'Four Elements', celtic: 'Celtic Cross' };
         function semitoneIn(cardId, toneKey) {
+            if (cardId >= 22) return semitoneIn(MINORS[cardId - 22].parts[0], toneKey);
             const c = CARDS[cardId], sys = TONE_SYSTEMS[toneKey];
             if (c.type === 'double' && sys && sys.planets && hasOwn(sys.planets, c.association)) return sys.planets[c.association];
             return BASE_TONES[cardId].semitone;
@@ -1135,12 +1300,15 @@
         function applyTone(t) {
             toneId = isTone(t) ? t : 'v4';
             CARDS.forEach(c => { c.semitone = semitoneIn(c.id, toneId); c.note = NOTE_NAMES[c.semitone]; });
+            MINORS.forEach(c => { c.semitone = CARDS[c.parts[0]].semitone; c.note = voicesOf(c).map(p => p.note).join('+'); });
         }
         function sourceLines() {
             return [
                 'Letters, trump order and the planet, sign and element of each card: Hermetic Order of the Golden Dawn.',
                 "Notes of the twelve signs (Aries C up to Pisces B) and of the three elements (Fire C, Air E, Water G#): Paul Foster Case's tone scale.",
-                'Notes of the seven planets (' + TONE_SYSTEMS[toneId].name + '): ' + TONE_SYSTEMS[toneId].planetSource + '.'
+                'Notes of the seven planets (' + TONE_SYSTEMS[toneId].name + '): ' + TONE_SYSTEMS[toneId].planetSource + '.',
+                DECKS[deckId].source,
+                "The 56 small cards: Two to Ten are the 36 decans (a planet in a sign), an Ace is its element, a court card is one element within another: Hermetic Order of the Golden Dawn. Sounding a small card as two notes, and giving Earth Saturn's note, is this tool's own design. The decan table has not yet been checked against a printed source."
             ];
         }
         const sourcesHtml = () => '<strong>Sources.</strong>' + sourceLines().map(l => '<span>' + l + '</span>').join('');
@@ -1148,7 +1316,7 @@
         // ============ STATE ============
         let audioContext = null;
         let currentSpread = 'single';
-        let reading = null;          // { spread, cards: [{card, reversed}] }
+        let reading = null;          // { spread, cards: [{card, reversed}], sig: card id or null, clar: {card, reversed, shown} or absent }
         let revealing = false;
         let spreadGen = 0;
         let isPlaying = false;
@@ -1214,10 +1382,25 @@
             if (v.cards.length !== POSITION_LABELS[v.spread].length) return null;
             const seen = new Set(), cards = [];
             for (const c of v.cards) {
-                if (!c || !isCardId(c.id) || seen.has(c.id)) return null;
+                if (!c || !isAnyCard(c.id) || seen.has(c.id)) return null;
                 seen.add(c.id); cards.push({ id: c.id, reversed: c.reversed === true });
             }
-            return { spread: v.spread, cards };
+            const out = { spread: v.spread, cards };
+            if (isAnyCard(v.sig) && !seen.has(v.sig)) { out.sig = v.sig; seen.add(v.sig); }
+            if (v.clar && typeof v.clar === 'object' && isAnyCard(v.clar.id) && !seen.has(v.clar.id)) out.clar = { id: v.clar.id, reversed: v.clar.reversed === true, shown: v.clar.shown === true };
+            return out;
+        }
+        // A reading as it is stored (card ids) and as it is used (card objects).
+        function packReading(rd) {
+            const o = { spread: rd.spread, cards: rd.cards.map(c => ({ id: c.card.id, reversed: !!c.reversed })) };
+            if (isAnyCard(rd.sig)) o.sig = rd.sig;
+            if (rd.clar) o.clar = { id: rd.clar.card.id, reversed: !!rd.clar.reversed, shown: !!rd.clar.shown };
+            return o;
+        }
+        function unpackReading(r) {
+            const rd = { spread: r.spread, cards: r.cards.map(c => ({ card: cardOf(c.id), reversed: !!c.reversed })), sig: isAnyCard(r.sig) ? r.sig : null };
+            if (r.clar) rd.clar = { card: cardOf(r.clar.id), reversed: !!r.clar.reversed, shown: !!r.clar.shown };
+            return rd;
         }
         function cleanSettings(v) {
             if (!v || typeof v !== 'object') return null;
@@ -1226,12 +1409,13 @@
             return { spread: isSpread(v.spread) ? v.spread : 'single', view: views.includes(v.view) ? v.view : 'dashboard',
                 tone: isTone(v.tone) ? v.tone : 'v4', voice: VOICES.includes(v.voice) ? v.voice : 'bowls', paper: PAPERS.includes(v.paper) ? v.paper : 'letter',
                 figs: { tri: f.tri !== false, sq: f.sq !== false, opp: f.opp !== false },
-                midi: typeof v.midi === 'string' ? v.midi.slice(0, 300) : '', midiId: typeof v.midiId === 'string' ? v.midiId.slice(0, 300) : '', midiMute: v.midiMute === true };
+                midi: typeof v.midi === 'string' ? v.midi.slice(0, 300) : '', midiId: typeof v.midiId === 'string' ? v.midiId.slice(0, 300) : '', midiMute: v.midiMute === true,
+                deck: isDeck(v.deck) ? v.deck : 'rws', pool: v.pool === 'trumps' ? 'trumps' : 'all', sig: isAnyCard(v.sig) ? v.sig : null };
         }
-        function saveSettings() { store.set(KEYS.settings, JSON.stringify({ spread: currentSpread, view: currentView, tone: toneId, voice: voiceId, paper: paperId, figs, midi: midiWanted, midiId: midiWantedId, midiMute })); }
+        function saveSettings() { store.set(KEYS.settings, JSON.stringify({ spread: currentSpread, view: currentView, tone: toneId, voice: voiceId, paper: paperId, figs, midi: midiWanted, midiId: midiWantedId, midiMute, deck: deckId, pool: poolId, sig: sigId })); }
         function saveReading() {
             if (!reading) { store.del(KEYS.reading); return; }
-            store.set(KEYS.reading, JSON.stringify({ spread: reading.spread, cards: reading.cards.map(c => ({ id: c.card.id, reversed: c.reversed })) }));
+            store.set(KEYS.reading, JSON.stringify(packReading(reading)));
         }
 
         // ============ INIT ============
@@ -1239,6 +1423,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const s = readStored(KEYS.settings, cleanSettings, { spread: 'single', view: 'dashboard', tone: 'v4', voice: 'bowls', paper: 'letter', figs: { tri: true, sq: true, opp: true } });
             currentSpread = s.spread;
+            applyDeck(s.deck); poolId = s.pool === 'trumps' ? 'trumps' : 'all'; sigId = isAnyCard(s.sig) ? s.sig : null;
             applyTone(s.tone); voiceId = s.voice; paperId = s.paper; figs = s.figs; midiWanted = s.midi || ''; midiWantedId = s.midiId || ''; midiMute = !!s.midiMute;
             step('settings', initSettings);
             step('midi', initMidi);
@@ -1251,12 +1436,13 @@
             step('spread buttons', () => setSpread(currentSpread, true));
             step('reading', () => {
                 const r = readStored(KEYS.reading, cleanReading, null);
-                if (r) { renderSpread({ spread: r.spread, cards: r.cards.map(c => ({ card: CARDS[c.id], reversed: c.reversed })) }, true); }
+                if (r) { renderSpread(unpackReading(r), true); }
             });
             step('wheel', initWheel);
             step('tree', initTree);
             step('sources', renderSources);
             step('journal files', initJournalFile);
+            step('deck tools', initDeckTools);
             step('daily', () => renderDaily(false));
             step('view', () => { if (s.view !== 'dashboard') showSection(s.view); });
             step('midnight', scheduleMidnight);
@@ -1689,9 +1875,21 @@
         }
 
         function playCardSound(card, reversed = false, octave = 4) {
-            sounding([midiOf(card.semitone, octave - (reversed ? 1 : 0))], 2.2, 0.3, null, [card]);
-            treePluck(card.id, 1400);
+            const vs = voicesOf(card), o = octave - (reversed ? 1 : 0);
+            sounding(vs.map(p => midiOf(p.semitone, o)), 2.2, vs.length > 1 ? 0.22 : 0.3, null, vs);
+            partsOf(card).forEach(p => treePluck(p.id, 1400));
         }
+        // Several voices at once, each at its own strength (a card weakened by its neighbours sounds at half).
+        function soundVoices(vs, dur, peak) {
+            const best = new Map();
+            vs.forEach(v => { const b = best.get(v.midi); if (!b || v.level > b.level) best.set(v.midi, v); });
+            const groups = new Map();
+            [...best.values()].sort((p, q) => p.midi - q.midi).forEach(v => { const k = v.level || 1; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(v); });   // low to high, as before
+            groups.forEach((list, lv) => sounding(list.map(v => v.midi), dur, peak * lv, null, list.map(v => v.card)));
+        }
+        // The significator is held under the reading as a low drone on its first note.
+        const sigMidi = rd => rd && isAnyCard(rd.sig) ? midiOf(voicesOf(cardOf(rd.sig))[0].semitone, 2) : null;
+        function sigDrone(secs) { const m = sigMidi(reading); if (m !== null) sounding([m], secs, 0.1, 'sine', null); }
         function playChordMidis(midis, cards) {
             const u = [...new Set(midis)].sort((a, b) => a - b);
             if (!u.length) return;
@@ -1838,20 +2036,47 @@
         }
 
         // Everything the tool says about a reading comes from here, so the summary, the sound and the Suno brief agree.
-        function analyse(rd) {
-            const n = rd.cards.length;
-            const notes = rd.cards.map((dc, i) => {
-                const octave = octaveFor(rd.spread, i, dc.reversed), midi = midiOf(dc.card.semitone, octave);
-                return { i, card: dc.card, reversed: dc.reversed, octave, midi, name: midiName(midi), position: POSITION_LABELS[rd.spread][i] };
+        // The cards on the table in order: the spread, then the clarifier once it has been turned face up.
+        const readRev = e => DECKS[deckId].reversals && !!e.reversed;   // a stored reversal is read only by a deck that reads reversals
+        const laidOf = rd => rd.cards.concat(rd.clar && rd.clar.shown ? [rd.clar] : []);
+        const elementOf = card => card.type === 'minor' ? card.element : card.type === 'mother' ? card.association : card.type === 'simple' ? SIGN_ELEMENT[card.association] : null;
+        const EL_FRIEND = { Fire: 'Air', Air: 'Fire', Water: 'Earth', Earth: 'Water' }, EL_FOE = { Fire: 'Water', Water: 'Fire', Air: 'Earth', Earth: 'Air' };
+        // Elemental dignity, for a deck that reads no reversals: each card is weighed against the card before and the card after.
+        // Its own element counts double. A planet's trump has no single element here, so it is neither strengthened nor weakened.
+        function dignities(cards) {
+            const els = cards.map(elementOf);
+            return els.map((e, i) => {
+                const nb = []; if (i > 0) nb.push(els[i - 1]); if (i < els.length - 1) nb.push(els[i + 1]);
+                if (!nb.length) return { word: '', level: 1 };
+                let sc = 0;
+                if (e) nb.forEach(o => { if (o) sc += o === e ? 2 : EL_FRIEND[e] === o ? 1 : EL_FOE[e] === o ? -2 : 0; });
+                return sc > 0 ? { word: 'strengthened', level: 1 } : sc < 0 ? { word: 'weakened', level: 0.5 } : { word: '', level: 0.8 };
             });
-            const midis = [...new Set(notes.map(x => x.midi))].sort((a, b) => a - b);
+        }
+        function analyse(rd) {
+            const D = DECKS[deckId], laid = laidOf(rd), n = laid.length;
+            const dig = D.reversals ? null : dignities(laid.map(dc => dc.card));
+            const notes = laid.map((dc, i) => {
+                const reversed = D.reversals && !!dc.reversed;
+                const octave = octaveFor(rd.spread, i, reversed), midi = midiOf(dc.card.semitone, octave);
+                const parts = voicesOf(dc.card).map(p => ({ card: p, midi: midiOf(p.semitone, octave) }));
+                return { i, card: dc.card, reversed, octave, midi, parts, name: parts.map(p => midiName(p.midi)).join('+'), position: POSITION_LABELS[rd.spread][i] || 'Clarifier', dignity: dig ? dig[i].word : '', level: dig ? dig[i].level : 1 };
+            });
+            // one entry per sounding note: a trump has one, a small card can have two
+            const voices = [];
+            notes.forEach(x => x.parts.forEach(p => voices.push({ i: x.i, card: p.card, of: x.card, reversed: x.reversed, midi: p.midi, name: midiName(p.midi), level: x.level, position: x.position })));
+            const midis = [...new Set(voices.map(x => x.midi))].sort((a, b) => a - b);
             const weights = new Array(12).fill(0);
-            notes.forEach((x, i) => { weights[x.card.semitone] += (i === n - 1 && n > 1) ? 2 : 1; });
+            voices.forEach(x => { weights[x.card.semitone] += (x.i === n - 1 && n > 1) ? 2 : 1; });
             const chord = nameChord(midis), key = findKey(weights);
             const reversedCount = notes.filter(x => x.reversed).length;
-            const mood = moodOf(chord.pcs, key, reversedCount, n);
-            return { spread: rd.spread, notes, midis, chord, key, mood, reversedCount, n };
+            const weakened = notes.filter(x => x.dignity === 'weakened').length, strengthened = notes.filter(x => x.dignity === 'strengthened').length;
+            const mood = moodOf(chord.pcs, key, D.reversals ? reversedCount : weakened, n);
+            return { spread: rd.spread, notes, voices, midis, chord, key, mood, reversedCount, weakened, strengthened, n, reversals: D.reversals, sig: isAnyCard(rd.sig) ? cardOf(rd.sig) : null };
         }
+        // How a card stands in the reading, in the words of the deck in use.
+        const standing = (a, x) => a.reversals ? (x.reversed ? 'reversed' : 'upright') : (x.dignity ? x.dignity + ' by its neighbours' : 'neither strengthened nor weakened');
+        const standingCount = a => a.reversals ? a.reversedCount + ' of ' + a.n + ' reversed' : a.strengthened + ' strengthened and ' + a.weakened + ' weakened by their neighbours, of ' + a.n;
         const keyText = a => a.key.fit === 'none'
             ? (a.key.distinct < 3 ? 'no key (fewer than three different notes)' : 'no key fits well (closest: ' + a.key.best.name + ', fit ' + a.key.best.r.toFixed(2) + (a.key.share < SCALE_SHARE_MIN ? '; only ' + Math.round(a.key.share * 100) + '% of the notes belong to it' : a.key.rivalMargin < RIVAL_MARGIN_MIN ? '; another key fits almost as well' : '') + ')')
             : a.key.best.name + ' (fit ' + a.key.best.r.toFixed(2) + ', ' + a.key.fit + (a.key.close ? '; also reads as ' + a.key.second.name : '') + ')';
@@ -1878,14 +2103,14 @@
         }
 
         // ============ CARD CREATION ============
-        function createCardElement(card, reversed = false, octave = 4) {
+        function createCardElement(card, reversed = false, octave = 4, onTurn) {
             const cardDiv = document.createElement('div');
             cardDiv.className = `tarot-card ${reversed ? 'reversed' : ''}`;
             cardDiv.tabIndex = 0;
             cardDiv.setAttribute('role', 'button');
             cardDiv.setAttribute('aria-label', `${card.name}${reversed ? ', reversed' : ''}, note ${card.note}. Press to flip and play.`);
-            const meaning = CARD_MEANINGS[card.id];
-            const meaningText = reversed ? meaning.reversed : meaning.upright;
+            const meaningText = meaningOf(card, reversed);
+            if (card.type === 'minor') cardDiv.classList.add('minor-card');
 
             cardDiv.innerHTML = `
                 <div class="card-inner">
@@ -1916,6 +2141,7 @@
                     heb.classList.remove('pulse');
                     heb.offsetHeight;
                     heb.classList.add('pulse');
+                    if (onTurn) onTurn();
                 }
                 showConnectionChain(card, reversed, octave - (reversed ? 1 : 0));
                 activatePanel('spread-panel');
@@ -1930,13 +2156,16 @@
         function showConnectionChain(card, reversed, octave) {
             const chain = document.getElementById('connection-chain');
             const planet = getPlanetForCard(card);
-            chain.innerHTML = `${card.name}${reversed ? ' (reversed)' : ''} <span class="arrow">→</span> ${card.hebrew} (${card.letterName}) <span class="arrow">→</span> ♪ ${card.note}${octave === undefined ? '' : octave} <span class="arrow">→</span> ${card.symbol} ${planet}`;
+            chain.innerHTML = card.type === 'minor'
+                ? `${card.name}${reversed ? ' (reversed)' : ''} <span class="arrow">→</span> ${card.symbol} ${card.association} <span class="arrow">→</span> ♪ ${voicesOf(card).map(p => p.note + (octave === undefined ? '' : octave)).join(' + ')}`
+                : `${card.name}${reversed ? ' (reversed)' : ''} <span class="arrow">→</span> ${card.hebrew} (${card.letterName}) <span class="arrow">→</span> ♪ ${card.note}${octave === undefined ? '' : octave} <span class="arrow">→</span> ${card.symbol} ${planet}`;
             chain.classList.add('visible');
             clearTimeout(chainTimer);
             chainTimer = setTimeout(() => chain.classList.remove('visible'), 5000);
         }
 
         function getPlanetForCard(card) {
+            if (card.type === 'minor') return card.association;
             if (card.type === 'double') return card.association;
             if (card.type === 'simple') return PLANET_RULERS[card.association] || card.association;
             return card.association;
@@ -1958,6 +2187,7 @@
                 b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
             });
             renderRules();
+            step('lay panel', buildLayPanel);
             if (!quiet) saveSettings();
         }
 
@@ -1969,21 +2199,26 @@
             if (pr) pr.hidden = !on;
             if (pf) pf.hidden = !on;
             if (ex) ex.hidden = !on;
+            const cr = document.getElementById('clar-row');
+            if (cr) cr.hidden = !on || !reading || !!reading.clar;
         }
 
         function renderRules() {
             const el = document.getElementById('rules-panel');
             if (!el) return;
             el.innerHTML = `<ul>
-                    <li><b>Register.</b> ${REGISTER_TEXT[currentSpread]} A reversed card sounds one octave lower than its position.</li>
+                    <li><b>Register.</b> ${REGISTER_TEXT[currentSpread]}</li>
+                    <li id="rule-deck"><b>${DECKS[deckId].name} deck.</b> ${DECKS[deckId].rule}</li>
+                    <li><b>Small cards.</b> Two to Ten sound two notes together, the planet's and the sign's. An Ace sounds its element. A court card sounds its two elements. On the tree a small card lights the paths of the trumps it is made from.</li>
+                    <li><b>Significator and clarifier.</b> A significator is held as a low drone under the reading. A clarifier stays face down until you turn it, and then sounds last. Both are this tool's own way of sounding them.</li>
                     <li><b>Chord.</b> Play as Chord sounds every note at once and names it from its pitch classes, or says it is a cluster. Arpeggio plays the same notes one by one, in spread order.</li>
                     <li><b>Key.</b> The best-fitting major or minor key for all the notes (Krumhansl-Schmuckler). The last card counts double. A fit under ${FIT_LOOSE} means no key fits well.</li>
-                    <li><b>Mood.</b> From the intervals (consonant, ambiguous or tense), the key (bright or dark) and how many cards are reversed.</li>
+                    <li><b>Mood.</b> From the intervals (consonant, ambiguous or tense), the key (bright or dark) and how many cards are ${DECKS[deckId].reversals ? 'reversed' : 'weakened by their neighbours'}.</li>
                 </ul>`;
         }
 
-        function shuffleCards() {
-            const a = [...CARDS];
+        function shuffleCards(from) {
+            const a = [...(from || CARDS)];
             for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
             return a;
         }
@@ -1991,10 +2226,16 @@
         function drawSpread() {
             stopAll();
             const num = POSITION_LABELS[currentSpread].length;
-            const shuffled = shuffleCards();
-            const cards = [];
-            for (let i = 0; i < num; i++) cards.push({ card: shuffled[i], reversed: Math.random() < 0.5 });
-            renderSpread({ spread: currentSpread, cards }, false);
+            const cards = [], D = DECKS[deckId];
+            if (deckBox.hand) {
+                // a deck shuffled by hand is dealt from the top, as it lies; a card comes out reversed only if it was turned
+                dealFromDeck(num).forEach(e => cards.push({ card: cardOf(e.id), reversed: D.reversals && !e.up }));
+                if (cards.length < num) { notify('The deck ran short. Shuffle for me, or widen the cards in Settings.'); return; }
+            } else {
+                const shuffled = shuffleCards(poolCards());
+                for (let i = 0; i < num; i++) cards.push({ card: shuffled[i], reversed: D.reversals ? Math.random() < 0.5 : false });
+            }
+            renderSpread({ spread: currentSpread, cards, sig: sigId }, false);
             logHistory(`Drew ${currentSpread} spread: ${cards.map(dc => dc.card.name).join(', ')}`);
         }
 
@@ -2008,6 +2249,8 @@
             summary.innerHTML = ''; summary.classList.remove('visible');
             ppfNarr.innerHTML = ''; ppfNarr.classList.remove('visible');
             reading = rd;
+            const shownRev = dc => DECKS[deckId].reversals && !!dc.reversed;
+            step('clarifier', renderClar); step('significator', renderSigLine);
             step('tree', () => renderTreeReading(instant ? rd.cards.length : 0));
             setReadingChrome(false);
             container.className = 'spread-container ' + SPREAD_CLASS[rd.spread];
@@ -2019,7 +2262,7 @@
                 const label = document.createElement('div');
                 label.className = 'position-label' + (instant ? ' visible' : '');
                 label.textContent = POSITION_LABELS[rd.spread][i] || `Position ${i + 1}`;
-                const el = createCardElement(dc.card, dc.reversed, REGISTER[rd.spread][i] || 4);
+                const el = createCardElement(dc.card, shownRev(dc), REGISTER[rd.spread][i] || 4);
                 if (instant) el.querySelector('.card-inner').classList.add('flipped');
                 wrapper.appendChild(label); wrapper.appendChild(el);
                 container.appendChild(wrapper);
@@ -2041,7 +2284,7 @@
                         if (gen !== spreadGen) return;
                         wrapper.querySelector('.card-inner').classList.add('flipped');
                         step('tree', () => renderTreeReading(i + 1));
-                        playCardSound(dc.card, dc.reversed, REGISTER[rd.spread][i] || 4);
+                        playCardSound(dc.card, shownRev(dc), REGISTER[rd.spread][i] || 4);
                         triggerHebrewReveal(dc.card);
                         wrapper.querySelector('.card-hebrew').classList.add('pulse');
                     }, 400);
@@ -2069,13 +2312,25 @@
             showSpreadSummary();
             markReadingBars();
             if (reading && reading.spread === 'three') showPPFNarrative();
+            step('standing', markStanding);
+        }
+        // Under a deck read by its neighbours, each card's label says how it stands.
+        function markStanding() {
+            if (!reading) return;
+            const a = analyse(reading);
+            document.querySelectorAll('#spread-display > div > .position-label, #clar-display > div > .position-label').forEach((lab, i) => {
+                const x = a.notes[i]; if (!x) return;
+                const front = lab.parentNode.querySelector('.card-front'); if (!front) return;
+                const old = front.querySelector('.card-dignity'); if (old) old.remove();
+                if (x.dignity) { const t = document.createElement('div'); t.className = 'card-reversed-tag card-dignity'; t.textContent = x.dignity.toUpperCase(); front.insertBefore(t, front.querySelector('.card-meaning')); }
+            });
         }
 
         function showPPFNarrative() {
             if (!reading || reading.cards.length < 3) return;
             const [past, present, future] = reading.cards;
             const ppfNarr = document.getElementById('ppf-narrative');
-            const txt = dc => (dc.reversed ? 'reversed: ' + CARD_MEANINGS[dc.card.id].reversed : CARD_MEANINGS[dc.card.id].upright);
+            const txt = dc => { const r = DECKS[deckId].reversals && dc.reversed; return (r ? 'reversed: ' : '') + meaningOf(dc.card, r); };
             ppfNarr.innerHTML = `
                 <span class="phase">${past.card.hebrew} ${past.card.note}</span>
                 <div class="arrow-line"></div>
@@ -2100,7 +2355,7 @@
             return {
                 chord: chordLine(a) + (['chord', 'dyad', 'cluster', 'quartal', 'octaves'].includes(a.chord.kind) ? ' — ' + a.midis.map(midiName).join(' ') : ''),
                 key: keyText(a),
-                mood: a.mood.words.join(', ') + ' — ' + a.reversedCount + ' of ' + a.n + ' reversed'
+                mood: a.mood.words.join(', ') + ' — ' + standingCount(a)
             };
         }
 
@@ -2112,10 +2367,14 @@
 
             a.notes.forEach(x => {
                 const planet = getPlanetForCard(x.card);
-                const meaning = CARD_MEANINGS[x.card.id];
-                const meaningText = x.reversed ? meaning.reversed : meaning.upright;
-                html += `<div class="summary-card"><strong>${x.position}:</strong> ${x.card.name}${x.reversed ? ' <b class="rev-word">(reversed)</b>' : ' (upright)'} (${x.card.hebrew} · ${x.card.letterName}) — ♪ ${x.name} — ${x.card.symbol} ${planet} — <em>"${meaningText}"</em></div>`;
+                const meaningText = meaningOf(x.card, x.reversed);
+                const stand = a.reversals ? (x.reversed ? ' <b class="rev-word">(reversed)</b>' : ' (upright)') : (x.dignity ? ' <b class="rev-word">(' + x.dignity + ')</b>' : '');
+                html += x.card.type === 'minor'
+                    ? `<div class="summary-card"><strong>${x.position}:</strong> ${x.card.name}${x.card.roman ? ', ' + x.card.roman : ''}${stand} — ♪ ${x.name} — ${x.card.symbol} ${x.card.association} — <em>"${meaningText}"</em></div>`
+                    : `<div class="summary-card"><strong>${x.position}:</strong> ${x.card.name}${stand} (${x.card.hebrew} · ${x.card.letterName}) — ♪ ${x.name} — ${x.card.symbol} ${planet} — <em>"${meaningText}"</em></div>`;
             });
+            if (a.sig) html += `<div class="summary-card" id="sum-sig"><strong>Significator:</strong> ${a.sig.name} — held as a drone on ♪ ${midiName(sigMidi(reading))}</div>`;
+            if (reading.clar && !reading.clar.shown) html += `<div class="summary-card" id="sum-clar"><strong>Clarifier:</strong> face down. Turn it and it joins the reading and sounds last.</div>`;
 
             html += `<div class="summary-chord"><strong>Harmonic Sequence:</strong> ${a.notes.map(x => x.name).join(' → ')}</div>`;
             const L = summaryLines(a);
@@ -2147,6 +2406,7 @@
             document.getElementById('connection-chain').classList.remove('visible');
             const p = document.getElementById('ppf-narrative'); p.innerHTML = ''; p.classList.remove('visible');
             reading = null;
+            step('clarifier', renderClar); step('significator', renderSigLine);
             saveReading();
             markReadingBars();
             step('tree', () => renderTreeReading());
@@ -2157,8 +2417,10 @@
             if (!reading) { notify('Draw cards first.'); return; }
             stopAll();
             const a = analyse(reading);
-            playChordMidis(a.notes.map(x => x.midi), a.notes.map(x => x.card));
-            a.notes.forEach(x => treePluck(x.card.id, 2400));
+            const uniq = new Set(a.voices.map(x => x.midi)).size;
+            soundVoices(a.voices, 2.8, Math.min(0.3, 0.6 / uniq));
+            a.voices.forEach(x => treePluck(x.card.id, 2400));
+            sigDrone(2.8);
             notify('Chord: ' + a.chord.text);
             logHistory('Chord: ' + a.chord.text + ' — ' + a.midis.map(midiName).join(' '));
         }
@@ -2169,11 +2431,12 @@
             const a = analyse(reading);
             const peak = Math.min(0.3, 0.8 / a.n);
             a.notes.forEach((x, i) => later(() => {
-                sounding([x.midi], 1.8, peak, null, [x.card]);
-                treePluck(x.card.id, 1400);
-                const heb = document.querySelectorAll('#spread-display .card-hebrew')[i];
+                sounding(x.parts.map(p => p.midi), 1.8, peak * x.level * (x.parts.length > 1 ? 0.75 : 1), null, x.parts.map(p => p.card));
+                partsOf(x.card).forEach(p => treePluck(p.id, 1400));
+                const heb = document.querySelectorAll('#spread-display .card-hebrew, #clar-display .card-hebrew')[i];
                 if (heb) { heb.classList.remove('pulse'); heb.offsetHeight; heb.classList.add('pulse'); }
             }, i * 450));
+            sigDrone(a.n * 0.45 + 1.4);
             logHistory('Arpeggio: ' + a.notes.map(x => x.name).join(' → '));
         }
 
@@ -2199,7 +2462,8 @@
             bowls: { name: 'Singing bowls', play(c, b, t, v, a, mark, ev) {
                 const gap = Math.min(2.4, 12 / v.notes.length), end = v.notes.length * gap + 0.4;
                 const chOf = i => midiChannelFor(a.notes[i].card);
-                v.notes.forEach((m, i) => { strikeBowl(c, b, m, t + i * gap, 0.15, 7); mark(i, i * gap, 2400, m); ev(m, i * gap, 5, 96, chOf(i)); });
+                const lv = i => a.notes[i].level || 1;
+                v.notes.forEach((m, i) => { strikeBowl(c, b, m, t + i * gap, 0.15 * lv(i), 7); mark(i, i * gap, 2400, m); ev(m, i * gap, 5, Math.round(96 * lv(i)), chOf(i)); });
                 if (v.notes.length > 1) { strikeBowl(c, b, v.bass + 12, t + end, 0.13, 8); ev(v.bass + 12, end, 6, 90, 7); v.notes.forEach((m, i) => { strikeBowl(c, b, m, t + end + i * 0.12, Math.min(0.1, 0.36 / v.notes.length), 8); mark(i, end + i * 0.12, 4000, m); ev(m, end + i * 0.12, 6, 84, chOf(i)); }); }
                 return end + 8;
             } },
@@ -2215,14 +2479,16 @@
                 };
                 for (let i = 0; i < 56; i++) { shot('sawtooth', freqOf(v.bass), t + i * beat / 2, 0.22, 0.34, 900, 120, 6, out); ev(v.bass, i * beat / 2, 0.2, 104, 4); }
                 // the pattern: the cards above the ground, in spread order, climbing an octave and coming back
-                const up = v.notes.length > 1 ? v.notes.slice(1) : [v.notes[0] + 12], top = v.notes[0] + 12;
-                const arp = []; up.forEach(m => { arp.push(m); arp.push(top); }); up.slice().reverse().forEach(m => { arp.push(m + 12); arp.push(top); });
-                for (let i = 0; i < 96; i++) { shot('square', freqOf(arp[i % arp.length]), t + 2 + i * beat / 4, 0.14, 0.12, 900 + 1800 * (0.5 + 0.5 * Math.sin(i / 96 * Math.PI * 2 - 1.5)), 0, 0.7, dl); ev(arp[i % arp.length], 2 + i * beat / 4, 0.11, 84, 5); }
-                v.notes.forEach(m => ev(m, 4, 11, 60, 6));
+                // each note keeps the strength of the card it came from (elemental dignity under Thoth; 1 otherwise)
+                const lv = i => a.notes[i].level || 1;
+                const up = v.notes.length > 1 ? v.notes.slice(1).map((m, j) => ({ m, k: lv(j + 1) })) : [{ m: v.notes[0] + 12, k: lv(0) }], top = { m: v.notes[0] + 12, k: lv(0) };
+                const arp = []; up.forEach(x => { arp.push(x); arp.push(top); }); up.slice().reverse().forEach(x => { arp.push({ m: x.m + 12, k: x.k }); arp.push(top); });
+                for (let i = 0; i < 96; i++) { const x = arp[i % arp.length]; shot('square', freqOf(x.m), t + 2 + i * beat / 4, 0.14, 0.12 * x.k, 900 + 1800 * (0.5 + 0.5 * Math.sin(i / 96 * Math.PI * 2 - 1.5)), 0, 0.7, dl); ev(x.m, 2 + i * beat / 4, 0.11, Math.round(84 * x.k), 5); }
+                v.notes.forEach((m, i) => ev(m, 4, 11, Math.round(60 * lv(i)), 6));
                 const pad = c.createGain(), pf = c.createBiquadFilter();
                 pad.gain.setValueAtTime(0.0001, t + 4); pad.gain.exponentialRampToValueAtTime(0.16 / Math.max(3, v.notes.length), t + 8); pad.gain.exponentialRampToValueAtTime(0.0001, t + 15);
                 pf.type = 'lowpass'; pf.frequency.setValueAtTime(1100, t); pf.connect(pad); pad.connect(out);
-                v.notes.forEach(m => [-7, 7].forEach(d => po(c, 'sawtooth', freqOf(m), t + 4, t + 15.1, pf, d, pad)));
+                v.notes.forEach((m, i) => { const ng = c.createGain(); ng.gain.setValueAtTime(lv(i), t); ng.connect(pf); [-7, 7].forEach(d => po(c, 'sawtooth', freqOf(m), t + 4, t + 15.1, ng, d, pad)); });
                 v.notes.forEach((m, i) => { for (let k = 0; k < 7; k++) mark(i, (i === 0 ? 0 : 2) + k * 2 + (i * 2 / v.notes.length), 500, m); });
                 return 16;
             } },
@@ -2240,7 +2506,7 @@
                 mark(0, 0, total * 1000, v.bass); ev(v.bass, 0, total, 84, 7);
                 v.notes.forEach((m, i) => {
                     const at = t + 3 + i * gap, g = c.createGain();
-                    g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(0.09, at + 1.2); g.gain.exponentialRampToValueAtTime(0.0001, at + 5.5); g.connect(out);
+                    g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(0.09 * (a.notes[i].level || 1), at + 1.2); g.gain.exponentialRampToValueAtTime(0.0001, at + 5.5); g.connect(out);
                     po(c, 'sine', freqOf(m), at, at + 5.6, g, 0, g); mark(i, 3 + i * gap, 5000, m); ev(m, 3 + i * gap, 5.5, 80, midiChannelFor(a.notes[i].card));
                 });
                 return total;
@@ -2252,7 +2518,8 @@
             if (!reading) { notify('Draw cards first.'); return; }
             stopAll();
             const c = ac(); if (!c) return;
-            const b = getBus(c), a = analyse(reading), v = performanceVoicing(a);
+            // a piece is played from the sounding notes, so a small card brings both of its notes
+            const b = getBus(c), a0 = analyse(reading), a = Object.assign({}, a0, { notes: a0.voices }), v = performanceVoicing(a);
             // the tree and the keys follow the piece: each card's path lights when its note enters
             const mark = (i, afterSecs, ms, midi) => later(() => { treePluck(a.notes[i].card.id, ms); lightNote(midi, ms); }, Math.max(0, afterSecs * 1000));
             // one starting moment for the whole piece, so every note is placed against the same clock reading
@@ -2265,8 +2532,16 @@
                 dest = { inp: hush(b.inp), hall: hush(b.hall) };
             }
             const secs = P.play(c, dest, c.currentTime + 0.06, v, a, mark, ev);
+            const sm = sigMidi(reading);
+            if (sm !== null) {
+                // the significator: one low sine under the whole piece
+                const t = c.currentTime + 0.06, g = c.createGain(), o = c.createOscillator();
+                g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.07, t + 1.5); g.gain.setValueAtTime(0.07, t + Math.max(1.6, secs - 2)); g.gain.exponentialRampToValueAtTime(0.0001, t + secs);
+                o.type = 'sine'; o.frequency.setValueAtTime(freqOf(sm), t); o.connect(g); g.connect(dest.inp); o.start(t); o.stop(t + secs + 0.1);
+                ev(sm, 0, secs, 64, 8);
+            }
             isPlaying = true; later(() => { isPlaying = false; }, secs * 1000);
-            notify(P.name + ': ' + a.notes.map(x => x.card.name).join(', '));
+            notify(P.name + ': ' + a0.notes.map(x => x.card.name).join(', '));
         }
 
         // ============ FREQUENCY CHART ============
@@ -2287,7 +2562,7 @@
 
         // Notes of the current reading are marked dimly; notes that sound light fully.
         function markReadingBars() {
-            const pcs = reading ? new Set(reading.cards.map(dc => dc.card.semitone)) : new Set();
+            const pcs = new Set(); if (reading) laidOf(reading).forEach(dc => voicesOf(dc.card).forEach(p => pcs.add(p.semitone)));
             document.querySelectorAll('.freq-bar').forEach(bar => {
                 bar.classList.toggle('marked', pcs.has(Number(bar.dataset.semitone)));
                 if (!bar._n) resetBar(bar);
@@ -2340,23 +2615,23 @@
             if (!entry) { entry = dailyFor(today); journal[today] = entry; saveJournal(journal); }
             const card = CARDS[entry.id];
             container.innerHTML = '';
-            const cardElement = createCardElement(card, entry.reversed, 4);
+            const rev = readRev(entry);
+            const cardElement = createCardElement(card, rev, 4);
             container.appendChild(cardElement);
             const inner = cardElement.querySelector('.card-inner');
             if (drawNow) later(() => { inner.classList.add('flipped'); triggerHebrewReveal(card); }, 300);
             else inner.classList.add('flipped');
 
-            const meaning = CARD_MEANINGS[card.id];
-            const meaningText = entry.reversed ? meaning.reversed : meaning.upright;
+            const meaningText = meaningOf(card, rev);
             info.innerHTML = `
                 <p><strong>Your card for ${today}:</strong></p>
-                <p><strong>${card.name}</strong> (${entry.reversed ? 'Reversed' : 'Upright'})</p>
-                <p><strong>Hebrew:</strong> ${card.hebrew} (${card.letterName}) · <strong>Note:</strong> ${card.note}${4 - (entry.reversed ? 1 : 0)} · <strong>Symbol:</strong> ${card.symbol}</p>
+                <p><strong>${card.name}</strong>${DECKS[deckId].reversals ? ' (' + (rev ? 'Reversed' : 'Upright') + ')' : ''}</p>
+                <p><strong>Hebrew:</strong> ${card.hebrew} (${card.letterName}) · <strong>Note:</strong> ${card.note}${4 - (rev ? 1 : 0)} · <strong>Symbol:</strong> ${card.symbol}</p>
                 <p><strong>Meaning:</strong> ${meaningText}</p>
                 <p><strong>Association:</strong> ${card.association}</p>
                 <div class="sources">${sourcesHtml()}</div>
             `;
-            if (drawNow) { playCardSound(card, entry.reversed, 4); logHistory(`Drew daily card: ${card.name}`); updateCalendar(); }
+            if (drawNow) { playCardSound(card, rev, 4); logHistory(`Drew daily card: ${card.name}`); updateCalendar(); }
         }
         function drawDailyCard() { renderDaily(true); }
 
@@ -2546,8 +2821,10 @@
         function lpFromSpread() {
             if (!reading) { notify('No spread drawn yet.'); return; }
             lpClearAll();
-            reading.cards.forEach((dc, i) => { if (i < 16) lpAssignPad(i, dc.card); });
-            logHistory(`Loaded ${reading.cards.length} cards from last spread to launchpad`);
+            // a pad holds one trump, so a small card gives the pads the trumps it is made from
+            const list = []; reading.cards.forEach(dc => partsOf(dc.card).forEach(p => { if (!list.includes(p)) list.push(p); }));
+            list.forEach((card, i) => { if (i < 16) lpAssignPad(i, card); });
+            logHistory(`Loaded ${Math.min(16, list.length)} cards from last spread to launchpad`);
         }
 
         function updateLPSidebar() {
@@ -2630,14 +2907,14 @@
                 const de = document.createElement('button');
                 de.type = 'button'; de.dataset.date = ds;
                 const dd = days[ds], hasNote = !!(dd && dd.note);
-                de.setAttribute('aria-label', `${ds}${entry ? ': ' + CARDS[entry.id].name + (entry.reversed ? ' (reversed)' : '') : ''}${hasNote ? ', has a note' : ''}${dd && dd.readings.length ? ', ' + dd.readings.length + ' saved reading' + (dd.readings.length > 1 ? 's' : '') : ''}. Press to open this day.`);
+                de.setAttribute('aria-label', `${ds}${entry ? ': ' + CARDS[entry.id].name + (readRev(entry) ? ' (reversed)' : '') : ''}${hasNote ? ', has a note' : ''}${dd && dd.readings.length ? ', ' + dd.readings.length + ' saved reading' + (dd.readings.length > 1 ? 's' : '') : ''}. Press to open this day.`);
                 de.className = 'calendar-day'; de.textContent = d.getDate();
                 if (ds === todayIso) de.classList.add('today');
                 if (ds === openDayIso) de.classList.add('open-day');
                 if (hasNote) de.classList.add('has-note');
                 if (entry) { de.classList.add('has-entry'); if (isCurrentMonth) entriesThisMonth++; }
                 if (!isCurrentMonth) de.style.opacity = '0.3';
-                de.addEventListener('click', () => { openDay(ds); if (entry) playCardSound(CARDS[entry.id], entry.reversed, 4); });
+                de.addEventListener('click', () => { openDay(ds); if (entry) playCardSound(CARDS[entry.id], readRev(entry), 4); });
                 calendar.appendChild(de);
             }
             stats.innerHTML = `<p>Entries this month: ${entriesThisMonth}</p>`;
@@ -2654,7 +2931,7 @@
         function playMelody(entries, label) {
             if (!entries.length) { notify('No daily cards recorded for ' + label + '.'); return; }
             stopAll();
-            entries.forEach((e, i) => later(() => playCardSound(CARDS[e.id], e.reversed, 4), i * 250));
+            entries.forEach((e, i) => later(() => playCardSound(CARDS[e.id], readRev(e), 4), i * 250));
         }
         function playWeekMelody() {
             const journal = getJournal(), list = [], today = new Date();
@@ -2739,14 +3016,14 @@
                 : 'Key: ' + a.key.best.name + ' (fit ' + a.key.best.r.toFixed(2) + ')';
             const style = `${keyStyle}. Mood: ${a.mood.words.join(', ')}. Harmony: ${a.chord.text}` +
                 (['chord', 'dyad', 'cluster', 'quartal', 'octaves'].includes(a.chord.kind) ? ' (' + a.midis.map(midiName).join(' ') + ')' : '') +
-                `. Notes in order: ${a.notes.map(x => x.name).join(', ')}. ${a.reversedCount} of ${a.n} cards reversed.`;
+                `. Notes in order: ${a.notes.map(x => x.name).join(', ')}. ${a.reversals ? a.reversedCount + ' of ' + a.n + ' cards reversed' : standingCount(a)}.`;
             const lines = [`Reading: ${a.spread === 'three' ? 'Past / Present / Future' : a.spread === 'elements' ? 'Four Elements' : a.spread === 'celtic' ? 'Celtic Cross' : 'Single card'}`, ''];
             a.notes.forEach(x => {
-                const m = CARD_MEANINGS[x.card.id];
-                lines.push(`${x.position} — ${x.card.name} (${x.card.hebrew} ${x.card.letterName}, ${x.reversed ? 'reversed' : 'upright'}, ${x.name}): ${x.reversed ? m.reversed : m.upright}`);
+                lines.push(`${x.position} — ${x.card.name} (${x.card.type === 'minor' ? x.card.association : x.card.hebrew + ' ' + x.card.letterName}, ${standing(a, x)}, ${x.name}): ${meaningOf(x.card, x.reversed)}`);
             });
-            lines.push('', `It begins with: ${a.notes[0].reversed ? CARD_MEANINGS[a.notes[0].card.id].reversed : CARD_MEANINGS[a.notes[0].card.id].upright}.`);
-            if (a.n > 1) { const L = a.notes[a.n - 1]; lines.push(`It ends with: ${L.reversed ? CARD_MEANINGS[L.card.id].reversed : CARD_MEANINGS[L.card.id].upright}.`); }
+            if (a.sig) lines.push(`Significator — ${a.sig.name}: ${meaningOf(a.sig, false)}`);
+            lines.push('', `It begins with: ${meaningOf(a.notes[0].card, a.notes[0].reversed)}.`);
+            if (a.n > 1) { const L = a.notes[a.n - 1]; lines.push(`It ends with: ${meaningOf(L.card, L.reversed)}.`); }
             lines.push(`The music is ${a.mood.words.join(', ')}.`, 'Write the words from these themes.');
             return { style, lyrics: lines.join('\n') };
         }
@@ -2790,6 +3067,9 @@
         function initSettings() {
             const t = document.getElementById('set-tone'), v = document.getElementById('set-voice'), p = document.getElementById('set-paper');
             t.value = toneId; v.value = voiceId; p.value = paperId;
+            const dk = document.getElementById('set-deck'), pl = document.getElementById('set-pool');
+            if (dk) { dk.value = deckId; dk.addEventListener('change', () => setDeck(dk.value)); }
+            if (pl) { pl.value = poolId; pl.addEventListener('change', () => setPool(pl.value)); }
             updateSettingsSummary();
             const fold = document.getElementById('settings-fold'), mq = window.matchMedia('(max-width: 700px)');
             const place = () => { fold.open = !mq.matches; };   // wide: open and always shown; narrow: folded shut
@@ -2801,12 +3081,14 @@
         function syncSettingsUi() {
             const t = document.getElementById('set-tone'), v = document.getElementById('set-voice'), p = document.getElementById('set-paper');
             if (t) t.value = toneId; if (v) v.value = voiceId; if (p) p.value = paperId;
+            const dk = document.getElementById('set-deck'), pl = document.getElementById('set-pool');
+            if (dk) dk.value = deckId; if (pl) pl.value = poolId;
             updateSettingsSummary();
         }
         function updateSettingsSummary() {
             const s = document.getElementById('settings-summary'); if (!s) return;
             const tn = { v4: 'Arcana v4', case: 'Case throughout' }[toneId] || toneId, vn = { bowls: 'Bowls', arcana: 'Arcana', pure: 'Pure', original: 'Original' }[voiceId] || voiceId;
-            s.innerHTML = 'Settings <span class="settings-state">' + tn + ' · ' + vn + ' voice' + (midiLive() ? (midiMute ? ' · MIDI only' : ' · MIDI') : '') + '</span>';
+            s.innerHTML = 'Settings <span class="settings-state">' + tn + ' · ' + vn + ' voice' + (deckId !== 'rws' ? ' · ' + DECKS[deckId].short + ' deck' : '') + (midiLive() ? (midiMute ? ' · MIDI only' : ' · MIDI') : '') + '</span>';
         }
         function renderSources() {
             ['table-sources', 'wheel-sources'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = sourcesHtml(); });
@@ -2827,6 +3109,32 @@
             step('suno', () => { if (document.getElementById('suno-style')) generateSunoPrompt(); });
             notify('Tone system: ' + TONE_SYSTEMS[id].name);
             logHistory('Tone system: ' + TONE_SYSTEMS[id].name);
+        }
+        // Everything that shows a card's name, number, letter or meaning is drawn again; no note changes.
+        function redrawFaces() {
+            step('table', buildCorrespondenceTable);
+            step('sources', renderSources);
+            step('rules', renderRules);
+            step('reading', () => { if (reading) renderSpread(reading, true); });
+            step('pads', () => lpPads.forEach((p, i) => { if (p) lpAssignPad(i, p.card); }));
+            step('daily', () => renderDaily(false));
+            step('calendar', updateCalendar);
+            step('wheel', renderWheel);
+            step('tree', renderTree);
+            step('deck tools', syncDeckTools);
+            step('suno', () => { if (document.getElementById('suno-style')) generateSunoPrompt(); });
+        }
+        function setDeck(id) {
+            if (!isDeck(id) || id === deckId) { syncSettingsUi(); return; }
+            stopAll();
+            applyDeck(id); applyTone(toneId); saveSettings(); syncSettingsUi();
+            redrawFaces();
+            notify('Deck: ' + DECKS[id].name + (DECKS[id].reversals ? '' : '. No reversals: cards are read by their neighbours.'));
+            logHistory('Deck: ' + DECKS[id].name);
+        }
+        function setPool(p) {
+            poolId = p === 'trumps' ? 'trumps' : 'all'; saveSettings(); syncSettingsUi(); step('deck tools', syncDeckTools);
+            notify(poolId === 'trumps' ? 'Spreads draw from the 22 trumps only.' : 'Spreads draw from all 78 cards.');
         }
         function setVoice(id) {
             if (!VOICES.includes(id)) { syncSettingsUi(); return; }
@@ -2860,8 +3168,8 @@
         let treeEls = [], treeFocus = 1;   // one Tab stop for the whole tree (Kether first); the arrow keys move within it
         const seph = n => SEPHIROTH[n - 1];
         function pathGeom(id) {
-            const a = seph(PATHS[id][0]), b = seph(PATHS[id][1]);
-            const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len, t = PATH_LABEL_T[id];
+            const k = pathOf(id), a = seph(PATHS[k][0]), b = seph(PATHS[k][1]);
+            const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len, t = PATH_LABEL_T[k];
             return { a, b, x1: a.x + ux * TREE_R, y1: a.y + uy * TREE_R, x2: b.x - ux * TREE_R, y2: b.y - uy * TREE_R, nx: -uy, ny: ux, lx: a.x + dx * t, ly: a.y + dy * t, mx: a.x + dx / 2, my: a.y + dy / 2 };
         }
         const stringD = (g, off) => 'M' + f1(g.x1) + ' ' + f1(g.y1) + ' Q' + f1(g.mx + g.nx * off) + ' ' + f1(g.my + g.ny * off) + ' ' + f1(g.x2) + ' ' + f1(g.y2);
@@ -2883,7 +3191,7 @@
             }
             return best;
         }
-        const pathsAt = n => PATHS.map((p, i) => p.includes(n) ? i : -1).filter(i => i >= 0);
+        const pathsAt = n => PATHS.map((p, i) => p.includes(n) ? pathOf(i) : -1).filter(i => i >= 0);
 
         function renderTree() {
             const svg = document.getElementById('tree-svg');
@@ -2899,7 +3207,7 @@
             CARDS.forEach(card => {
                 const g = pathGeom(card.id), col = NOTE_COLOURS[card.semitone];
                 const str = S('path', { class: 't-string', d: stringD(g, 0), stroke: col }, strings);
-                const lab = S('g', { class: 't-path', 'data-id': card.id, tabindex: -1, role: 'button', 'aria-label': card.name + ', ' + card.letterName + ', note ' + card.note + '. Path ' + (11 + card.id) + ', ' + g.a.name + ' to ' + g.b.name + '.' }, labels);
+                const lab = S('g', { class: 't-path', 'data-id': card.id, tabindex: -1, role: 'button', 'aria-label': card.name + ', ' + card.letterName + ', note ' + card.note + '. Path ' + (11 + pathOf(card.id)) + ', ' + g.a.name + ' to ' + g.b.name + '.' }, labels);
                 S('circle', { class: 't-hit', cx: g.lx, cy: g.ly, r: HIT_R }, lab);
                 S('circle', { class: 't-disc', cx: g.lx, cy: g.ly, r: DISC_R, stroke: col }, lab);
                 S('text', { class: 't-heb', x: g.lx, y: g.ly + 9 }, lab, card.hebrew);
@@ -2923,15 +3231,20 @@
         function renderTreeReading(shown) {
             if (!treeEls.length) return;
             treeEls.forEach(p => { ['lab', 'str'].forEach(k => p[k].classList.remove('in-reading', 'rev')); p.ord.textContent = ''; p.lab.setAttribute('aria-label', p.label); });
-            const cards = reading ? reading.cards.slice(0, shown === undefined ? reading.cards.length : shown) : [];
+            const all = reading ? laidOf(reading) : [];
+            const cards = all.slice(0, shown === undefined ? all.length : Math.min(shown, all.length));
             cards.forEach((dc, i) => {
-                const p = treeEls[dc.card.id];
-                ['lab', 'str'].forEach(k => { p[k].classList.add('in-reading'); p[k].classList.toggle('rev', !!dc.reversed); });
-                p.ord.textContent = String(i + 1);
-                p.lab.setAttribute('aria-label', p.label + ' In the reading: card ' + (i + 1) + ', ' + (POSITION_LABELS[reading.spread][i] || '') + (dc.reversed ? ', reversed.' : '.'));
+                // a trump lights its own path; a small card lights the paths of the trumps it is made from, numbered on the first
+                const rev = DECKS[deckId].reversals && !!dc.reversed, small = dc.card.id >= 22;
+                partsOf(dc.card).forEach((part, k) => {
+                    const p = treeEls[part.id];
+                    ['lab', 'str'].forEach(c => { p[c].classList.add('in-reading'); if (rev) p[c].classList.add('rev'); });
+                    if (k === 0) p.ord.textContent = (p.ord.textContent ? p.ord.textContent + '·' : '') + String(i + 1);
+                    p.lab.setAttribute('aria-label', p.lab.getAttribute('aria-label') + ' In the reading: card ' + (i + 1) + ', ' + (POSITION_LABELS[reading.spread][i] || 'Clarifier') + (small ? ', as part of ' + dc.card.name : '') + (rev ? ', reversed.' : '.'));
+                });
             });
             const sig = document.getElementById('tree-sigil');
-            if (sig) sig.setAttribute('points', cards.length > 1 ? cards.map(dc => { const g = treeEls[dc.card.id].g; return f1(g.lx) + ',' + f1(g.ly); }).join(' ') : '');
+            if (sig) sig.setAttribute('points', cards.length > 1 ? cards.map(dc => { const g = treeEls[homeOf(dc.card)].g; return f1(g.lx) + ',' + f1(g.ly); }).join(' ') : '');
             const panel = document.getElementById('tree-panel');
             if (panel) panel.classList.toggle('has-reading', cards.length > 0);
         }
@@ -2974,9 +3287,9 @@
             if (!card || !p) return;
             // a path that is in the reading sounds as the reading sounds it: its position's register, an octave lower if reversed
             let inRd = null;
-            if (reading) { try { inRd = analyse(reading).notes.find(x => x.card.id === id) || null; } catch (e) {} }
+            if (reading) { try { const a = analyse(reading); inRd = a.notes.find(x => x.card.id === id) || a.voices.find(x => x.card.id === id) || null; } catch (e) {} }
             if (inRd) { sounding([inRd.midi], 2.2, 0.3, null, [card]); treePluck(id, 1400); } else playCardSound(card, false, 4);
-            treeDetail('<b>' + card.roman + ' · ' + card.name + (inRd && inRd.reversed ? ' (reversed)' : '') + '</b><span>' + card.hebrew + ' ' + card.letterName + ' · ' + card.symbol + ' ' + card.association + ' · <i>' + (inRd ? inRd.name : card.note + '4') + '</i></span><span>Path ' + (11 + id) + ': ' + p.g.a.name + ' to ' + p.g.b.name + '</span><em>' + CARD_MEANINGS[id].upright + '</em>');
+            treeDetail('<b>' + card.roman + ' · ' + card.name + (inRd && inRd.reversed ? ' (reversed)' : '') + '</b><span>' + card.hebrew + ' ' + card.letterName + ' · ' + card.symbol + ' ' + card.association + ' · <i>' + (inRd ? inRd.name : card.note + '4') + '</i></span><span>Path ' + (11 + pathOf(id)) + ': ' + p.g.a.name + ' to ' + p.g.b.name + '</span><em>' + meaningOf(card, false) + '</em>');
         }
         function soundSephira(n) {
             const s = seph(n), ids = pathsAt(n);
@@ -3112,7 +3425,7 @@
         const xmlText = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         function treeDrawing() {
             const a = reading ? analyse(reading) : null, inRd = new Map();
-            if (a) a.notes.forEach((x, i) => inRd.set(x.card.id, { i, reversed: x.reversed }));
+            if (a) a.notes.forEach((x, i) => partsOf(x.card).forEach(p => { if (!inRd.has(p.id)) inRd.set(p.id, { i, reversed: x.reversed }); }));
             const cap = a ? a.notes.map((x, i) => (i + 1) + ' ' + x.card.name + (x.reversed ? ' (reversed)' : '') + ' ' + x.name) : [], rows = [];
             for (let i = 0; i < cap.length; i += 3) rows.push(cap.slice(i, i + 3).join(' · '));
             const H = 960 + 18 * Math.max(0, rows.length - 1);
@@ -3123,14 +3436,15 @@
                 return [[g.x1, g.y1, g.lx - ux * gap, g.ly - uy * gap], [g.lx + ux * gap, g.ly + uy * gap, g.x2, g.y2]].map(q => '<line x1="' + f1(q[0]) + '" y1="' + f1(q[1]) + '" x2="' + f1(q[2]) + '" y2="' + f1(q[3]) + '" stroke-width="' + w + '"' + (dash ? ' stroke-dasharray="10 8"' : '') + '/>').join(''); };
             L.push('<g stroke-width="0.4">' + [50, 250, 450, 650].map(cy => '<circle cx="300" cy="' + cy + '" r="200"/>').join('') + '</g>');
             L.push('<g class="paths">' + CARDS.map(c => inRd.has(c.id) ? line(c, 3, inRd.get(c.id).reversed) : line(c, 0.8, false)).join('') + '</g>');
-            if (a && a.notes.length > 1) L.push('<polygon stroke-width="1.2" points="' + a.notes.map(x => { const g = pathGeom(x.card.id); return f1(g.lx) + ',' + f1(g.ly); }).join(' ') + '"/>');
+            if (a && a.notes.length > 1) L.push('<polygon stroke-width="1.2" points="' + a.notes.map(x => { const g = pathGeom(homeOf(x.card)); return f1(g.lx) + ',' + f1(g.ly); }).join(' ') + '"/>');
             L.push('<g class="spheres" stroke-width="1.2" fill="#fff">' + SEPHIROTH.map(s => '<circle cx="' + s.x + '" cy="' + s.y + '" r="' + TREE_R + '"/>').join('') + '</g>');
             L.push('<g class="letters" stroke-width="1" fill="#fff">' + CARDS.map(c => { const g = pathGeom(c.id); return '<circle cx="' + f1(g.lx) + '" cy="' + f1(g.ly) + '" r="' + DISC_R + '"' + (inRd.has(c.id) ? ' stroke-width="2.4"' : '') + '/>'; }).join('') + '</g>');
             L.push('<g fill="#000" stroke="none" font-family="serif" text-anchor="middle">');
             SEPHIROTH.forEach(s => L.push('<text x="' + s.lx + '" y="' + s.ly + '" font-size="13" text-anchor="' + s.anchor + '">' + s.name + '</text>'));
             CARDS.forEach(c => { const g = pathGeom(c.id); L.push('<text class="letter" x="' + f1(g.lx) + '" y="' + f1(g.ly + 8) + '" font-size="24">' + c.hebrew + '</text>'); });
             if (a) {
-                a.notes.forEach((x, i) => { const sp = ordSpot(x.card.id); L.push('<text class="order" x="' + f1(sp.x) + '" y="' + f1(sp.y + 6) + '" font-size="17" font-weight="bold">' + (i + 1) + '</text>'); });
+                const ords = new Map(); a.notes.forEach((x, i) => { const h = homeOf(x.card); ords.set(h, (ords.has(h) ? ords.get(h) + '·' : '') + (i + 1)); });
+                ords.forEach((txt, h) => { const sp = ordSpot(h); L.push('<text class="order" x="' + f1(sp.x) + '" y="' + f1(sp.y + 6) + '" font-size="17" font-weight="bold">' + txt + '</text>'); });
                 L.push('<text x="300" y="930" font-size="14">' + xmlText(SPREAD_NAMES[a.spread] + ' · ' + isoDate(new Date()) + ' · ' + a.chord.text) + '</text>');
                 rows.forEach((r, k) => L.push('<text x="300" y="' + (950 + 18 * k) + '" font-size="12">' + xmlText(r) + '</text>'));
             }
@@ -3245,7 +3559,7 @@
             if (!reading) { if (out) { const p = document.createElement('p'); p.textContent = 'No reading yet. Draw cards on the dashboard and they are marked here, numbered in order, with the intervals between them.'; out.appendChild(p); } return; }
             const a = analyse(reading), placed = [];
             for (let i = 0; i + 1 < a.notes.length; i++) {
-                const p1 = nodes[a.notes[i].card.id].p, p2 = nodes[a.notes[i + 1].card.id].p;
+                const p1 = nodes[homeOf(a.notes[i].card)].p, p2 = nodes[homeOf(a.notes[i + 1].card)].p;
                 S('line', { class: 'rd-line', x1: f1(p1.x), y1: f1(p1.y), x2: f1(p2.x), y2: f1(p2.y) }, rdLayer);
                 if (a.n <= 4) {
                     const d = a.notes[i + 1].midi - a.notes[i].midi, ic = Math.abs(d) % 12;
@@ -3259,13 +3573,13 @@
             }
             const badges = [];
             a.notes.forEach((x, i) => {
-                const n = nodes[x.card.id]; n.g.classList.add('in-reading');
+                const n = nodes[homeOf(x.card)]; n.g.classList.add('in-reading');
                 // the number sits on the rim of its card, at the first of eight directions that touches nothing else
                 let best = null;
                 for (const deg of [45, 90, 0, 135, -45, 180, -90, -135]) {
                     const bx = n.p.x + Math.sin(deg * Math.PI / 180) * (n.nr + 2), by = n.p.y - Math.cos(deg * Math.PI / 180) * (n.nr + 2);
                     let bad = 0;
-                    Object.keys(nodes).forEach(id => { const o = nodes[id]; if (+id !== x.card.id && Math.hypot(o.p.x - bx, o.p.y - by) < o.nr + 12) bad++; });
+                    Object.keys(nodes).forEach(id => { const o = nodes[id]; if (+id !== homeOf(x.card) && Math.hypot(o.p.x - bx, o.p.y - by) < o.nr + 12) bad++; });
                     letters.forEach(l => { if (Math.abs(l.x - bx) < 22 && Math.abs(l.y - by) < 26) bad++; });
                     badges.forEach(q => { if (Math.hypot(q.x - bx, q.y - by) < 24) bad++; });
                     placed.forEach(q => { if (Math.abs(q.x - bx) < 30 && Math.abs(q.y - by) < 24) bad++; });
@@ -3351,8 +3665,10 @@
             const ev = [];
             items.forEach((it, i) => {
                 ev.push({ tick: i * PPQ, ord: 1, bytes: metaText(6, it.label) });
-                ev.push({ tick: i * PPQ, ord: 2, bytes: [0x90, it.midi, 80] });
-                ev.push({ tick: i * PPQ + ARP, ord: 0, bytes: [0x80, it.midi, 0] });
+                (it.midis || [it.midi]).forEach(m => {   // a small card's two notes are struck together, as they sound
+                    ev.push({ tick: i * PPQ, ord: 2, bytes: [0x90, m, 80] });
+                    ev.push({ tick: i * PPQ + ARP, ord: 0, bytes: [0x80, m, 0] });
+                });
             });
             // the chord starts when the last arpeggio note has finished sounding, so no pitch is struck again while it still rings
             const T = items.length ? (items.length - 1) * PPQ + ARP : 0;
@@ -3380,7 +3696,7 @@
         function saveReadingMidi() {
             if (!reading) { notify('Draw cards first, then there is a reading to save.'); return; }
             const a = analyse(reading);
-            const items = a.notes.map(x => ({ midi: x.midi, label: x.position + ': ' + x.card.name + (x.reversed ? ' (reversed)' : '') + ' ' + x.name }));
+            const items = a.notes.map(x => ({ midi: x.midi, midis: x.parts.map(p => p.midi), label: x.position + ': ' + x.card.name + (x.reversed ? ' (reversed)' : '') + ' ' + x.name }));
             const bytes = midiBytes('Harmonic Arcana: ' + SPREAD_NAMES[a.spread], items, a.midis, 'Chord: ' + a.chord.text);
             downloadFile('harmonic-arcana-' + a.spread + '-' + isoDate(new Date()) + '.mid', new Blob([bytes], { type: 'audio/midi' }));
             notify('Saved the reading as a MIDI file.'); logHistory('Saved reading as MIDI (' + a.notes.length + ' notes, then the chord)');
@@ -3446,12 +3762,16 @@
             // bar 1: the sequence. holds[step] is what that line and octave currently says (sharp or natural) until the bar line.
             const holds = {};
             a.notes.forEach((x, i) => {
-                const p = place(x.midi, seqX(i), 'seq', false, i);
-                let acc = '';
-                if (p.sharp && !holds[p.step]) acc = sharpMark(p.cx - 14, p.cy);
-                else if (!p.sharp && holds[p.step]) acc = naturalMark(p.cx - 14, p.cy);
-                holds[p.step] = p.sharp;
-                groups[p.clef] += p.g + acc;
+                const steps = [];
+                x.parts.map(pt => pt.midi).sort((u, v) => u - v).forEach(m => {   // a small card's two notes stand in one column
+                    const st = staffStep(m).step, near = steps.some(q => Math.abs(q - st) <= 1); steps.push(st);
+                    const p = place(m, seqX(i), 'seq', near, i);
+                    let acc = '';
+                    if (p.sharp && !holds[p.step]) acc = sharpMark(seqX(i) - 14 - (steps.length > 1 ? 9 : 0), p.cy);
+                    else if (!p.sharp && holds[p.step]) acc = naturalMark(seqX(i) - 14 - (steps.length > 1 ? 9 : 0), p.cy);
+                    holds[p.step] = p.sharp;
+                    groups[p.clef] += p.g + acc;
+                });
                 above += '<text x="' + f1(seqX(i)) + '" y="17" text-anchor="middle" font-size="11" font-weight="700">' + (i + 1) + '</text>';
                 below += '<text x="' + f1(seqX(i)) + '" y="' + (H - 18) + '" text-anchor="middle" font-size="11">' + esc(x.name) + '</text>' + (x.reversed ? '<text x="' + f1(seqX(i)) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="9" font-style="italic">rev.</text>' : '');
             });
@@ -3506,6 +3826,7 @@
         }
 
         function attributionOf(card) {
+            if (card.type === 'minor') return card.association;
             if (card.type === 'simple') return 'sign ' + card.association + ', ruled by ' + (PLANET_RULERS[card.association] || '—');
             if (card.type === 'double') return 'planet ' + card.association;
             return 'element ' + card.association;
@@ -3514,7 +3835,7 @@
             const a = analyse(rd), L = summaryLines(a), now = new Date(), iso = isoDate(now);
             const long = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             const A4 = paper === 'a4';
-            const rows = a.notes.map((x, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(x.position) + '</td><td>' + esc(x.card.roman) + ' ' + esc(x.card.name) + '</td><td class="heb">' + esc(x.card.hebrew) + ' ' + esc(x.card.letterName) + '</td><td>' + esc(attributionOf(x.card)) + '</td><td class="nt">' + esc(x.name) + '</td><td>' + (x.reversed ? 'reversed' : 'upright') + '</td></tr>').join('');
+            const rows = a.notes.map((x, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(x.position) + '</td><td>' + esc(x.card.roman) + ' ' + esc(x.card.name) + '</td><td class="heb">' + (x.card.type === 'minor' ? '' : esc(x.card.hebrew) + ' ' + esc(x.card.letterName)) + '</td><td>' + esc(attributionOf(x.card)) + '</td><td class="nt">' + esc(x.name) + '</td><td>' + (a.reversals ? (x.reversed ? 'reversed' : 'upright') : esc(x.dignity || 'plain')) + '</td></tr>').join('');
             const css = '@page{size:' + (A4 ? 'A4' : 'Letter') + ';margin:0.6in}*{box-sizing:border-box}html,body{margin:0;background:#fff;color:#000}body{font:10.5pt/1.35 Georgia,"Times New Roman",serif}' +
                 '.page{width:' + (A4 ? '210mm' : '8.5in') + ';min-height:' + (A4 ? '297mm' : '11in') + ';padding:0.6in;margin:0 auto;background:#fff}' +
                 '@media print{.page{width:auto;min-height:0;padding:0;margin:0}}' +
@@ -3526,10 +3847,10 @@
             return '<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Harmonic Arcana reading sheet ' + iso + '</title><style>' + css + '</style></head><body>' +
                 '<main class="page" data-paper="' + (A4 ? 'a4' : 'letter') + '">' +
                 '<h1>HARMONIC ARCANA: READING SHEET</h1>' +
-                '<p class="sub"><span class="s-date">' + esc(long) + ' (' + iso + ')</span> · <span class="s-spread">' + esc(SPREAD_NAMES[a.spread]) + '</span> · <span class="s-tone">Tone system: ' + esc(TONE_SYSTEMS[toneId].name) + '</span></p>' +
-                '<table class="cards"><thead><tr><th>#</th><th>Position</th><th>Card</th><th>Letter</th><th>Attribution</th><th>Note</th><th>Orientation</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+                '<p class="sub"><span class="s-date">' + esc(long) + ' (' + iso + ')</span> · <span class="s-spread">' + esc(SPREAD_NAMES[a.spread]) + '</span> · <span class="s-tone">Tone system: ' + esc(TONE_SYSTEMS[toneId].name) + '</span> · <span class="s-deck">Deck: ' + esc(DECKS[deckId].name) + '</span>' + (a.sig ? ' · <span class="s-sig">Significator: ' + esc(a.sig.name) + '</span>' : '') + '</p>' +
+                '<table class="cards"><thead><tr><th>#</th><th>Position</th><th>Card</th><th>Letter</th><th>Attribution</th><th>Note</th><th>' + (a.reversals ? 'Orientation' : 'Dignity') + '</th></tr></thead><tbody>' + rows + '</tbody></table>' +
                 staffSvg(a) +
-                '<p class="conv">Grand staff at sounding pitch: treble clef from middle C up, bass clef below it, sharps and naturals, no key signature. An accidental holds to the end of the bar on its own line and octave, and a natural sign cancels a sharp. Bar one: the numbered notes, one beat each, in reading order. Bar two, its own bar: the chord, all notes together, held, with its own accidentals. A reversed card sounds an octave lower than its position.</p>' +
+                '<p class="conv">Grand staff at sounding pitch: treble clef from middle C up, bass clef below it, sharps and naturals, no key signature. An accidental holds to the end of the bar on its own line and octave, and a natural sign cancels a sharp. Bar one: the numbered notes, one beat each, in reading order. Bar two, its own bar: the chord, all notes together, held, with its own accidentals. A small card\'s notes stand together in one column.' + (a.reversals ? ' A reversed card sounds an octave lower than its position.' : ' This deck reads no reversals; the table says where a card is strengthened or weakened by its neighbours.') + '</p>' +
                 '<div class="sum"><p class="s-chord"><strong>Chord:</strong> ' + esc(L.chord) + '</p><p class="s-key"><strong>Key:</strong> ' + esc(L.key) + '</p><p class="s-mood"><strong>Mood:</strong> ' + esc(L.mood) + '</p></div>' +
                 '<div class="src"><strong>Sources.</strong>' + sourceLines().map(l => '<span>' + esc(l) + '</span>').join('') + '</div>' +
                 '<div class="notes"><b>Notes:</b></div>' +
@@ -3549,7 +3870,13 @@
         function cleanSavedReading(r) {
             const base = cleanReading(r);
             if (!base) return null;
-            return { spread: base.spread, cards: base.cards, tone: isTone(r.tone) ? r.tone : 'v4', at: typeof r.at === 'string' && /^\d{2}:\d{2}$/.test(r.at) ? r.at : '' };
+            const out = { spread: base.spread, cards: base.cards, tone: isTone(r.tone) ? r.tone : 'v4', at: typeof r.at === 'string' && /^\d{2}:\d{2}$/.test(r.at) ? r.at : '' };
+            if (base.sig !== undefined) out.sig = base.sig;
+            if (base.clar) out.clar = base.clar;
+            if (isDeck(r.deck)) out.deck = r.deck;
+            if (typeof r.who === 'string' && r.who.trim()) out.who = r.who.trim().slice(0, 80);
+            if (typeof r.q === 'string' && r.q.trim()) out.q = r.q.trim().slice(0, 200);
+            return out;
         }
         function cleanDays(v) {
             if (!v || typeof v !== 'object' || Array.isArray(v)) return null;
@@ -3606,8 +3933,17 @@
         }
         const longDate = iso => { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); };
         function readingLine(r) {
-            const notes = r.cards.map((c, i) => POSITION_LABELS[r.spread][i] + ': ' + CARDS[c.id].name + (c.reversed ? ' (reversed)' : '') + ' ' + midiName(midiOf(semitoneIn(c.id, r.tone), octaveFor(r.spread, i, c.reversed))));
-            return SPREAD_NAMES[r.spread] + (r.at ? ' at ' + r.at : '') + ' (' + TONE_SYSTEMS[r.tone].name + '): ' + notes.join('; ');
+            const noRev = r.deck && !DECKS[r.deck].reversals;
+            const nm = id => nameIn(r.deck, id);   // a reading saved before decks existed was a Rider-Waite-Smith one
+            const pitch = (id, o) => [...new Set(partsOf(cardOf(id)).map(p => semitoneIn(p.id, r.tone)))].map(st => midiName(midiOf(st, o))).join('+');
+            const notes = r.cards.map((c, i) => POSITION_LABELS[r.spread][i] + ': ' + nm(c.id) + (c.reversed && !noRev ? ' (reversed)' : '') + ' ' + pitch(c.id, octaveFor(r.spread, i, c.reversed && !noRev)));
+            let t = SPREAD_NAMES[r.spread] + (r.at ? ' at ' + r.at : '') + ' (' + TONE_SYSTEMS[r.tone].name + '): ' + notes.join('; ');
+            if (r.sig !== undefined) t += '; significator ' + nm(r.sig);
+            if (r.clar) t += '; clarifier ' + (r.clar.shown ? nm(r.clar.id) : 'left face down');
+            if (r.deck) t += '. Deck: ' + DECKS[r.deck].name;
+            if (r.who) t += '. For: ' + r.who;
+            if (r.q) t += '. Question: ' + r.q;
+            return t;
         }
         function openDay(iso) {
             if (!validIso(iso)) return;
@@ -3616,7 +3952,7 @@
             panel.hidden = false; panel.textContent = '';
             const h = document.createElement('h4'); h.textContent = longDate(iso); panel.appendChild(h);
             const e = getJournal()[iso], p = document.createElement('p');
-            p.textContent = e ? 'Daily card: ' + CARDS[e.id].name + (e.reversed ? ' (reversed)' : ' (upright)') + ', ' + midiName(midiOf(CARDS[e.id].semitone, 4 - (e.reversed ? 1 : 0))) + '.' : 'No daily card was drawn on this day.';
+            p.textContent = e ? 'Daily card: ' + CARDS[e.id].name + (DECKS[deckId].reversals ? (e.reversed ? ' (reversed)' : ' (upright)') : '') + ', ' + midiName(midiOf(CARDS[e.id].semitone, 4 - (readRev(e) ? 1 : 0))) + '.' : 'No daily card was drawn on this day.';
             panel.appendChild(p);
             const d = getDays()[iso], list = document.createElement('ul'); list.className = 'day-readings';
             (d ? d.readings : []).forEach(r => { const li = document.createElement('li'); li.textContent = readingLine(r); list.appendChild(li); });
@@ -3630,7 +3966,11 @@
             if (!reading) { notify('Draw cards first, then there is a reading to save.'); return; }
             const now = new Date(), iso = isoDate(now), days = getDays(), cur = days[iso] || { note: '', readings: [] };
             if (cur.readings.length >= READINGS_MAX) { notify('This day already holds ' + READINGS_MAX + ' readings, the most it keeps.'); return; }
-            cur.readings.push({ spread: reading.spread, cards: reading.cards.map(c => ({ id: c.card.id, reversed: c.reversed })), tone: toneId, at: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') });
+            const rec = Object.assign(packReading(reading), { tone: toneId, at: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'), deck: deckId });
+            const who = (document.getElementById('rd-who') || {}).value, q = (document.getElementById('rd-q') || {}).value;
+            if (who && who.trim()) rec.who = who.trim().slice(0, 80);
+            if (q && q.trim()) rec.q = q.trim().slice(0, 200);
+            cur.readings.push(rec);
             days[iso] = cur;
             if (!setDays(days)) { notify('Could not save: ' + storeWhy() + '.'); return; }
             notify('Saved this reading to your journal for ' + iso + '.'); logHistory('Saved reading to journal');
@@ -3739,11 +4079,215 @@
             });
         }
 
+        // ============ THE DECK: significator, clarifier, laying your own cards, shuffling by hand ============
+        const poolCards = () => (poolId === 'trumps' ? CARDS : ALL_CARDS).filter(c => c.id !== sigId);
+        function cardOptions(sel, withNone, noneText) {
+            sel.textContent = '';
+            if (withNone) { const o = document.createElement('option'); o.value = ''; o.textContent = noneText; sel.appendChild(o); }
+            const D = DECKS[deckId], groups = [['Trumps', CARDS]].concat(D.suits.map((n, i) => [n, MINORS.filter(c => c.suit === i)]));
+            groups.forEach(([name, list]) => {
+                const g = document.createElement('optgroup'); g.label = name;
+                list.forEach(c => { const o = document.createElement('option'); o.value = String(c.id); o.textContent = (c.id < 22 ? c.roman + ' ' : '') + c.name + (c.kind === 'pip' && c.roman ? ' (' + c.roman + ')' : ''); g.appendChild(o); });
+                sel.appendChild(g);
+            });
+        }
+        function renderSigLine() {
+            const el = document.getElementById('sig-line'); if (!el) return;
+            const cur = reading && isAnyCard(reading.sig) ? reading.sig : null;
+            const drone = id => midiName(midiOf(voicesOf(cardOf(id))[0].semitone, 2));
+            let t = '';
+            if (cur !== null) t = 'Significator: ' + cardOf(cur).name + '. It is kept out of the draw and held as a low drone (' + drone(cur) + ') whenever the reading plays.';
+            if (isAnyCard(sigId) && sigId !== cur) t += (t ? ' ' : '') + (reading ? cardOf(sigId).name + ' becomes the significator from the next draw.' : 'Significator: ' + cardOf(sigId).name + '. It is kept out of the draw and held as a low drone (' + drone(sigId) + ') whenever the reading plays.');
+            el.textContent = t;
+        }
+        function setSig(v) {
+            const id = v === '' || v === null ? null : Number(v);
+            sigId = isAnyCard(id) ? id : null;
+            saveSettings();
+            if (reading) {
+                const used = laidOf(reading).some(dc => dc.card.id === sigId) || (reading.clar && reading.clar.card.id === sigId);
+                if (used) notify(cardOf(sigId).name + ' is already in this reading, so it becomes the significator from the next draw.');
+                else { reading.sig = sigId; saveReading(); finishReading(); }
+            }
+            renderSigLine();
+        }
+        function renderClar() {
+            const host = document.getElementById('clar-display'); if (!host) return;
+            host.textContent = '';
+            const row = document.getElementById('clar-row'), pr = document.getElementById('play-row');
+            if (row) row.hidden = !reading || !!reading.clar || !pr || pr.hidden;
+            if (!reading || !reading.clar) return;
+            const cl = reading.clar, wrap = document.createElement('div'), label = document.createElement('div');
+            label.className = 'position-label visible';
+            label.textContent = cl.shown ? 'Clarifier' : 'Clarifier (face down)';
+            const el = createCardElement(cl.card, DECKS[deckId].reversals && !!cl.reversed, 4, () => {
+                if (cl.shown) return;
+                cl.shown = true; label.textContent = 'Clarifier'; saveReading(); finishReading();
+            });
+            if (cl.shown) el.querySelector('.card-inner').classList.add('flipped');
+            else el.setAttribute('aria-label', 'Clarifier, face down. Press to turn it over and hear it.');
+            wrap.appendChild(label); wrap.appendChild(el); host.appendChild(wrap);
+        }
+        function drawClarifier() {
+            if (!reading || reading.clar) return;
+            const used = new Set(reading.cards.map(dc => dc.card.id)); if (isAnyCard(reading.sig)) used.add(reading.sig);
+            let pick = null, up = true;
+            if (deckBox.hand) { const e = dealFromDeck(1, used)[0]; if (e) { pick = cardOf(e.id); up = e.up; } }
+            if (!pick) { const rest = poolCards().filter(c => !used.has(c.id)); pick = rest[Math.floor(Math.random() * rest.length)]; up = Math.random() >= 0.5; }
+            if (!pick) return;
+            reading.clar = { card: pick, reversed: DECKS[deckId].reversals && !up, shown: false };
+            saveReading(); renderClar(); showSpreadSummary();
+            notify('A clarifier is laid face down. Turn it when you are ready; it sounds last.');
+            logHistory('Laid a clarifier face down');
+        }
+
+        // ---- laying the cards you actually drew ----
+        function buildLayPanel() {
+            const host = document.getElementById('lay-panel'); if (!host) return;
+            const kept = {}; host.querySelectorAll('select[data-lay]').forEach(x => { kept[x.dataset.lay] = x.value; });
+            const keptRev = {}; host.querySelectorAll('input[data-rev]').forEach(x => { keptRev[x.dataset.rev] = x.checked; });
+            host.textContent = '';
+            const D = DECKS[deckId];
+            const intro = document.createElement('p'); intro.className = 'deck-note';
+            intro.textContent = 'Enter the cards you drew from your own deck, in order, for the spread chosen above (' + SPREAD_NAMES[currentSpread] + ').' + (D.reversals ? '' : ' The ' + D.name + ' deck is read without reversals.');
+            host.appendChild(intro);
+            const row = (text, key, none) => {
+                const r = document.createElement('div'); r.className = 'lay-row';
+                const lab = document.createElement('label'); lab.textContent = text;
+                const sel = document.createElement('select'); sel.dataset.lay = key; sel.setAttribute('aria-label', text);
+                cardOptions(sel, true, none); if (kept[key]) sel.value = kept[key]; lab.appendChild(sel); r.appendChild(lab);
+                if (D.reversals) {
+                    const rl = document.createElement('label'); rl.className = 'lay-rev';
+                    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.dataset.rev = key; cb.checked = !!keptRev[key]; cb.setAttribute('aria-label', text + ', reversed');
+                    rl.appendChild(cb); rl.appendChild(document.createTextNode('reversed')); r.appendChild(rl);
+                }
+                host.appendChild(r);
+            };
+            POSITION_LABELS[currentSpread].forEach((p, i) => row((i + 1) + '. ' + p, String(i), 'Choose a card'));
+            row('Clarifier (stays face down)', 'clar', 'None');
+            const bar = document.createElement('div'); bar.className = 'toolbar';
+            const go = document.createElement('button'); go.type = 'button'; go.id = 'lay-go'; go.textContent = 'Lay these cards'; go.addEventListener('click', layOwn);
+            bar.appendChild(go); host.appendChild(bar);
+            const msg = document.createElement('p'); msg.className = 'deck-note'; msg.id = 'lay-msg'; msg.setAttribute('role', 'status'); host.appendChild(msg);
+        }
+        function layOwn() {
+            const host = document.getElementById('lay-panel'), msg = document.getElementById('lay-msg');
+            const val = k => { const s = host.querySelector('select[data-lay="' + k + '"]'); return s && s.value !== '' ? Number(s.value) : null; };
+            const rev = k => { const c = host.querySelector('input[data-rev="' + k + '"]'); return !!(c && c.checked); };
+            const labels = POSITION_LABELS[currentSpread], cards = [], seen = new Set();
+            const say = t => { if (msg) msg.textContent = t; };
+            for (let i = 0; i < labels.length; i++) {
+                const id = val(String(i));
+                if (!isAnyCard(id)) { say('Choose a card for ' + labels[i] + '.'); return; }
+                if (seen.has(id)) { say(cardOf(id).name + ' is entered twice. A deck holds one of each card.'); return; }
+                seen.add(id); cards.push({ card: cardOf(id), reversed: rev(String(i)) });
+            }
+            const rd = { spread: currentSpread, cards, sig: null };
+            const cid = val('clar');
+            if (isAnyCard(cid)) {
+                if (seen.has(cid)) { say(cardOf(cid).name + ' is in the spread already, so it cannot also be the clarifier.'); return; }
+                seen.add(cid); rd.clar = { card: cardOf(cid), reversed: rev('clar'), shown: false };
+            }
+            if (isAnyCard(sigId)) {
+                if (seen.has(sigId)) { say(cardOf(sigId).name + ' is your significator, so it cannot also be laid. Change one of them.'); return; }
+                rd.sig = sigId;
+            }
+            say('');
+            stopAll();
+            renderSpread(rd, false);
+            const fold = document.getElementById('lay-fold'); if (fold) fold.open = false;
+            logHistory('Laid by hand: ' + cards.map(dc => dc.card.name).join(', '));
+            try { document.getElementById('spread-display').scrollIntoView({ block: 'nearest' }); } catch (e) {}
+        }
+
+        // ---- one deck that keeps its order, shuffled the way cards are ----
+        // The order and which way up each card is are kept on this device. The moves behave like cards: a riffle cuts near the
+        // middle and drops from each half in proportion to what is left in it (the Gilbert-Shannon-Reeds model), an overhand
+        // shuffle throws small packets off the top, a cut lifts a packet and puts it underneath. The dice behind them are the
+        // browser's hardware random source stirred with the timing and position of your own touches.
+        let deckBox = { order: ALL_CARDS.map(c => c.id), up: ALL_CARDS.map(() => true), hand: false, moves: 0 };
+        function cleanDeck(v) {
+            if (!v || typeof v !== 'object' || !Array.isArray(v.order) || !Array.isArray(v.up) || v.order.length !== 78 || v.up.length !== 78) return null;
+            if (new Set(v.order).size !== 78 || !v.order.every(isAnyCard)) return null;
+            return { order: v.order.slice(), up: v.up.map(x => x !== false), hand: v.hand === true, moves: Number.isInteger(v.moves) && v.moves >= 0 ? Math.min(v.moves, 100000) : 0 };
+        }
+        const saveDeck = () => store.set(KEYS.deck, JSON.stringify(deckBox));
+        const deckEntries = () => deckBox.order.map((id, i) => ({ id, up: deckBox.up[i] }));
+        function setDeckEntries(es) { deckBox.order = es.map(e => e.id); deckBox.up = es.map(e => e.up); }
+        let entropy = (Date.now() ^ Math.floor(performance.now() * 1000)) >>> 0;
+        function stir(v) { entropy = Math.imul((entropy ^ (v >>> 0)) >>> 0, 0x9E3779B1) >>> 0; entropy = (entropy ^ (entropy >>> 15)) >>> 0; }
+        function handRand() {
+            let c;
+            try { const b = new Uint32Array(1); window.crypto.getRandomValues(b); c = b[0]; } catch (e) { c = Math.floor(Math.random() * 4294967296); }
+            stir(c); stir(Math.floor(performance.now() * 1000));
+            return entropy / 4294967296;
+        }
+        function riffled(es) {
+            let cut = 0; for (let i = 0; i < es.length; i++) if (handRand() < 0.5) cut++;
+            const L = es.slice(0, cut), R = es.slice(cut), out = [];
+            while (L.length || R.length) out.push(handRand() < L.length / (L.length + R.length) ? L.shift() : R.shift());
+            return out;
+        }
+        function overhanded(es) {
+            const rest = es.slice(); let out = [];
+            while (rest.length) out = rest.splice(0, 1 + Math.floor(handRand() * 9)).concat(out);
+            return out;
+        }
+        function cutDeck(es, k, turn) {
+            k = Math.max(1, Math.min(es.length - 1, k | 0));
+            let top = es.slice(0, k); const bottom = es.slice(k);
+            if (turn) top = top.map(e => ({ id: e.id, up: !e.up }));   // the lifted packet is turned end for end before it goes under
+            return bottom.concat(top);
+        }
+        function deckMove(kind, at) {
+            if (kind === 'machine') { deckBox.hand = false; deckBox.moves = 0; saveDeck(); deckStatus(); notify('The tool shuffles the whole deck afresh for every draw.'); return; }
+            const es = deckEntries(), k = at !== undefined ? at : Number((document.getElementById('cut-at') || { value: 39 }).value);
+            const next = kind === 'riffle' ? riffled(es) : kind === 'overhand' ? overhanded(es) : kind === 'cut' ? cutDeck(es, k, false) : kind === 'turn' ? cutDeck(es, k, true) : null;
+            if (!next) return;
+            setDeckEntries(next); deckBox.hand = true; deckBox.moves++;
+            const ok = saveDeck(); deckStatus();
+            if (!ok) notify('Shuffled, but the deck could not be kept: ' + storeWhy() + '.');
+            logHistory('Deck: ' + ({ riffle: 'riffle', overhand: 'overhand shuffle', cut: 'cut at ' + k, turn: 'cut at ' + k + ' and turned' }[kind]));
+        }
+        // Deals from the top of the deck as it lies, passing over cards that are not in play, and puts the dealt cards underneath.
+        function dealFromDeck(num, skip) {
+            const out = [], keep = [];
+            const ok = e => (poolId !== 'trumps' || e.id < 22) && e.id !== sigId && !(skip && skip.has(e.id));
+            deckEntries().forEach(e => { if (out.length < num && ok(e)) out.push(e); else keep.push(e); });
+            if (out.length < num) return [];
+            setDeckEntries(keep.concat(out)); saveDeck(); deckStatus();
+            return out;
+        }
+        function deckStatus() {
+            const el = document.getElementById('deck-status'); if (!el) return;
+            const turned = deckBox.up.filter(u => !u).length;
+            el.textContent = deckBox.hand
+                ? 'Shuffled by hand: ' + deckBox.moves + ' move' + (deckBox.moves === 1 ? '' : 's') + ' so far. The next spread is dealt from the top of this deck. ' + turned + ' of 78 cards are turned. Seven riffles mix a deck well; fewer leave it partly in order, as with real cards.'
+                : 'The tool is shuffling for you: every draw is a fresh, fair shuffle of the whole deck. Make any move above and the deck becomes yours.';
+        }
+        function syncDeckTools() {
+            const sel = document.getElementById('sig-select');
+            if (sel) { cardOptions(sel, true, 'None'); sel.value = isAnyCard(sigId) ? String(sigId) : ''; }
+            buildLayPanel(); renderSigLine(); deckStatus();
+        }
+        function initDeckTools() {
+            const d = readStored(KEYS.deck, cleanDeck, null); if (d) deckBox = d;
+            syncDeckTools();
+            const sel = document.getElementById('sig-select'); if (sel) sel.addEventListener('change', () => setSig(sel.value));
+            const cut = document.getElementById('cut-at'), n = document.getElementById('cut-at-n');
+            if (cut && n) cut.addEventListener('input', () => { n.textContent = cut.value; });
+            const sp = document.getElementById('shuffle-panel');
+            if (sp) ['pointerdown', 'pointermove', 'pointerup'].forEach(t => sp.addEventListener(t, e => { stir(Math.floor(e.clientX * 4099 + e.clientY)); stir(Math.floor(e.timeStamp * 1000)); }, { passive: true }));
+        }
+
         // Hooks for the check file. Read-only helpers; they change nothing the page does on its own.
         window.HA = {
             CARDS, REGISTER, analyse, nameChord, findKey, dailyFor, midiOf, midiName, isoDate,
             state: () => ({ spread: currentSpread, view: currentView, tone: toneId, voice: voiceId, paper: paperId, reading: reading && { spread: reading.spread, cards: reading.cards.map(c => ({ id: c.card.id, reversed: c.reversed })) }, lp: lpPads.map(p => p ? p.card.id : null) }),
-            loadReading: (spread, cards) => { setSpread(spread); renderSpread({ spread, cards: cards.map(c => ({ card: CARDS[c.id], reversed: !!c.reversed })) }, true); },
+            loadReading: (spread, cards, extra) => { setSpread(spread); renderSpread(unpackReading(Object.assign({ spread, cards }, extra || {})), true); },
+            ALL_CARDS, DECKS, dignities, meaningOf, setDeck, setPool,
+            deck: () => ({ id: deckId, pool: poolId, sig: sigId, box: JSON.parse(JSON.stringify(deckBox)) }),
+            deckMove: (kind, at) => deckMove(kind, at),
             brief: () => reading ? buildSunoBrief(analyse(reading)) : null,
             tree: { SEPHIROTH, PATHS, state: treeState, drawing: treeDrawing }, performanceVoicing, BOWL_PARTIALS,
             midi: () => ({ port: midiPort ? midiPort.name : null, id: midiPort ? midiPort.id : null, wanted: midiWanted, mute: midiMute, failed: midiFailed, held: [...midiHeld.keys(), ...midiPiece.keys()] }),
