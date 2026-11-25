@@ -730,7 +730,7 @@
         .settings-bar label { min-width: 0; }
         .settings-bar select { max-width: 100%; }
         #set-midi { max-width: 260px; text-overflow: ellipsis; }
-        .settings-bar .midi-mute input { width: 40px; height: 40px; accent-color: var(--gold); margin: 0; }
+        .settings-bar .midi-mute input { width: 40px; min-width: 40px; flex: 0 0 40px; height: 40px; accent-color: var(--gold); margin: 0; }
         .midi-status { font-family: var(--read); font-size: 14px; color: var(--soft); flex-basis: 100%; text-align: center; }
         .midi-status:empty { display: none; }
         .perform-row { align-items: center; margin: 0 0 12px; }
@@ -790,6 +790,51 @@
         .cut-at { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--soft); }
         .cut-at input[type=range] { width: min(320px, 100%); height: 40px; }
         .minor-card .card-hebrew { font-family: 'Cinzel', Georgia, serif; }
+        /* ---- Contemplation: one card at a time, the tree dark around it ---- */
+        html.ct-open, html.ct-open body { overflow: hidden; }
+        .contemplate { position: fixed; inset: 0; z-index: 3000; background: #050507; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; touch-action: manipulation; -webkit-user-select: none; user-select: none; --ct-fade: 3s; }
+        .contemplate[hidden] { display: none; }
+        .contemplate[data-look="veil"] { --ct-fade: 6s; }
+        .ct-flood { position: absolute; inset: -20%; opacity: 0; transition: opacity var(--ct-fade) ease-in-out; pointer-events: none; }
+        .ct-flood.on { opacity: 0.92; }
+        .contemplate[data-look="ember"] .ct-flood.on { opacity: 0.2; }
+        .contemplate[data-look="veil"] .ct-flood { filter: blur(40px); }
+        .contemplate[data-look="veil"] .ct-flood.on { opacity: 0.7; animation: ct-drift 38s ease-in-out infinite alternate; }
+        @keyframes ct-drift { from { transform: translate(-6%, -4%) rotate(-4deg) scale(1.05); } to { transform: translate(6%, 5%) rotate(5deg) scale(1.2); } }
+        @keyframes ct-breathe { from { opacity: 0.55; } to { opacity: 1; } }
+        #ct-tree { position: relative; z-index: 1; flex: 1 1 0; min-height: 0; width: 96vw; max-width: 96vw; margin: 2vh 0 1.5vh; pointer-events: none; }
+        #ct-tree .ct-path { fill: none; stroke: rgba(5,5,7,0.5); stroke-width: 5; stroke-linecap: round; transition: stroke var(--ct-fade), stroke-width var(--ct-fade), opacity var(--ct-fade); }
+        #ct-tree .ct-seph { fill: rgba(5,5,7,0.5); stroke: rgba(5,5,7,0.6); stroke-width: 2; transition: fill var(--ct-fade), stroke var(--ct-fade); }
+        .contemplate[data-look="ember"] #ct-tree .ct-path { stroke: rgba(232,232,232,0.07); }
+        .contemplate[data-look="ember"] #ct-tree .ct-seph { fill: rgba(232,232,232,0.04); stroke: rgba(232,232,232,0.1); }
+        /* a dark edge keeps the white marks readable on a bright flood such as yellow */
+        #ct-tree .ct-path.was { stroke: rgba(255,255,255,0.6); filter: drop-shadow(0 0 2px rgba(0,0,0,0.9)); }
+        #ct-tree .ct-seph.was { stroke: rgba(255,255,255,0.6); }
+        #ct-tree .ct-path.lit { stroke: #fff; stroke-width: 11; filter: drop-shadow(0 0 2px #000) drop-shadow(0 0 5px rgba(0,0,0,0.75)); animation: ct-breathe 5s ease-in-out infinite alternate; }
+        #ct-tree .ct-seph.end { stroke: rgba(255,255,255,0.8); stroke-width: 3; filter: drop-shadow(0 0 2px rgba(0,0,0,0.9)); }
+        #ct-tree .ct-seph.lit { fill: #fff; stroke: #fff; filter: drop-shadow(0 0 2px #000) drop-shadow(0 0 5px rgba(0,0,0,0.75)); animation: ct-breathe 5s ease-in-out infinite alternate; }
+        .contemplate[data-look="ember"] #ct-tree .ct-path.was { stroke: rgba(232,232,232,0.32); filter: none; }
+        .contemplate[data-look="ember"] #ct-tree .ct-seph.was, .contemplate[data-look="ember"] #ct-tree .ct-seph.end { stroke: rgba(232,232,232,0.45); filter: none; }
+        .contemplate[data-look="ember"] #ct-tree .ct-path.lit { stroke: var(--ct-col, #fff); filter: drop-shadow(0 0 14px var(--ct-col, #fff)); }
+        .contemplate[data-look="ember"] #ct-tree .ct-seph.lit { fill: var(--ct-col, #fff); stroke: var(--ct-col, #fff); filter: drop-shadow(0 0 16px var(--ct-col, #fff)); }
+        .ct-text { position: relative; z-index: 2; flex: 0 0 auto; width: min(560px, 92vw); margin: 0 0 max(64px, 9vh); padding: 14px 18px; text-align: center; background: rgba(5,5,7,0.66); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; color: var(--white); }
+        .ct-pos { font-family: var(--ui); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--soft); min-height: 14px; }
+        .ct-name { font-size: 1.7rem; color: #fff; margin: 4px 0 2px; }
+        .ct-note { font-family: var(--ui); font-size: 13px; color: var(--gold); }
+        .ct-mean { margin-top: 8px; font-size: 1rem; line-height: 1.45; }
+        .ct-chord { margin-top: 8px; font-style: italic; color: var(--gold); min-height: 1.2em; }
+        .ct-chord:empty { display: none; }
+        .ct-close { position: absolute; z-index: 3; right: 14px; bottom: 14px; min-width: 88px; min-height: 44px; background: rgba(5,5,7,0.7); color: var(--white); border: 1px solid rgba(255,255,255,0.35); border-radius: 6px; font-family: var(--ui); font-size: 13px; cursor: pointer; }
+        .ct-close:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+        .ct-daily { background: var(--obsidian); color: var(--white); border: 1px solid var(--dim); padding: 8px 14px; min-height: 44px; font-family: var(--ui); font-size: 12px; cursor: pointer; }
+        .ct-daily:hover, .ct-daily:focus-visible { border-color: var(--orange); }
+        .summary-line.named { color: var(--gold); }
+        .tarot-card { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        @media (prefers-reduced-motion: reduce) {
+            .contemplate, .contemplate[data-look="veil"] { --ct-fade: 0.01s; }
+            .contemplate .ct-flood.on, #ct-tree .lit { animation: none !important; }
+        }
+        @media (max-height: 480px) { .ct-mean { display: none; } .ct-text { padding: 8px 14px; } .ct-name { font-size: 1.3rem; } }
     </style>
 </head>
 <body>
@@ -848,6 +893,7 @@
                     <button type="button" onclick="performReading('bowls')">Singing bowls</button>
                     <button type="button" onclick="performReading('drive')">Night drive</button>
                     <button type="button" onclick="performReading('drone')">Overtone drone</button>
+                    <button type="button" id="ct-btn" onclick="contemplate()" title="Sit with the reading one card at a time. Hold any card to sit with it alone.">Contemplate</button>
                 </div>
                 <div class="toolbar clar-row" id="clar-row" hidden>
                     <button type="button" id="clar-btn" onclick="drawClarifier()">Draw a clarifier</button>
@@ -1044,8 +1090,8 @@
         <div class="settings-bar" id="settings-bar">
             <label>Tone system
                 <select id="set-tone" aria-label="Tone system">
-                    <option value="v4">Arcana v4 (default)</option>
-                    <option value="case">Case throughout</option>
+                    <option value="case">Case throughout (default)</option>
+                    <option value="v4">Arcana v4 (the earlier planet notes)</option>
                 </select>
             </label>
             <label>Deck
@@ -1068,6 +1114,13 @@
                     <option value="original">Original (v4 voice)</option>
                 </select>
             </label>
+            <label>Contemplation
+                <select id="set-look" aria-label="Look of contemplation">
+                    <option value="flood">Flood (the screen fills with the colour)</option>
+                    <option value="ember">Ember (dark; only the card's place glows)</option>
+                    <option value="veil">Veil (colour drifts slowly)</option>
+                </select>
+            </label>
             <label>Sheet paper
                 <select id="set-paper" aria-label="Sheet paper">
                     <option value="letter">Letter</option>
@@ -1086,6 +1139,19 @@
 
         <div class="history-log" id="history-log"><h4>Log</h4></div>
 
+        <div class="contemplate" id="contemplate" role="dialog" aria-modal="true" aria-label="Contemplation" hidden>
+            <div class="ct-flood" id="ct-flood-a"></div>
+            <div class="ct-flood" id="ct-flood-b"></div>
+            <svg id="ct-tree" viewBox="0 0 600 900" aria-hidden="true"></svg>
+            <div class="ct-text" id="ct-text" aria-live="polite">
+                <div class="ct-pos" id="ct-pos"></div>
+                <div class="ct-name" id="ct-name"></div>
+                <div class="ct-note" id="ct-note"></div>
+                <div class="ct-mean" id="ct-mean"></div>
+                <div class="ct-chord" id="ct-chord"></div>
+            </div>
+            <button type="button" class="ct-close" id="ct-close" onclick="closeContemplate()">Close</button>
+        </div>
         <div class="card-selector" id="card-selector" role="dialog" aria-modal="true" aria-label="Select card for pad">
             <h4>Select Card for Pad</h4>
             <div id="card-options"></div>
@@ -1287,7 +1353,7 @@
         };
         const hasOwn = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
         const isTone = t => typeof t === 'string' && hasOwn(TONE_SYSTEMS, t);
-        const VOICES = ['bowls', 'arcana', 'pure', 'original'], PAPERS = ['letter', 'a4'];
+        const VOICES = ['bowls', 'arcana', 'pure', 'original'], PAPERS = ['letter', 'a4'], LOOKS = ['flood', 'ember', 'veil'];
         const SPREAD_NAMES = { single: 'Single card', three: 'Past / Present / Future', elements: 'Four Elements', celtic: 'Celtic Cross' };
         function semitoneIn(cardId, toneKey) {
             if (cardId >= 22) return semitoneIn(MINORS[cardId - 22].parts[0], toneKey);
@@ -1295,10 +1361,10 @@
             if (c.type === 'double' && sys && sys.planets && hasOwn(sys.planets, c.association)) return sys.planets[c.association];
             return BASE_TONES[cardId].semitone;
         }
-        let toneId = 'v4', voiceId = 'bowls', paperId = 'letter';
+        let toneId = 'case', voiceId = 'bowls', paperId = 'letter', lookId = 'flood', toneMoved = false;
         let figs = { tri: true, sq: true, opp: true };
         function applyTone(t) {
-            toneId = isTone(t) ? t : 'v4';
+            toneId = isTone(t) ? t : 'case';
             CARDS.forEach(c => { c.semitone = semitoneIn(c.id, toneId); c.note = NOTE_NAMES[c.semitone]; });
             MINORS.forEach(c => { c.semitone = CARDS[c.parts[0]].semitone; c.note = voicesOf(c).map(p => p.note).join('+'); });
         }
@@ -1345,8 +1411,10 @@
             let v = null;
             try { v = clean(JSON.parse(raw)); } catch (e) { v = null; }
             if (v === null) { store.del(key); return fallback; }
+            const moved = v && v.moved === true; if (v && typeof v === 'object' && 'moved' in v) delete v.moved;   // a one-time flag for this load, never stored
             const again = JSON.stringify(v);
             if (again !== raw) store.set(key, again);
+            if (moved) v.moved = true;
             return v;
         }
         const storeWhy = () => store.why === 'full' ? 'this browser\'s storage is full' : 'this browser is blocking storage';
@@ -1407,12 +1475,12 @@
             const views = ['dashboard', 'daily', 'journal', 'correspondence', 'wheel', 'fullArcana', 'launchpad', 'suno'];
             const f = v.figs && typeof v.figs === 'object' ? v.figs : {};
             return { spread: isSpread(v.spread) ? v.spread : 'single', view: views.includes(v.view) ? v.view : 'dashboard',
-                tone: isTone(v.tone) ? v.tone : 'v4', voice: VOICES.includes(v.voice) ? v.voice : 'bowls', paper: PAPERS.includes(v.paper) ? v.paper : 'letter',
+                tone: !isTone(v.tone) || (v.toneSet !== 2 && v.tone === 'v4') ? 'case' : v.tone, toneSet: 2, moved: v.toneSet !== 2 && v.tone === 'v4', look: LOOKS.includes(v.look) ? v.look : 'flood', voice: VOICES.includes(v.voice) ? v.voice : 'bowls', paper: PAPERS.includes(v.paper) ? v.paper : 'letter',
                 figs: { tri: f.tri !== false, sq: f.sq !== false, opp: f.opp !== false },
                 midi: typeof v.midi === 'string' ? v.midi.slice(0, 300) : '', midiId: typeof v.midiId === 'string' ? v.midiId.slice(0, 300) : '', midiMute: v.midiMute === true,
                 deck: isDeck(v.deck) ? v.deck : 'rws', pool: v.pool === 'trumps' ? 'trumps' : 'all', sig: isAnyCard(v.sig) ? v.sig : null };
         }
-        function saveSettings() { store.set(KEYS.settings, JSON.stringify({ spread: currentSpread, view: currentView, tone: toneId, voice: voiceId, paper: paperId, figs, midi: midiWanted, midiId: midiWantedId, midiMute, deck: deckId, pool: poolId, sig: sigId })); }
+        function saveSettings() { store.set(KEYS.settings, JSON.stringify({ spread: currentSpread, view: currentView, tone: toneId, toneSet: 2, look: lookId, voice: voiceId, paper: paperId, figs, midi: midiWanted, midiId: midiWantedId, midiMute, deck: deckId, pool: poolId, sig: sigId })); }
         function saveReading() {
             if (!reading) { store.del(KEYS.reading); return; }
             store.set(KEYS.reading, JSON.stringify(packReading(reading)));
@@ -1421,10 +1489,10 @@
         // ============ INIT ============
         function step(name, fn) { try { fn(); } catch (e) { try { console.warn('Harmonic Arcana: ' + name + ' failed', e); } catch (e2) {} } }
         document.addEventListener('DOMContentLoaded', function() {
-            const s = readStored(KEYS.settings, cleanSettings, { spread: 'single', view: 'dashboard', tone: 'v4', voice: 'bowls', paper: 'letter', figs: { tri: true, sq: true, opp: true } });
+            const s = readStored(KEYS.settings, cleanSettings, { spread: 'single', view: 'dashboard', tone: 'case', voice: 'bowls', paper: 'letter', figs: { tri: true, sq: true, opp: true } });
             currentSpread = s.spread;
             applyDeck(s.deck); poolId = s.pool === 'trumps' ? 'trumps' : 'all'; sigId = isAnyCard(s.sig) ? s.sig : null;
-            applyTone(s.tone); voiceId = s.voice; paperId = s.paper; figs = s.figs; midiWanted = s.midi || ''; midiWantedId = s.midiId || ''; midiMute = !!s.midiMute;
+            applyTone(s.tone); toneMoved = !!s.moved; lookId = LOOKS.includes(s.look) ? s.look : 'flood'; voiceId = s.voice; paperId = s.paper; figs = s.figs; midiWanted = s.midi || ''; midiWantedId = s.midiId || ''; midiMute = !!s.midiMute;
             step('settings', initSettings);
             step('midi', initMidi);
             step('piano', createPiano);
@@ -2108,7 +2176,7 @@
             cardDiv.className = `tarot-card ${reversed ? 'reversed' : ''}`;
             cardDiv.tabIndex = 0;
             cardDiv.setAttribute('role', 'button');
-            cardDiv.setAttribute('aria-label', `${card.name}${reversed ? ', reversed' : ''}, note ${card.note}. Press to flip and play.`);
+            cardDiv.setAttribute('aria-label', `${card.name}${reversed ? ', reversed' : ''}, note ${card.note}. Press to flip and play. Hold, or press C, to contemplate it.`);
             const meaningText = meaningOf(card, reversed);
             if (card.type === 'minor') cardDiv.classList.add('minor-card');
 
@@ -2147,8 +2215,18 @@
                 activatePanel('spread-panel');
                 logHistory(`Played ${card.name} (${reversed ? 'Reversed' : 'Upright'})`);
             };
+            // Hold a card (or press C on it) to sit with it alone.
+            let holdT = 0, held = false, hx = 0, hy = 0;
+            const drop = () => { clearTimeout(holdT); holdT = 0; };
+            const faceUp = () => { const inner = cardDiv.querySelector('.card-inner'); return !!inner && inner.classList.contains('flipped'); };
+            const sit = () => { if (!faceUp()) { notify('Turn the card over first.'); return false; } contemplateCard(card, reversed, octave, '', !!cardDiv.closest('#spread-display, #clar-display')); return true; };
+            cardDiv.addEventListener('pointerdown', e => { held = false; if (e.button) return; hx = e.clientX; hy = e.clientY; drop(); if (!faceUp()) return; holdT = setTimeout(() => { holdT = 0; held = sit(); }, 600); });
+            cardDiv.addEventListener('pointermove', e => { if (holdT && Math.hypot(e.clientX - hx, e.clientY - hy) > 10) drop(); });
+            ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => cardDiv.addEventListener(t, drop));
+            cardDiv.addEventListener('contextmenu', e => { if (held || holdT) e.preventDefault(); });
+            cardDiv.addEventListener('click', e => { if (held) { held = false; e.stopImmediatePropagation(); e.preventDefault(); } });
             cardDiv.addEventListener('click', flip);
-            cardDiv.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); flip(); } });
+            cardDiv.addEventListener('keydown', e => { if (e.ctrlKey || e.metaKey || e.altKey) return; if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } else if (e.key === 'c' || e.key === 'C') { e.preventDefault(); e.stopPropagation(); sit(); } });
             return cardDiv;
         }
 
@@ -2381,6 +2459,7 @@
             html += `<div class="summary-line" id="sum-chord"><strong>Chord:</strong> ${L.chord}</div>`;
             html += `<div class="summary-line" id="sum-key"><strong>Key:</strong> ${L.key}</div>`;
             html += `<div class="summary-line" id="sum-mood"><strong>Mood:</strong> ${L.mood}</div>`;
+            namedSets(laidOf(reading)).forEach(n => { html += `<div class="summary-line named"><strong>${esc(n.name)}:</strong> ${esc(n.say)} (${esc(n.notes)})</div>`; });
 
             if (reading.spread === 'three') {
                 html += `<div style="margin-top:10px;font-style:italic;color:var(--gold);">From ${a.notes[0].card.name} through ${a.notes[1].card.name} into ${a.notes[2].card.name} — the thread of time reveals itself in ${a.notes.map(x => x.card.note).join(', ')}.</div>`;
@@ -2629,8 +2708,11 @@
                 <p><strong>Hebrew:</strong> ${card.hebrew} (${card.letterName}) · <strong>Note:</strong> ${card.note}${4 - (rev ? 1 : 0)} · <strong>Symbol:</strong> ${card.symbol}</p>
                 <p><strong>Meaning:</strong> ${meaningText}</p>
                 <p><strong>Association:</strong> ${card.association}</p>
+                <p><button type="button" class="ct-daily" id="daily-ct">Contemplate this card</button></p>
                 <div class="sources">${sourcesHtml()}</div>
             `;
+            const dct = document.getElementById('daily-ct');
+            if (dct) dct.addEventListener('click', () => contemplateCard(card, rev, 4, 'Card for ' + today));
             if (drawNow) { playCardSound(card, rev, 4); logHistory(`Drew daily card: ${card.name}`); updateCalendar(); }
         }
         function drawDailyCard() { renderDaily(true); }
@@ -2669,12 +2751,13 @@
         const PAD_KEYS = { '1':0, '2':1, '3':2, '4':3, q:4, w:5, e:6, r:7, a:8, s:9, d:10, f:11, z:12, x:13, c:14, v:15 };
         function onKeyDown(e) {
             if (e.key === 'Escape') {
-                if (document.getElementById('card-selector').classList.contains('visible')) closeCardSelector(); else stopAll();
+                if (ct.open) closeContemplate(); else if (document.getElementById('card-selector').classList.contains('visible')) closeCardSelector(); else stopAll();
                 return;
             }
             if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
             const t = e.target;
             if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+            if (ct.open) { if (e.key === 'Tab') { e.preventDefault(); document.getElementById('ct-close').focus(); } else if (e.key === 'ArrowRight' || e.key === ' ') { if (document.activeElement !== document.getElementById('ct-close') || e.key !== ' ') { e.preventDefault(); ctNext(); } } return; }
             if (document.getElementById('card-selector').classList.contains('visible')) return;
             const k = (e.key || '').toLowerCase();
             if (currentView === 'dashboard' && k in PIANO_KEYS) {
@@ -3070,6 +3153,9 @@
             const dk = document.getElementById('set-deck'), pl = document.getElementById('set-pool');
             if (dk) { dk.value = deckId; dk.addEventListener('change', () => setDeck(dk.value)); }
             if (pl) { pl.value = poolId; pl.addEventListener('change', () => setPool(pl.value)); }
+            const lk = document.getElementById('set-look');
+            if (lk) { lk.value = lookId; lk.addEventListener('change', () => setLook(lk.value)); }
+            if (toneMoved) { toneMoved = false; saveSettings(); later(() => { notify('The seven planet cards now sound in Paul Foster Case\'s notes. The earlier notes are under Settings, Tone system.'); }, 600); }
             updateSettingsSummary();
             const fold = document.getElementById('settings-fold'), mq = window.matchMedia('(max-width: 700px)');
             const place = () => { fold.open = !mq.matches; };   // wide: open and always shown; narrow: folded shut
@@ -3083,6 +3169,7 @@
             if (t) t.value = toneId; if (v) v.value = voiceId; if (p) p.value = paperId;
             const dk = document.getElementById('set-deck'), pl = document.getElementById('set-pool');
             if (dk) dk.value = deckId; if (pl) pl.value = poolId;
+            const lk = document.getElementById('set-look'); if (lk) lk.value = lookId;
             updateSettingsSummary();
         }
         function updateSettingsSummary() {
@@ -3248,6 +3335,200 @@
             const panel = document.getElementById('tree-panel');
             if (panel) panel.classList.toggle('has-reading', cards.length > 0);
         }
+
+        // ============ CONTEMPLATION ============
+        // Named groups of trumps. A reading holds one when every member is present, as a trump or inside a small card.
+        // The three Mothers and the three crosses are traditional groupings; that each cross sounds a diminished seventh
+        // follows from Case's scale. "The Great Work" is the name from the owner's research notes; not checked against print.
+        const NAMED_SETS = [
+            { name: 'The three Mothers', ids: [0, 12, 20], say: 'Air, Water and Fire, the three mother letters' },
+            { name: 'The four elements', ids: [0, 12, 20, 21], say: 'Air, Water, Fire and Earth together' },
+            { name: 'The Great Work', ids: [19, 3, 21], say: 'the Sun, Venus and Saturn' },
+            { name: 'The two lights', ids: [19, 2], say: 'the Sun and the Moon' },
+            { name: 'The cardinal cross', ids: [4, 7, 11, 15], say: 'Aries, Cancer, Libra and Capricorn, the signs that begin the seasons' },
+            { name: 'The fixed cross', ids: [5, 8, 13, 17], say: 'Taurus, Leo, Scorpio and Aquarius, the signs that hold' },
+            { name: 'The mutable cross', ids: [6, 9, 14, 18], say: 'Gemini, Virgo, Sagittarius and Pisces, the signs that turn' }
+        ];
+        function namedSets(laid) {
+            const have = new Set(); (laid || []).forEach(dc => partsOf(dc.card).forEach(p => have.add(p.id)));
+            return NAMED_SETS.filter(n => n.ids.every(i => have.has(i))).map(n => ({ name: n.name, say: n.say, ids: n.ids.slice(), notes: [...new Set(n.ids.map(i => CARDS[i].semitone))].sort((x, y) => x - y).map(st => NOTE_NAMES[st]).join(' · ') }));
+        }
+        // The sphere a small card belongs to: Ace Kether down to Ten Malkuth; the court cards by their element
+        // (Fire Chokmah, Water Binah, Air Tiphareth, Earth Malkuth). Trumps are paths and have none.
+        function sphereOf(card) {
+            if (!card || card.id < 22) return 0;
+            return card.rank <= 10 ? card.rank : [10, 6, 3, 2][card.rank - 11];
+        }
+        const ct = { open: false, steps: [], at: -1, drones: [], bus: null, opener: null, timer: 0, flip: 0, lock: null, asking: false, named: [], walk: false };
+        const CT_DWELL = 10;   // seconds on each card of a reading
+        function ctStepFor(dc, i, a, label) {
+            const card = dc.card, rev = DECKS[deckId].reversals && !!dc.reversed, x = a ? a.notes[i] : null;
+            const parts = partsOf(card), oct = dc.octave || 4;
+            const midis = x ? x.parts.map(p => p.midi) : voicesOf(card).map(p => midiOf(p.semitone, oct - (rev ? 1 : 0)));
+            const cols = [...new Set((x ? x.parts.map(p => p.card) : voicesOf(card)).map(p => NOTE_COLOURS[p.semitone]))];
+            const sph = sphereOf(card);
+            return { card, rev, parts, midis, cols, sph, level: x ? x.level : 1, dignity: x ? x.dignity : '',
+                pos: label !== undefined ? label : (x ? x.position : ''), noteName: midis.map(midiName).join(' + ') };
+        }
+        function ctDraw() {
+            const svg = document.getElementById('ct-tree'); svg.innerHTML = '';
+            const gp = S('g', {}, svg), gs = S('g', {}, svg);
+            CARDS.forEach(c => { const g = pathGeom(c.id); S('path', { class: 'ct-path', 'data-id': c.id, d: stringD(g, 0) }, gp); });
+            SEPHIROTH.forEach(q => S('circle', { class: 'ct-seph', 'data-n': q.n, cx: q.x, cy: q.y, r: TREE_R }, gs));
+        }
+        // Everything contemplation sounds goes through its own pair of gains, so Close can fade all of it, struck bowls included.
+        function ctBus(c) {
+            if (ct.bus && ct.bus.ctx === c) return ct.bus;
+            const b = getBus(c), inp = c.createGain(), hall = c.createGain();
+            inp.gain.setValueAtTime(1, c.currentTime); hall.gain.setValueAtTime(1, c.currentTime);
+            inp.connect(b.inp); hall.connect(b.hall);
+            return (ct.bus = { ctx: c, inp, hall });
+        }
+        function ctDrone(st) {
+            const c = ac();
+            if (c && !ctSilent()) {
+                const b = ctBus(c), t = c.currentTime + 0.05, peak = 0.05 * st.level * (st.midis.length > 1 ? 0.8 : 1);
+                st.midis.forEach((m, k) => {
+                    strikeBowl(c, b, m, t + k * 0.35, 0.11 * st.level, 9);
+                    const g = c.createGain(), lp = c.createBiquadFilter();
+                    lp.type = 'lowpass'; lp.frequency.setValueAtTime(1400, t);
+                    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + 3.5);
+                    lp.connect(g); g.connect(b.inp); g.connect(b.hall);
+                    // held for as long as the card is up (the far stop time only exists so that Stop can find and end them)
+                    const os = [po(c, 'sine', freqOf(m), t, t + 86400, lp, -4, g), po(c, 'sine', freqOf(m), t, t + 86400, lp, 4, g), po(c, 'triangle', freqOf(m) / 2, t, t + 86400, lp, 0, g)];
+                    ct.drones.push({ g, os, peak, t0: t, step: st });
+                });
+            }
+            // MIDI: the note is held, not tapped; it ends when contemplation closes
+            if (midiLive()) st.midis.forEach((m, k) => {
+                const ch = midiChannelFor(st.parts[Math.min(k, st.parts.length - 1)]), key = ch + ':' + m;
+                if (m >= 0 && m <= 127 && !midiHeld.has(key)) { midiHeld.set(key, ++midiToken); midiSend([0x90 | ch, m, Math.round(64 * st.level)]); }
+            });
+        }
+        const ctSilent = () => midiLive() && midiMute;   // the owner chose MIDI only
+        // Where a drone's swell has got to, so that a change starts from there and not from silence.
+        function ctHold(d, now) {
+            const p = d.g.gain;
+            if (typeof p.cancelAndHoldAtTime === 'function') { p.cancelAndHoldAtTime(now); return; }
+            const k = Math.max(0, Math.min(1, (now - d.t0) / 3.5)), v = d.settled !== undefined ? d.settled : 0.0001 * Math.pow(d.peak / 0.0001, k);
+            p.cancelScheduledValues(now); p.setValueAtTime(Math.max(0.0001, v), now);
+        }
+        function ctSettle() {   // earlier cards sink under the new one; nothing is cut off
+            const c = audioContext; if (!c) return;
+            ct.drones.forEach(d => { try { ctHold(d, c.currentTime); d.settled = d.peak * 0.4; d.g.gain.setTargetAtTime(d.peak * 0.4, c.currentTime, 1.2); } catch (e) {} });
+        }
+        function ctRelease(secs) {
+            const c = audioContext, ds = ct.drones, b = ct.bus; ct.drones = []; ct.bus = null;
+            if (!c) return;
+            if (b) {   // one fade for everything, including bowls struck a moment ago or still to come
+                [b.inp, b.hall].forEach(g => { try { g.gain.setTargetAtTime(0, c.currentTime, secs / 8); } catch (e) {} });
+                setTimeout(() => { try { b.inp.disconnect(); b.hall.disconnect(); } catch (e) {} }, secs * 1000 + 300);
+            }
+            ds.forEach(d => { try { d.os.forEach(o => o.stop(c.currentTime + secs)); } catch (e) {} });
+        }
+        function ctWake() {
+            try {
+                if (!ct.open || ct.lock || ct.asking || !navigator.wakeLock || !navigator.wakeLock.request) return;
+                ct.asking = true;
+                navigator.wakeLock.request('screen').then(l => { ct.asking = false; if (ct.open && !ct.lock) { ct.lock = l; l.addEventListener && l.addEventListener('release', () => { if (ct.lock === l) ct.lock = null; }); } else l.release(); }).catch(() => { ct.asking = false; });
+            } catch (e) { ct.asking = false; }
+        }
+        // While it is open the page behind is out of reach of the keyboard and of a screen reader.
+        function ctInert(on) {
+            const root = document.getElementById('contemplate');
+            for (let n = root; n && n !== document.body; n = n.parentElement) [...n.parentElement.children].forEach(e => { if (e !== n && e.tagName !== 'SCRIPT' && e.tagName !== 'STYLE') { if (on) { if (!e.inert) { e.inert = true; e.dataset.ctInert = '1'; } } else if (e.dataset.ctInert) { e.inert = false; delete e.dataset.ctInert; } } });
+        }
+        function ctPaint(layer, st) {
+            const c1 = st.cols[0], c2 = st.cols[1] || st.cols[0];
+            layer.style.background = lookId === 'veil'
+                ? 'conic-gradient(from 40deg at 45% 40%, ' + c1 + ', #050507 30%, ' + c2 + ' 55%, #050507 80%, ' + c1 + ')'
+                : 'radial-gradient(circle at 50% 38%, ' + c1 + ' 0%, ' + c2 + ' 34%, ' + c2 + '55 62%, #050507 100%)';
+        }
+        function ctShow(i) {
+            const st = ct.steps[i], root = document.getElementById('contemplate'); if (!st || !ct.open) return;
+            ct.at = i;
+            // colour: the two flood layers trade places, so one colour dissolves into the next
+            const a = document.getElementById('ct-flood-a'), b = document.getElementById('ct-flood-b'), on = ct.flip ? a : b, off = ct.flip ? b : a; ct.flip = 1 - ct.flip;
+            ctPaint(on, st);
+            on.classList.add('on'); off.classList.remove('on');
+            root.style.setProperty('--ct-col', st.cols[0]);
+            // the card's place on the tree: its paths, the spheres they join, and for a small card its own sphere
+            const svg = document.getElementById('ct-tree');
+            svg.querySelectorAll('.lit').forEach(e => { e.classList.remove('lit'); e.classList.add('was'); });
+            svg.querySelectorAll('.end').forEach(e => e.classList.remove('end'));
+            st.parts.forEach(p => {
+                const e = svg.querySelector('.ct-path[data-id="' + p.id + '"]'); if (e) { e.classList.remove('was'); e.classList.add('lit'); e.style.setProperty('--ct-col', NOTE_COLOURS[p.semitone]); }
+                PATHS[pathOf(p.id)].forEach(n => { const q = svg.querySelector('.ct-seph[data-n="' + n + '"]'); if (q) q.classList.add('end'); });
+            });
+            if (st.sph) { const q = svg.querySelector('.ct-seph[data-n="' + st.sph + '"]'); if (q) { q.classList.remove('was'); q.classList.add('lit'); } }
+            // words
+            const set = (id, t) => { document.getElementById(id).textContent = t; };
+            set('ct-pos', (ct.walk ? (i + 1) + ' of ' + ct.steps.length + (st.pos ? ' · ' + st.pos : '') : st.pos) + (st.rev ? ' · reversed' : '') + (st.dignity ? ' · ' + st.dignity : ''));
+            set('ct-name', st.card.name);
+            set('ct-note', st.noteName + ' · ' + st.card.association + (st.sph ? ' · ' + seph(st.sph).name : ''));
+            set('ct-mean', meaningOf(st.card, st.rev));
+            // sound: this card comes forward, the ones before it stay underneath
+            ctSettle(); ctDrone(st);
+            // a named group, the moment its last member arrives
+            const now = namedSets(ct.steps.slice(0, i + 1).map(s => ({ card: s.card }))), fresh = now.filter(n => !ct.named.includes(n.name));
+            ct.named = now.map(n => n.name);
+            set('ct-chord', fresh.length ? fresh.map(n => n.name + ': ' + n.notes).join('  ·  ') : (ct.walk && i === ct.steps.length - 1 && ct.steps.length > 1 ? 'The whole reading, held.' : ''));
+            if (fresh.length) { const c = ac(); if (c && !ctSilent()) { const bb = ctBus(c); [...new Set(fresh.flatMap(n => n.ids.map(k => CARDS[k].semitone)))].forEach((stn, k) => strikeBowl(c, bb, midiOf(stn, 5), c.currentTime + 2.2 + k * 0.22, 0.05, 7)); } }
+            clearTimeout(ct.timer); ct.timer = 0;
+            if (ct.walk && i < ct.steps.length - 1) ct.timer = setTimeout(() => ctShow(i + 1), CT_DWELL * 1000);
+        }
+        function ctNext() { if (ct.open && ct.walk && ct.at < ct.steps.length - 1) ctShow(ct.at + 1); }
+        function ctOpen(steps, walk) {
+            if (!steps.length) return;
+            if (ct.open) closeContemplate(true);
+            stopAll();
+            ct.bus = null;
+            const root = document.getElementById('contemplate');
+            Object.assign(ct, { open: true, steps, at: -1, walk, named: [], flip: 0, opener: document.activeElement });
+            root.dataset.look = lookId; root.hidden = false;
+            document.documentElement.classList.add('ct-open');
+            ['ct-flood-a', 'ct-flood-b'].forEach(id => document.getElementById(id).classList.remove('on'));
+            ctDraw();
+            ctWake(); ctInert(true);
+            document.getElementById('ct-close').focus({ preventScroll: true });
+            ctShow(0);
+            logHistory('Contemplating ' + (walk ? 'the reading' : steps[0].card.name));
+        }
+        // The whole reading, one card at a time. Tap, or press the right arrow, to move on sooner.
+        function contemplate() {
+            if (!reading) { notify('Draw or lay a reading first.'); return; }
+            const a = analyse(reading), laid = laidOf(reading);
+            ctOpen(laid.map((dc, i) => ctStepFor(dc, i, a)), laid.length > 1);
+        }
+        // One card alone. In a reading it keeps the octave and strength it has there.
+        function contemplateCard(card, reversed, octave, label, inSpread) {
+            if (reading && inSpread) {
+                const laid = laidOf(reading), i = laid.findIndex(dc => dc.card.id === card.id);
+                if (i >= 0 && !label) { ctOpen([ctStepFor(laid[i], i, analyse(reading))], false); return; }
+            }
+            ctOpen([ctStepFor({ card, reversed, octave }, 0, null, label || '')], false);
+        }
+        function closeContemplate(quiet) {
+            if (!ct.open) return;
+            clearTimeout(ct.timer); ct.timer = 0; ct.open = false;
+            ctRelease(2.5); midiPanic();
+            try { if (ct.lock) ct.lock.release(); } catch (e) {} ct.lock = null;
+            document.getElementById('contemplate').hidden = true;
+            document.documentElement.classList.remove('ct-open'); ctInert(false);
+            if (!quiet && ct.opener && document.contains(ct.opener) && ct.opener.focus) ct.opener.focus({ preventScroll: true });
+            ct.opener = null;
+        }
+        function setLook(id) {
+            lookId = LOOKS.includes(id) ? id : 'flood'; saveSettings(); syncSettingsUi();
+            const root = document.getElementById('contemplate'); if (root) root.dataset.look = lookId;
+            if (ct.open && ct.at >= 0) { const on = document.querySelector('.ct-flood.on'); if (on) ctPaint(on, ct.steps[ct.at]); }
+            notify('Contemplation: ' + { flood: 'Flood', ember: 'Ember', veil: 'Veil' }[lookId]);
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const root = document.getElementById('contemplate'); if (!root) return;
+            root.addEventListener('click', e => { if (!e.target.closest('#ct-close')) ctNext(); });
+            document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') ctWake(); });   // the screen lock is dropped when the page is hidden
+        });
 
         const calmMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
         function treePluck(id, ms) {
@@ -3835,6 +4116,8 @@
             const a = analyse(rd), L = summaryLines(a), now = new Date(), iso = isoDate(now);
             const long = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             const A4 = paper === 'a4';
+            // the ruled box for handwritten notes gives up lines when a clarifier or named groups need the room, so the sheet stays one page
+            const named = namedSets(laidOf(rd)), crowd = (a.notes.length > 10 ? 1 : 0) + Math.min(2, Math.ceil(named.length / 2)), notesIn = [1.55, 0.95, 0.65, 0.35][Math.min(3, crowd)];
             const rows = a.notes.map((x, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(x.position) + '</td><td>' + esc(x.card.roman) + ' ' + esc(x.card.name) + '</td><td class="heb">' + (x.card.type === 'minor' ? '' : esc(x.card.hebrew) + ' ' + esc(x.card.letterName)) + '</td><td>' + esc(attributionOf(x.card)) + '</td><td class="nt">' + esc(x.name) + '</td><td>' + (a.reversals ? (x.reversed ? 'reversed' : 'upright') : esc(x.dignity || 'plain')) + '</td></tr>').join('');
             const css = '@page{size:' + (A4 ? 'A4' : 'Letter') + ';margin:0.6in}*{box-sizing:border-box}html,body{margin:0;background:#fff;color:#000}body{font:10.5pt/1.35 Georgia,"Times New Roman",serif}' +
                 '.page{width:' + (A4 ? '210mm' : '8.5in') + ';min-height:' + (A4 ? '297mm' : '11in') + ';padding:0.6in;margin:0 auto;background:#fff}' +
@@ -3843,7 +4126,7 @@
                 'table{width:100%;border-collapse:collapse;font-size:9.5pt}th,td{border:1px solid #000;padding:2px 5px;text-align:left;vertical-align:top}th{font-weight:700}td.nt{font-weight:700;white-space:nowrap}td.heb{white-space:nowrap}' +
                 '.staff-svg{display:block;max-width:100%;height:auto;margin:6px 0 2px;break-inside:avoid}.conv{font-size:8.5pt;margin:0 0 6px}' +
                 '.sum p{margin:3px 0}.src{font-size:8.5pt;margin:6px 0}.src span{display:block}' +
-                '.notes{border:1px solid #000;margin-top:8px;padding:4px 6px;height:1.55in;background-image:linear-gradient(to bottom,transparent calc(0.3in - 1px),#000 calc(0.3in - 1px));background-size:100% 0.3in;break-inside:avoid}.notes b{background:#fff;padding-right:4px}';
+                '.notes{border:1px solid #000;margin-top:8px;padding:4px 6px;height:' + notesIn + 'in;background-image:linear-gradient(to bottom,transparent calc(0.3in - 1px),#000 calc(0.3in - 1px));background-size:100% 0.3in;break-inside:avoid}.notes b{background:#fff;padding-right:4px}';
             return '<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Harmonic Arcana reading sheet ' + iso + '</title><style>' + css + '</style></head><body>' +
                 '<main class="page" data-paper="' + (A4 ? 'a4' : 'letter') + '">' +
                 '<h1>HARMONIC ARCANA: READING SHEET</h1>' +
@@ -3851,7 +4134,7 @@
                 '<table class="cards"><thead><tr><th>#</th><th>Position</th><th>Card</th><th>Letter</th><th>Attribution</th><th>Note</th><th>' + (a.reversals ? 'Orientation' : 'Dignity') + '</th></tr></thead><tbody>' + rows + '</tbody></table>' +
                 staffSvg(a) +
                 '<p class="conv">Grand staff at sounding pitch: treble clef from middle C up, bass clef below it, sharps and naturals, no key signature. An accidental holds to the end of the bar on its own line and octave, and a natural sign cancels a sharp. Bar one: the numbered notes, one beat each, in reading order. Bar two, its own bar: the chord, all notes together, held, with its own accidentals. A small card\'s notes stand together in one column.' + (a.reversals ? ' A reversed card sounds an octave lower than its position.' : ' This deck reads no reversals; the table says where a card is strengthened or weakened by its neighbours.') + '</p>' +
-                '<div class="sum"><p class="s-chord"><strong>Chord:</strong> ' + esc(L.chord) + '</p><p class="s-key"><strong>Key:</strong> ' + esc(L.key) + '</p><p class="s-mood"><strong>Mood:</strong> ' + esc(L.mood) + '</p></div>' +
+                '<div class="sum"><p class="s-chord"><strong>Chord:</strong> ' + esc(L.chord) + '</p><p class="s-key"><strong>Key:</strong> ' + esc(L.key) + '</p><p class="s-mood"><strong>Mood:</strong> ' + esc(L.mood) + '</p>' + (named.length ? '<p class="s-named">' + named.map(n => '<strong>' + esc(n.name) + '</strong> (' + esc(n.notes) + ').').join(' ') + '</p>' : '') + '</div>' +
                 '<div class="src"><strong>Sources.</strong>' + sourceLines().map(l => '<span>' + esc(l) + '</span>').join('') + '</div>' +
                 '<div class="notes"><b>Notes:</b></div>' +
                 '</main></body></html>';
@@ -4286,6 +4569,8 @@
             state: () => ({ spread: currentSpread, view: currentView, tone: toneId, voice: voiceId, paper: paperId, reading: reading && { spread: reading.spread, cards: reading.cards.map(c => ({ id: c.card.id, reversed: c.reversed })) }, lp: lpPads.map(p => p ? p.card.id : null) }),
             loadReading: (spread, cards, extra) => { setSpread(spread); renderSpread(unpackReading(Object.assign({ spread, cards }, extra || {})), true); },
             ALL_CARDS, DECKS, dignities, meaningOf, setDeck, setPool,
+            contemplate, contemplateCard, closeContemplate, namedSets, sphereOf, setLook, NAMED_SETS,
+            ct: () => ({ open: ct.open, at: ct.at, steps: ct.steps.map(s => ({ id: s.card.id, midis: s.midis.slice(), cols: s.cols.slice(), sph: s.sph, level: s.level })), walk: ct.walk, drones: ct.drones.length, named: ct.named.slice(), look: lookId }),
             deck: () => ({ id: deckId, pool: poolId, sig: sigId, box: JSON.parse(JSON.stringify(deckBox)) }),
             deckMove: (kind, at) => deckMove(kind, at),
             brief: () => reading ? buildSunoBrief(analyse(reading)) : null,
