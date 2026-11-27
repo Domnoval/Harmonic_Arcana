@@ -829,6 +829,15 @@
         .ct-daily { background: var(--obsidian); color: var(--white); border: 1px solid var(--dim); padding: 8px 14px; min-height: 44px; font-family: var(--ui); font-size: 12px; cursor: pointer; }
         .ct-daily:hover, .ct-daily:focus-visible { border-color: var(--orange); }
         .summary-line.named { color: var(--gold); }
+        .settings-bar label { max-width: 100%; flex-wrap: wrap; }
+        .settings-bar select { max-width: 100%; text-overflow: ellipsis; }
+        .tuning-note { flex: 1 1 100%; font-family: var(--read); font-size: 14px; line-height: 1.45; color: var(--soft); text-transform: none; letter-spacing: 0; }
+        .tuning-note:empty { display: none; }
+        .tuning-note p { margin: 0 0 4px; }
+        .settings-bar .pitch-other[hidden] { display: none; }
+        .settings-bar .pitch-other { text-transform: none; letter-spacing: 0; }
+        .settings-bar .pitch-other input { width: 96px; min-height: 40px; background: var(--obsidian); color: var(--white); border: 1px solid var(--dim); border-radius: 3px; padding: 4px 6px; font: inherit; font-size: 16px; }
+        .settings-bar .pitch-other input:focus { border-color: var(--orange); outline: none; }
         .tarot-card { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
         @media (prefers-reduced-motion: reduce) {
             .contemplate, .contemplate[data-look="veil"] { --ct-fade: 0.01s; }
@@ -1114,6 +1123,23 @@
                     <option value="original">Original (v4 voice)</option>
                 </select>
             </label>
+            <label>Concert pitch
+                <select id="set-pitch" aria-label="Concert pitch: what A above middle C is tuned to">
+                    <option value="440">A = 440 Hz (standard)</option>
+                    <option value="432">A = 432 Hz</option>
+                    <option value="other">Another number…</option>
+                </select>
+            </label>
+            <label class="pitch-other" id="pitch-other-wrap" hidden>A =
+                <input type="number" id="set-pitch-hz" min="380" max="480" step="0.01" inputmode="decimal" aria-label="Concert pitch in hertz, 380 to 480"> Hz
+            </label>
+            <label>Temperament
+                <select id="set-temper" aria-label="Temperament: how the twelve notes are spaced">
+                    <option value="equal">Equal (standard)</option>
+                    <option value="just">Just intonation, on C</option>
+                    <option value="pyth">Pythagorean, on C</option>
+                </select>
+            </label>
             <label>Contemplation
                 <select id="set-look" aria-label="Look of contemplation">
                     <option value="flood">Flood (the screen fills with the colour)</option>
@@ -1134,6 +1160,7 @@
             </label>
             <label class="midi-mute"><input type="checkbox" id="set-midi-mute"> Silence the built-in sound while MIDI is on</label>
             <span class="midi-status" id="midi-status" role="status"></span>
+            <div class="tuning-note" id="tuning-note"></div>
         </div>
         </details>
 
@@ -1362,7 +1389,7 @@
             return BASE_TONES[cardId].semitone;
         }
         let toneId = 'case', voiceId = 'bowls', paperId = 'letter', lookId = 'flood', toneMoved = false;
-        let figs = { tri: true, sq: true, opp: true };
+        let figs = { tri: true, sq: true, opp: true }, pitchOther = false;
         function applyTone(t) {
             toneId = isTone(t) ? t : 'case';
             CARDS.forEach(c => { c.semitone = semitoneIn(c.id, toneId); c.note = NOTE_NAMES[c.semitone]; });
@@ -1374,6 +1401,7 @@
                 "Notes of the twelve signs (Aries C up to Pisces B) and of the three elements (Fire C, Air E, Water G#): Paul Foster Case's tone scale.",
                 'Notes of the seven planets (' + TONE_SYSTEMS[toneId].name + '): ' + TONE_SYSTEMS[toneId].planetSource + '.',
                 DECKS[deckId].source,
+                ...(tuningIsStandard() ? [] : ['Tuning: ' + tuningName() + '. ' + tuningLines()[0]]),
                 "The 56 small cards: Two to Ten are the 36 decans (a planet in a sign), an Ace is its element, a court card is one element within another: Hermetic Order of the Golden Dawn. Sounding a small card as two notes, and giving Earth Saturn's note, is this tool's own design. The decan table has not yet been checked against a printed source."
             ];
         }
@@ -1475,12 +1503,12 @@
             const views = ['dashboard', 'daily', 'journal', 'correspondence', 'wheel', 'fullArcana', 'launchpad', 'suno'];
             const f = v.figs && typeof v.figs === 'object' ? v.figs : {};
             return { spread: isSpread(v.spread) ? v.spread : 'single', view: views.includes(v.view) ? v.view : 'dashboard',
-                tone: !isTone(v.tone) || (v.toneSet !== 2 && v.tone === 'v4') ? 'case' : v.tone, toneSet: 2, moved: v.toneSet !== 2 && v.tone === 'v4', look: LOOKS.includes(v.look) ? v.look : 'flood', voice: VOICES.includes(v.voice) ? v.voice : 'bowls', paper: PAPERS.includes(v.paper) ? v.paper : 'letter',
+                tone: !isTone(v.tone) || (v.toneSet !== 2 && v.tone === 'v4') ? 'case' : v.tone, toneSet: 2, moved: v.toneSet !== 2 && v.tone === 'v4', look: LOOKS.includes(v.look) ? v.look : 'flood', pitch: cleanPitch(v.pitch), temper: isTemper(v.temper) ? v.temper : 'equal', voice: VOICES.includes(v.voice) ? v.voice : 'bowls', paper: PAPERS.includes(v.paper) ? v.paper : 'letter',
                 figs: { tri: f.tri !== false, sq: f.sq !== false, opp: f.opp !== false },
                 midi: typeof v.midi === 'string' ? v.midi.slice(0, 300) : '', midiId: typeof v.midiId === 'string' ? v.midiId.slice(0, 300) : '', midiMute: v.midiMute === true,
                 deck: isDeck(v.deck) ? v.deck : 'rws', pool: v.pool === 'trumps' ? 'trumps' : 'all', sig: isAnyCard(v.sig) ? v.sig : null };
         }
-        function saveSettings() { store.set(KEYS.settings, JSON.stringify({ spread: currentSpread, view: currentView, tone: toneId, toneSet: 2, look: lookId, voice: voiceId, paper: paperId, figs, midi: midiWanted, midiId: midiWantedId, midiMute, deck: deckId, pool: poolId, sig: sigId })); }
+        function saveSettings() { store.set(KEYS.settings, JSON.stringify({ spread: currentSpread, view: currentView, tone: toneId, toneSet: 2, look: lookId, pitch: pitchA, temper: temperId, voice: voiceId, paper: paperId, figs, midi: midiWanted, midiId: midiWantedId, midiMute, deck: deckId, pool: poolId, sig: sigId })); }
         function saveReading() {
             if (!reading) { store.del(KEYS.reading); return; }
             store.set(KEYS.reading, JSON.stringify(packReading(reading)));
@@ -1492,7 +1520,7 @@
             const s = readStored(KEYS.settings, cleanSettings, { spread: 'single', view: 'dashboard', tone: 'case', voice: 'bowls', paper: 'letter', figs: { tri: true, sq: true, opp: true } });
             currentSpread = s.spread;
             applyDeck(s.deck); poolId = s.pool === 'trumps' ? 'trumps' : 'all'; sigId = isAnyCard(s.sig) ? s.sig : null;
-            applyTone(s.tone); toneMoved = !!s.moved; lookId = LOOKS.includes(s.look) ? s.look : 'flood'; voiceId = s.voice; paperId = s.paper; figs = s.figs; midiWanted = s.midi || ''; midiWantedId = s.midiId || ''; midiMute = !!s.midiMute;
+            applyTone(s.tone); toneMoved = !!s.moved; lookId = LOOKS.includes(s.look) ? s.look : 'flood'; pitchA = cleanPitch(s.pitch); temperId = isTemper(s.temper) ? s.temper : 'equal'; voiceId = s.voice; paperId = s.paper; figs = s.figs; midiWanted = s.midi || ''; midiWantedId = s.midiId || ''; midiMute = !!s.midiMute;
             step('settings', initSettings);
             step('midi', initMidi);
             step('piano', createPiano);
@@ -1548,11 +1576,51 @@
         }
 
         // ============ NOTES ============
-        function getFrequency(semitone, octave = 4) {
-            return 440 * Math.pow(2, (semitone - 9) / 12 + (octave - 4));
-        }
+        // ---- Tuning: concert pitch (what A above middle C is set to) and temperament (how the twelve notes are spaced).
+        // Equal: twelve equal steps. Just and Pythagorean: each note is a whole-number ratio above C. In every temperament
+        // A is held exactly at the concert pitch, so "A = 432" means what it says; C and the rest are placed from there.
+        const TEMPERAMENTS = {
+            equal: { id: 'equal', name: 'Equal', ratios: null,
+                     about: 'twelve equal steps, the tuning of a modern piano' },
+            just: { id: 'just', name: 'Just, on C', ratios: [[1, 1], [16, 15], [9, 8], [6, 5], [5, 4], [4, 3], [45, 32], [3, 2], [8, 5], [5, 3], [9, 5], [15, 8]],
+                    about: 'each note a simple ratio above C (5-limit just intonation)' },
+            pyth: { id: 'pyth', name: 'Pythagorean, on C', ratios: [[1, 1], [256, 243], [9, 8], [32, 27], [81, 64], [4, 3], [729, 512], [3, 2], [128, 81], [27, 16], [16, 9], [243, 128]],
+                    about: 'every note reached from C by pure fifths (ratios of 2 and 3 only)' }
+        };
+        const PITCH_MIN = 380, PITCH_MAX = 480;
+        const isTemper = t => typeof t === 'string' && Object.prototype.hasOwnProperty.call(TEMPERAMENTS, t);
+        const cleanPitch = v => { const n = typeof v === 'number' ? v : parseFloat(v); return Number.isFinite(n) && n >= PITCH_MIN && n <= PITCH_MAX ? Math.round(n * 100) / 100 : 440; };
+        let pitchA = 440, temperId = 'equal';
         const midiOf = (semitone, octave) => 60 + semitone + 12 * (octave - 4);
-        const freqOf = midi => 440 * Math.pow(2, (midi - 69) / 12);
+        // The frequency of a MIDI note under a given tuning (defaults: the one in use).
+        function freqIn(midi, pitch, temper) {
+            const R = TEMPERAMENTS[temper].ratios;
+            if (!R) return pitch * Math.pow(2, (midi - 69) / 12);
+            const pc = ((midi % 12) + 12) % 12, oct = Math.floor(midi / 12) - 5;     // octave 0 is the one that holds middle C (60)
+            return pitch / (R[9][0] / R[9][1]) * (R[pc][0] / R[pc][1]) * Math.pow(2, oct);
+        }
+        const freqOf = midi => freqIn(midi, pitchA, temperId);
+        function getFrequency(semitone, octave = 4) { return freqOf(midiOf(semitone, octave)); }
+        // How far a note sits from the usual tuning (A = 440, equal steps), in cents; 100 cents is one piano key.
+        const centsOff = (midi, pitch, temper) => 1200 * Math.log2(freqIn(midi, pitch === undefined ? pitchA : pitch, temper || temperId) / (440 * Math.pow(2, (midi - 69) / 12)));
+        const tuningIsStandard = () => pitchA === 440 && temperId === 'equal';
+        const fmtCents = c => { const r = Math.round(c * 10) / 10; return (r > 0 ? '+' : r < 0 ? '\u2212' : '') + Math.abs(r).toFixed(1); };
+        const fmtHz = n => (Math.round(n * 100) / 100).toString();
+        const tuningName = (pitch, temper) => 'A = ' + fmtHz(pitch === undefined ? pitchA : pitch) + ' Hz, ' + TEMPERAMENTS[temper || temperId].name.toLowerCase().replace('just', 'just intonation').replace(', on c', ' on C');
+        // What the setting does, in words and numbers; nothing is claimed here that is not played.
+        function tuningLines() {
+            const T = TEMPERAMENTS[temperId], out = [];
+            if (tuningIsStandard()) return ['Standard tuning: A = 440 Hz, twelve equal steps.'];
+            const midiSays = () => midiLive() ? ['MIDI out carries note numbers only, not this tuning: the instrument on the other end plays in its own. Set the same tuning there.' + (midiMute ? ' The built-in sound is silenced, so what you hear now is that instrument\'s tuning; the hertz shown here are right only if it is set to match.' : '')] : [];
+            const whole = 1200 * Math.log2(pitchA / 440);
+            if (!T.ratios) out.push('A = ' + fmtHz(pitchA) + ' Hz, equal steps: every note is ' + fmtCents(whole).replace(/^[+\u2212]/, '') + ' cents ' + (whole < 0 ? 'lower' : 'higher') + ' than standard (100 cents is one piano key).');
+            else {
+                out.push(T.name + ': ' + T.about + '. A is held at ' + fmtHz(pitchA) + ' Hz; middle C comes out at ' + freqOf(60).toFixed(2) + ' Hz.');
+                out.push('Each note against standard tuning, in cents: ' + NOTE_NAMES.map((n, i) => n + ' ' + fmtCents(centsOff(60 + i))).join(', ') + '.');
+                out.push('Ratios above C: ' + NOTE_NAMES.map((n, i) => n + ' ' + T.ratios[i][0] + '/' + T.ratios[i][1]).join(', ') + '.');
+            }
+            return out.concat(midiSays());
+        }
         const pcName = m => NOTE_NAMES[((m % 12) + 12) % 12];
         const midiName = m => pcName(m) + (Math.floor(m / 12) - 1);
         function octaveFor(spread, index, reversed) { return (REGISTER[spread][index] || 4) - (reversed ? 1 : 0); }
@@ -3155,6 +3223,15 @@
             if (pl) { pl.value = poolId; pl.addEventListener('change', () => setPool(pl.value)); }
             const lk = document.getElementById('set-look');
             if (lk) { lk.value = lookId; lk.addEventListener('change', () => setLook(lk.value)); }
+            const ps = document.getElementById('set-pitch'), ph = document.getElementById('set-pitch-hz'), tp = document.getElementById('set-temper');
+            if (ps && ph && tp) {
+                ps.addEventListener('change', () => { if (ps.value === 'other') { pitchOther = true; syncSettingsUi(); ph.focus(); ph.select(); } else { pitchOther = false; setTuning(parseFloat(ps.value), temperId); } });
+                const take = () => { const n = parseFloat(ph.value); if (Number.isFinite(n) && n >= PITCH_MIN && n <= PITCH_MAX) setTuning(n, temperId); else { notify('Concert pitch must be a number from ' + PITCH_MIN + ' to ' + PITCH_MAX + ' Hz.'); syncSettingsUi(); } };
+                ph.addEventListener('blur', () => { if (ph.value !== fmtHz(pitchA)) take(); });
+                ph.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ph.blur(); } else if (e.key === 'Escape') ph.value = fmtHz(pitchA); });
+                tp.addEventListener('change', () => setTuning(pitchA, tp.value));
+            }
+            syncSettingsUi();
             if (toneMoved) { toneMoved = false; saveSettings(); later(() => { notify('The seven planet cards now sound in Paul Foster Case\'s notes. The earlier notes are under Settings, Tone system.'); }, 600); }
             updateSettingsSummary();
             const fold = document.getElementById('settings-fold'), mq = window.matchMedia('(max-width: 700px)');
@@ -3170,12 +3247,19 @@
             const dk = document.getElementById('set-deck'), pl = document.getElementById('set-pool');
             if (dk) dk.value = deckId; if (pl) pl.value = poolId;
             const lk = document.getElementById('set-look'); if (lk) lk.value = lookId;
+            const ps = document.getElementById('set-pitch'), ph = document.getElementById('set-pitch-hz'), tp = document.getElementById('set-temper'), pw = document.getElementById('pitch-other-wrap');
+            if (ps && ph && tp && pw) {
+                const preset = (pitchA === 440 || pitchA === 432) && !pitchOther;
+                ps.value = preset ? String(pitchA) : 'other'; pw.hidden = preset; if (document.activeElement !== ph) ph.value = fmtHz(pitchA); tp.value = temperId;
+            }
             updateSettingsSummary();
         }
         function updateSettingsSummary() {
+            const tnote = document.getElementById('tuning-note'), lines = tuningLines();
+            if (tnote && tnote.dataset.said !== lines.join('\n')) { tnote.dataset.said = lines.join('\n'); tnote.innerHTML = ''; lines.forEach(l => { const e = document.createElement('p'); e.textContent = l; tnote.appendChild(e); }); }
             const s = document.getElementById('settings-summary'); if (!s) return;
             const tn = { v4: 'Arcana v4', case: 'Case throughout' }[toneId] || toneId, vn = { bowls: 'Bowls', arcana: 'Arcana', pure: 'Pure', original: 'Original' }[voiceId] || voiceId;
-            s.innerHTML = 'Settings <span class="settings-state">' + tn + ' · ' + vn + ' voice' + (deckId !== 'rws' ? ' · ' + DECKS[deckId].short + ' deck' : '') + (midiLive() ? (midiMute ? ' · MIDI only' : ' · MIDI') : '') + '</span>';
+            s.innerHTML = 'Settings <span class="settings-state">' + tn + ' · ' + vn + ' voice' + (deckId !== 'rws' ? ' · ' + DECKS[deckId].short + ' deck' : '') + (tuningIsStandard() ? '' : ' · A ' + fmtHz(pitchA) + (temperId === 'equal' ? '' : ' ' + (temperId === 'just' ? 'just' : 'Pythagorean')) + (midiLive() ? ' (not sent over MIDI)' : '')) + (midiLive() ? (midiMute ? ' · MIDI only' : ' · MIDI') : '') + '</span>';
         }
         function renderSources() {
             ['table-sources', 'wheel-sources'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = sourcesHtml(); });
@@ -3196,6 +3280,20 @@
             step('suno', () => { if (document.getElementById('suno-style')) generateSunoPrompt(); });
             notify('Tone system: ' + TONE_SYSTEMS[id].name);
             logHistory('Tone system: ' + TONE_SYSTEMS[id].name);
+        }
+        // Tuning changes no note name, only how many hertz each one is. Everything sounding is stopped; everything that prints hertz is redrawn.
+        function setTuning(pitch, temper) {
+            const p = cleanPitch(pitch), t = isTemper(temper) ? temper : 'equal';
+            if (p === pitchA && t === temperId) { syncSettingsUi(); return; }
+            if (ct.open) closeContemplate(true);
+            stopAll();
+            pitchA = p; temperId = t; if (p !== 440 && p !== 432) pitchOther = true;
+            saveSettings(); syncSettingsUi();
+            step('table', buildCorrespondenceTable);
+            step('sources', renderSources);
+            step('tree', renderTree);
+            step('wheel', () => { renderWheel(); const d = document.getElementById('wheel-detail'); if (d) d.innerHTML = ''; });
+            notify('Tuning: ' + tuningName());
         }
         // Everything that shows a card's name, number, letter or meaning is drawn again; no note changes.
         function redrawFaces() {
@@ -3961,6 +4059,7 @@
             const end = chordMidis.length ? T + CHORD_TICKS : T;
             const t0 = midiTrack([
                 { tick: 0, ord: 0, bytes: metaText(3, title) },
+                ...(tuningIsStandard() ? [] : [{ tick: 0, ord: 0.5, bytes: metaText(1, 'Heard in Harmonic Arcana at ' + tuningName().replace('\u2212', '-') + '. This file holds note numbers only; set the same tuning on the instrument that plays it.') }]),
                 { tick: 0, ord: 1, bytes: [0xFF, 0x58, 0x04, 4, 2, 24, 8] },
                 { tick: 0, ord: 2, bytes: [0xFF, 0x51, 0x03, (TEMPO_US >> 16) & 255, (TEMPO_US >> 8) & 255, TEMPO_US & 255] },
                 { tick: end, ord: 9, bytes: [0xFF, 0x2F, 0x00] }
@@ -4117,7 +4216,7 @@
             const long = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             const A4 = paper === 'a4';
             // the ruled box for handwritten notes gives up lines when a clarifier or named groups need the room, so the sheet stays one page
-            const named = namedSets(laidOf(rd)), crowd = (a.notes.length > 10 ? 1 : 0) + Math.min(2, Math.ceil(named.length / 2)), notesIn = [1.55, 0.95, 0.65, 0.35][Math.min(3, crowd)];
+            const named = namedSets(laidOf(rd)), crowd = (a.notes.length > 10 ? 1 : 0) + Math.min(2, Math.ceil(named.length / 2)) + (tuningIsStandard() ? 0 : 1), notesIn = [1.55, 0.95, 0.65, 0.35][Math.min(3, crowd)];
             const rows = a.notes.map((x, i) => '<tr><td>' + (i + 1) + '</td><td>' + esc(x.position) + '</td><td>' + esc(x.card.roman) + ' ' + esc(x.card.name) + '</td><td class="heb">' + (x.card.type === 'minor' ? '' : esc(x.card.hebrew) + ' ' + esc(x.card.letterName)) + '</td><td>' + esc(attributionOf(x.card)) + '</td><td class="nt">' + esc(x.name) + '</td><td>' + (a.reversals ? (x.reversed ? 'reversed' : 'upright') : esc(x.dignity || 'plain')) + '</td></tr>').join('');
             const css = '@page{size:' + (A4 ? 'A4' : 'Letter') + ';margin:0.6in}*{box-sizing:border-box}html,body{margin:0;background:#fff;color:#000}body{font:10.5pt/1.35 Georgia,"Times New Roman",serif}' +
                 '.page{width:' + (A4 ? '210mm' : '8.5in') + ';min-height:' + (A4 ? '297mm' : '11in') + ';padding:0.6in;margin:0 auto;background:#fff}' +
@@ -4130,7 +4229,7 @@
             return '<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Harmonic Arcana reading sheet ' + iso + '</title><style>' + css + '</style></head><body>' +
                 '<main class="page" data-paper="' + (A4 ? 'a4' : 'letter') + '">' +
                 '<h1>HARMONIC ARCANA: READING SHEET</h1>' +
-                '<p class="sub"><span class="s-date">' + esc(long) + ' (' + iso + ')</span> · <span class="s-spread">' + esc(SPREAD_NAMES[a.spread]) + '</span> · <span class="s-tone">Tone system: ' + esc(TONE_SYSTEMS[toneId].name) + '</span> · <span class="s-deck">Deck: ' + esc(DECKS[deckId].name) + '</span>' + (a.sig ? ' · <span class="s-sig">Significator: ' + esc(a.sig.name) + '</span>' : '') + '</p>' +
+                '<p class="sub"><span class="s-date">' + esc(long) + ' (' + iso + ')</span> · <span class="s-spread">' + esc(SPREAD_NAMES[a.spread]) + '</span> · <span class="s-tone">Tone system: ' + esc(TONE_SYSTEMS[toneId].name) + '</span> · <span class="s-deck">Deck: ' + esc(DECKS[deckId].name) + '</span>' + (tuningIsStandard() ? '' : ' · <span class="s-tuning">Tuning: ' + esc(tuningName()) + '</span>') + (a.sig ? ' · <span class="s-sig">Significator: ' + esc(a.sig.name) + '</span>' : '') + '</p>' +
                 '<table class="cards"><thead><tr><th>#</th><th>Position</th><th>Card</th><th>Letter</th><th>Attribution</th><th>Note</th><th>' + (a.reversals ? 'Orientation' : 'Dignity') + '</th></tr></thead><tbody>' + rows + '</tbody></table>' +
                 staffSvg(a) +
                 '<p class="conv">Grand staff at sounding pitch: treble clef from middle C up, bass clef below it, sharps and naturals, no key signature. An accidental holds to the end of the bar on its own line and octave, and a natural sign cancels a sharp. Bar one: the numbered notes, one beat each, in reading order. Bar two, its own bar: the chord, all notes together, held, with its own accidentals. A small card\'s notes stand together in one column.' + (a.reversals ? ' A reversed card sounds an octave lower than its position.' : ' This deck reads no reversals; the table says where a card is strengthened or weakened by its neighbours.') + '</p>' +
@@ -4157,6 +4256,7 @@
             if (base.sig !== undefined) out.sig = base.sig;
             if (base.clar) out.clar = base.clar;
             if (isDeck(r.deck)) out.deck = r.deck;
+            if (r.pitch !== undefined || r.temper !== undefined) { const pp = cleanPitch(r.pitch), tt = isTemper(r.temper) ? r.temper : 'equal'; if (pp !== 440 || tt !== 'equal') { out.pitch = pp; out.temper = tt; } }
             if (typeof r.who === 'string' && r.who.trim()) out.who = r.who.trim().slice(0, 80);
             if (typeof r.q === 'string' && r.q.trim()) out.q = r.q.trim().slice(0, 200);
             return out;
@@ -4224,6 +4324,7 @@
             if (r.sig !== undefined) t += '; significator ' + nm(r.sig);
             if (r.clar) t += '; clarifier ' + (r.clar.shown ? nm(r.clar.id) : 'left face down');
             if (r.deck) t += '. Deck: ' + DECKS[r.deck].name;
+            if (r.pitch !== undefined) t += '. Tuning: ' + tuningName(r.pitch, r.temper);
             if (r.who) t += '. For: ' + r.who;
             if (r.q) t += '. Question: ' + r.q;
             return t;
@@ -4249,7 +4350,7 @@
             if (!reading) { notify('Draw cards first, then there is a reading to save.'); return; }
             const now = new Date(), iso = isoDate(now), days = getDays(), cur = days[iso] || { note: '', readings: [] };
             if (cur.readings.length >= READINGS_MAX) { notify('This day already holds ' + READINGS_MAX + ' readings, the most it keeps.'); return; }
-            const rec = Object.assign(packReading(reading), { tone: toneId, at: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'), deck: deckId });
+            const rec = Object.assign(packReading(reading), { tone: toneId, at: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'), deck: deckId }, tuningIsStandard() ? {} : { pitch: pitchA, temper: temperId });
             const who = (document.getElementById('rd-who') || {}).value, q = (document.getElementById('rd-q') || {}).value;
             if (who && who.trim()) rec.who = who.trim().slice(0, 80);
             if (q && q.trim()) rec.q = q.trim().slice(0, 200);
@@ -4570,6 +4671,7 @@
             loadReading: (spread, cards, extra) => { setSpread(spread); renderSpread(unpackReading(Object.assign({ spread, cards }, extra || {})), true); },
             ALL_CARDS, DECKS, dignities, meaningOf, setDeck, setPool,
             contemplate, contemplateCard, closeContemplate, namedSets, sphereOf, setLook, NAMED_SETS,
+            TEMPERAMENTS, freqIn, freqOf, centsOff, setTuning, tuningLines, tuning: () => ({ pitch: pitchA, temper: temperId, standard: tuningIsStandard(), name: tuningName() }),
             ct: () => ({ open: ct.open, at: ct.at, steps: ct.steps.map(s => ({ id: s.card.id, midis: s.midis.slice(), cols: s.cols.slice(), sph: s.sph, level: s.level })), walk: ct.walk, drones: ct.drones.length, named: ct.named.slice(), look: lookId }),
             deck: () => ({ id: deckId, pool: poolId, sig: sigId, box: JSON.parse(JSON.stringify(deckBox)) }),
             deckMove: (kind, at) => deckMove(kind, at),
